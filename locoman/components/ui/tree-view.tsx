@@ -3,15 +3,15 @@
 import React from 'react'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { ChevronRight } from 'lucide-react'
-import { cva } from 'class-variance-authority'
+import { cva } from '@/node_modules/class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const treeVariants = cva(
-    'group hover:before:opacity-100 before:absolute before:rounded-lg before:left-0 px-2 before:w-full before:opacity-0 before:bg-accent/70 before:h-[2rem] before:-z-10'
+    'group mb-1 hover:bg-accent/70 before:opacity-100 before:absolute rounded-lg px-2'
 )
 
 const selectedTreeVariants = cva(
-    'before:opacity-100 before:bg-accent/70 text-accent-foreground'
+    'bg-accent/70 before:opacity-100 before:bg-accent/70 text-accent-foreground'
 )
 
 interface TreeDataItem {
@@ -137,7 +137,7 @@ const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
         }
         return (
             <div ref={ref} role="tree" className={className} {...props}>
-                <ul>
+                <ul >
                     {data.map((item) => (
                         <li key={item.id}>
                             {item.children ? (
@@ -292,6 +292,7 @@ const AccordionTrigger = React.forwardRef<
         >
             <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-200 text-accent-foreground/50 mr-1" />
             {children}
+            
         </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
 ))
@@ -350,8 +351,7 @@ const TreeActions = ({
     return (
         <div
             className={cn(
-                isSelected ? 'block' : 'hidden',
-                'absolute right-3 group-hover:block'
+                isSelected ? 'block' : 'hidden', 'absolute right-3 group-hover:block'
             )}
         >
             {children}

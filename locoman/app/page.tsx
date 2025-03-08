@@ -1,3 +1,5 @@
+"use client"
+
 import { AppSidebar } from "@/components/app-sidebar"
 import {
   Breadcrumb,
@@ -10,6 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
+  SidebarMenuButton,
   SidebarProvider,
   SidebarTrigger
 } from "@/components/ui/sidebar"
@@ -21,6 +24,7 @@ import {
 } from "@/components/ui/resizable"
 
 import { TreeView, TreeDataItem } from '@/components/ui/tree-view';
+import { FolderOpen, FolderClosed, File, FilePen } from "lucide-react"
 const data: TreeDataItem[] = [
   {
     id: '1',
@@ -32,10 +36,13 @@ const data: TreeDataItem[] = [
         children: [
           {
             id: '3',
+
             name: 'Item 1.1.1',
           },
           {
             id: '4',
+            icon: File,
+            selectedIcon: FilePen,
             name: 'Item 1.1.2',
           },
         ],
@@ -48,6 +55,10 @@ const data: TreeDataItem[] = [
   },
   {
     id: '6',
+    name: 'Item 2',
+  },
+  {
+    id: '7',
     name: 'Item 2',
   },
 ];
@@ -83,11 +94,10 @@ export default function Page() {
             className="min-h-[200px] rounded-lg md:min-w-[450px]"
           >
             <ResizablePanel defaultSize={25} >
-              <div className="flex h-full items-center justify-center">
-                <div className="flex flex-1 flex-col gap-4 pt-2">
-                  <div className="min-h-[100px] rounded-xl bg-muted/50" />
-                  <div className="min-h-[100px] rounded-xl bg-muted/50" />
-                  <div className="min-h-[100px] rounded-xl bg-muted/50" />
+              <div className=" h-full items-center justify-center">
+                <div className=" flex-1 flex-col gap-4 pt-2">
+                  <TreeView data={data} initialSelectedItemId="0" expandAll={true}/>
+
                   <span className="font-semibold">Sidebar</span>
                   <Input type="email" placeholder="Email" />
                 </div>
@@ -96,9 +106,8 @@ export default function Page() {
             </ResizablePanel>
             {/* <ResizableHandle withHandle={false} /> */}
             <ResizablePanel defaultSize={75}>
-              <div className="flex h-full items-center justify-center p-6">
+              <div className="h-full items-center justify-center p-6">
                 <span className="font-semibold">Content</span>
-                <TreeView data={data} />;
               </div>
             </ResizablePanel>
           </ResizablePanelGroup>
