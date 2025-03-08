@@ -11,9 +11,15 @@ import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
+  SidebarTrigger
 } from "@/components/ui/sidebar"
 import { Input } from "@/components/ui/input"
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+
 
 export default function Page() {
   return (
@@ -39,12 +45,31 @@ export default function Page() {
             </Breadcrumb>
           </div>
         </header>
+
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min flex items-center justify-center">
-            <div className="w-full max-w-sm">
-              <Input type="email" placeholder="Email" />
-            </div>
-          </div>
+          <ResizablePanelGroup
+            direction="horizontal"
+            className="min-h-[200px] rounded-lg md:min-w-[450px]"
+          >
+            <ResizablePanel defaultSize={25} >
+              <div className="flex h-full items-center justify-center">
+                <div className="flex flex-1 flex-col gap-4 pt-2">
+                  <div className="min-h-[100px] rounded-xl bg-muted/50" />
+                  <div className="min-h-[100px] rounded-xl bg-muted/50" />
+                  <div className="min-h-[100px] rounded-xl bg-muted/50" />
+                  <span className="font-semibold">Sidebar</span>
+                  <Input type="email" placeholder="Email" />
+                </div>
+
+              </div>
+            </ResizablePanel>
+            {/* <ResizableHandle withHandle={false} /> */}
+            <ResizablePanel defaultSize={75}>
+              <div className="flex h-full items-center justify-center p-6">
+                <span className="font-semibold">Content</span>
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </div>
 
       </SidebarInset>
