@@ -25,6 +25,8 @@ import {
 
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
+
 import Link from "next/link"
 
 import { TreeView, TreeDataItem } from '@/components/ui/tree-view';
@@ -36,7 +38,8 @@ const data: TreeDataItem[] = [
   {
     id: '0',
     name: 'Beauftragung',
-    actions: <Button className="p-0 m-0" size="icon" variant="ghost" onClick={() => console.log("confirmed")}><CirclePlus /></Button>,
+    actions: <div><Link className={buttonVariants({ variant: "ghost" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus/></Link></div>,
+    
     children: [
       {
         id: '1',
@@ -173,8 +176,6 @@ export default function Page() {
           <ResizablePanel defaultSize={25}>
             <ScrollDiv className="h-full">
               <TreeView className=" p-4 pt-0" data={data} initialSelectedItemId="0" expandAll={true} />
-              <span className="font-semibold">Sidebar</span>
-              <Input type="email" placeholder="Email" />
             </ScrollDiv>
           </ResizablePanel>
           {<ResizableHandle withHandle={false} />}

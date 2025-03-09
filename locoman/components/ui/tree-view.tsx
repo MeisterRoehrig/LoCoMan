@@ -351,7 +351,7 @@ const TreeActions = ({
     return (
         <div
             className={cn(
-                isSelected ? 'block' : 'hidden', 'absolute right-2 group-hover:block'
+                isSelected ? 'block' : 'hidden', 'absolute right-4 group-hover:block'
             )}
                 
         >
