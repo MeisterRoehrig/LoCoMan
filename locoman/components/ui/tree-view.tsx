@@ -93,7 +93,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
         }, [data, expandAll, initialSelectedItemId])
 
         return (
-            <div className={cn('overflow-hidden relative p-2', className)}>
+            <div className={cn('overflow-hidden relative', className)}>
                 <TreeItem
                     data={data}
                     ref={ref}
@@ -351,8 +351,9 @@ const TreeActions = ({
     return (
         <div
             className={cn(
-                isSelected ? 'block' : 'hidden', 'absolute right-3 group-hover:block'
+                isSelected ? 'block' : 'hidden', 'absolute right-2 group-hover:block'
             )}
+                
         >
             {children}
         </div>
