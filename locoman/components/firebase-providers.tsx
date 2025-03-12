@@ -2,17 +2,13 @@
 
 import { FC, ReactNode, useMemo } from "react";
 import {
-  AnalyticsProvider,
   AuthProvider,
   FirebaseAppProvider,
   FirestoreProvider,
   useFirebaseApp,
-} from "reactfire"; 
+} from "reactfire";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { isBrowser } from "@/lib/utils";
-import { getAnalytics } from "firebase/analytics";
-import { FirebaseOptions } from "firebase/app";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -27,21 +23,15 @@ const firebaseConfig = {
 const FirebaseProviderSDKs: FC<{ children: ReactNode }> = ({ children }) => {
   const firebase = useFirebaseApp();
   // we have to use getters to pass to providers, children should use hooks
-  const auth = useMemo(() => getAuth(), []);
-  const firestore = useMemo(() => getFirestore(firebase), []);
-  const analytics = useMemo(() => isBrowser() && getAnalytics(firebase), []);
+  const auth = useMemo(() => getAuth(), [firebase]);
+  const firestore = useMemo(() => getFirestore(firebase), [firebase]);
 
   return (
     <>
       {auth && (
         <AuthProvider sdk={auth}>
           <FirestoreProvider sdk={firestore}>
-            {/* we can only use analytics in the browser */}
-            {analytics ? (
-              <AnalyticsProvider sdk={analytics}>{children}</AnalyticsProvider>
-            ) : (
-              <>{children}</>
-            )}
+            {children}
           </FirestoreProvider>
         </AuthProvider>
       )}
@@ -53,10 +43,8 @@ export const MyFirebaseProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
   return (
-    <>
-      <FirebaseAppProvider firebaseConfig={firebaseConfig}>
-        <FirebaseProviderSDKs>{children}</FirebaseProviderSDKs>
-      </FirebaseAppProvider>
-    </>
+    <FirebaseAppProvider firebaseConfig={firebaseConfig}>
+      <FirebaseProviderSDKs>{children}</FirebaseProviderSDKs>
+    </FirebaseAppProvider>
   );
 };

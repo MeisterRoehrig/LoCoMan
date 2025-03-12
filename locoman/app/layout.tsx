@@ -4,9 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import "@/app/globals.css";
-import { cn } from "@/lib/utils";
 import { MyFirebaseProvider } from "@/components/firebase-providers";
-import { ReactNode } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

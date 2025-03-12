@@ -22,24 +22,23 @@ export const AuthCard = () => {
     if (user) {
       router.push("/dashboard");
     }
-  }, [user]);
+  }, [user, router]); // Include 'router' in the dependency array
+
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>{isShowingSignUp ? "Sign Up" : "Sign In"}</CardTitle>
-          <CardDescription>
-            Give them a reason to {isShowingSignUp ? "sign up" : "sign in"}.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isShowingSignUp ? (
-            <SignUpForm onShowLogin={() => setIsShowingSignUp(false)} />
-          ) : (
-            <SignInForm onShowSignUp={() => setIsShowingSignUp(true)} />
-          )}
-        </CardContent>
-      </Card>
-    </>
+    <Card>
+      <CardHeader>
+        <CardTitle>{isShowingSignUp ? "Sign Up" : "Sign In"}</CardTitle>
+        <CardDescription>
+          Give them a reason to {isShowingSignUp ? "sign up" : "sign in"}.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isShowingSignUp ? (
+          <SignUpForm onShowLogin={() => setIsShowingSignUp(false)} />
+        ) : (
+          <SignInForm onShowSignUp={() => setIsShowingSignUp(true)} />
+        )}
+      </CardContent>
+    </Card>
   );
 };

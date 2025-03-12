@@ -61,6 +61,13 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "caret-blink": "caret-blink 1.25s ease-out infinite",
+        "gradient": 'gradient 8s linear infinite',
+        "shine": 'shine 3s ease-out infinite',
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -74,16 +81,22 @@ module.exports = {
           "0%,70%,100%": { opacity: "1" },
           "20%,50%": { opacity: "0" },
         },
+        "gradient": {
+          '0%': { backgroundPosition: '0% 0%' },
+          '100%': { backgroundPosition: 'var(--bg-size) 0%' },
+        },
+        "shine": {
+          '0%': { backgroundPosition: '200% 0' },
+          '25%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
       },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "caret-blink": "caret-blink 1.25s ease-out infinite",
-      },
+
     },
   },
   plugins: [
     require("tailwindcss-animate"),
     require("tailwind-scrollbar")({ nocompatible: true }),
   ],
+
 }

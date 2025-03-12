@@ -3,7 +3,7 @@
 import React from 'react'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { ChevronRight } from 'lucide-react'
-import { cva } from '@/node_modules/class-variance-authority'
+import { cva } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const treeVariants = cva(
@@ -17,9 +17,9 @@ const selectedTreeVariants = cva(
 interface TreeDataItem {
     id: string
     name: string
-    icon?: any
-    selectedIcon?: any
-    openIcon?: any
+    icon?: React.ComponentType<{ className?: string }>
+    selectedIcon?: React.ComponentType<{ className?: string }>
+    openIcon?: React.ComponentType<{ className?: string }>
     children?: TreeDataItem[]
     actions?: React.ReactNode
     onClick?: () => void
@@ -30,8 +30,8 @@ type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
     initialSelectedItemId?: string
     onSelectChange?: (item: TreeDataItem | undefined) => void
     expandAll?: boolean
-    defaultNodeIcon?: any
-    defaultLeafIcon?: any
+    defaultNodeIcon?: React.ComponentType<{ className?: string }>
+    defaultLeafIcon?: React.ComponentType<{ className?: string }>
 }
 
 const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
@@ -74,9 +74,9 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
                 targetId: string
             ) {
                 if (items instanceof Array) {
-                    for (let i = 0; i < items.length; i++) {
-                        ids.push(items[i]!.id)
-                        if (walkTreeItems(items[i]!, targetId) && !expandAll) {
+                    for (const item of items) {
+                        ids.push(item.id)
+                        if (walkTreeItems(item, targetId) && !expandAll) {
                             return true
                         }
                         if (!expandAll) ids.pop()
@@ -114,8 +114,8 @@ type TreeItemProps = TreeProps & {
     selectedItemId?: string
     handleSelectChange: (item: TreeDataItem | undefined) => void
     expandedItemIds: string[]
-    defaultNodeIcon?: any
-    defaultLeafIcon?: any
+    defaultNodeIcon?: React.ComponentType<{ className?: string }>
+    defaultLeafIcon?: React.ComponentType<{ className?: string }>
 }
 
 const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
@@ -178,8 +178,8 @@ const TreeNode = ({
     handleSelectChange: (item: TreeDataItem | undefined) => void
     expandedItemIds: string[]
     selectedItemId?: string
-    defaultNodeIcon?: any
-    defaultLeafIcon?: any
+    defaultNodeIcon?: React.ComponentType<{ className?: string }>
+    defaultLeafIcon?: React.ComponentType<{ className?: string }>
 }) => {
     const [value, setValue] = React.useState(
         expandedItemIds.includes(item.id) ? [item.id] : []
@@ -233,7 +233,7 @@ const TreeLeaf = React.forwardRef<
         item: TreeDataItem
         selectedItemId?: string
         handleSelectChange: (item: TreeDataItem | undefined) => void
-        defaultLeafIcon?: any
+        defaultLeafIcon?: React.ComponentType<{ className?: string }>
     }
 >(
     (
@@ -250,6 +250,9 @@ const TreeLeaf = React.forwardRef<
         return (
             <div
                 ref={ref}
+                role="treeitem"
+                aria-selected={selectedItemId === item.id}
+                tabIndex={0}
                 className={cn(
                     'ml-5 flex text-left items-center py-2 cursor-pointer before:right-1',
                     treeVariants(),
@@ -259,6 +262,12 @@ const TreeLeaf = React.forwardRef<
                 onClick={() => {
                     handleSelectChange(item)
                     item.onClick?.()
+                }}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        handleSelectChange(item)
+                        item.onClick?.()
+                    }
                 }}
                 {...props}
             >
@@ -324,7 +333,7 @@ const TreeIcon = ({
     item: TreeDataItem
     isOpen?: boolean
     isSelected?: boolean
-    default?: any
+    default?: React.ComponentType<{ className?: string }>
 }) => {
     let Icon = defaultIcon
     if (isSelected && item.selectedIcon) {

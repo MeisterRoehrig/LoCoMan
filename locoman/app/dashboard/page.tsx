@@ -12,11 +12,9 @@ import {
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
-  SidebarMenuButton,
   SidebarProvider,
   SidebarTrigger
 } from "@/components/ui/sidebar"
-import { Input } from "@/components/ui/input"
 import {
   ResizableHandle,
   ResizablePanel,
@@ -24,13 +22,11 @@ import {
 } from "@/components/ui/resizable"
 
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
 import { buttonVariants } from "@/components/ui/button"
 
 import Link from "next/link"
 
 import { TreeView, TreeDataItem } from '@/components/ui/tree-view';
-import { FolderOpen, FolderClosed, File, FilePen } from "lucide-react"
 import { CirclePlus } from "lucide-react";
 import { ScrollDiv } from "@/components/ui/scroll-div"
 
@@ -38,46 +34,95 @@ const data: TreeDataItem[] = [
   {
     id: '0',
     name: 'Beauftragung',
-    actions: <div><Link className={buttonVariants({ variant: "ghost" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus/></Link></div>,
-    
+    actions: (
+      <div className="flex">
+        <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+      </div>
+    ),
+
     children: [
       {
         id: '1',
         name: 'Transportbedarf überprüfen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '2',
         name: 'Angebot vorbereiten und übermitteln',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '3',
         name: 'Transportbedarf erfassen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
     ],
   },
   {
     id: '4',
     name: 'Disposition',
+    actions: (
+      <div className="flex">
+        <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+      </div>
+    ),
     children: [
       {
         id: '5',
         name: 'Verfügbarkeit von Personal und Fuhrpark prüfen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '6',
         name: 'Tour planen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '7',
         name: 'Touren, Fahrzeuge und Fahrer disponieren',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '8',
         name: 'Frachtpapiere vorbereiten',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '9',
         name: 'Dokumente an Fahrer übermitteln',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
     ],
   },
@@ -88,58 +133,123 @@ const data: TreeDataItem[] = [
       {
         id: '11',
         name: 'Zum Abholort fahren',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '12',
         name: 'Verladepapiere an Erfassungsstelle übergeben',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '13',
         name: 'Beladeplatz zuweisen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '14',
         name: 'Sendung überprüfen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '15',
         name: 'Sendung beladen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
     ],
   },
   {
     id: '16',
     name: 'Transport',
+    actions: (
+      <div className="flex">
+        <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+      </div>
+    ),
     children: [
       {
         id: '17',
         name: 'Fahrerkarte einlesen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '18',
         name: 'Fahrzeugzustand prüfen und vorbereiten',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '19',
         name: 'sendung transportieren',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
     ],
   },
   {
     id: '20',
     name: 'Entladung',
+    actions: (
+      <div className="flex">
+        <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+      </div>
+    ),
     children: [
       {
         id: '21',
         name: 'Sendung entladen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '22',
         name: 'Sendung überprüfen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
       {
         id: '23',
         name: 'Sendung annehmen',
+        actions: (
+          <div className="flex">
+            <Link className={buttonVariants({ variant: "link" })} href={"javascript:void(0)"} onClick={() => console.log("confirmed")}><CirclePlus /></Link>
+          </div>
+        ),
       },
     ],
   },
@@ -182,6 +292,7 @@ export default function Page() {
           <ResizablePanel defaultSize={75}>
             <ScrollArea type="scroll" className="flex-1 p-4 pt-0 rounded-md h-full">
               <span className="font-semibold">Sidebar</span>
+
             </ScrollArea>
           </ResizablePanel>
         </ResizablePanelGroup>

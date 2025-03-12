@@ -52,8 +52,8 @@ export const SignUpForm: FC<SignUpFormProps> = ({ onShowLogin, onSignUp }) => {
         toast({ title: "Account created!" });
         onSignUp?.();
       }
-    } catch (err: any) {
-      if ("code" in err && err.code.includes("already")) {
+    } catch (err: unknown) {
+      if (err instanceof Error && "code" in err && (err as { code: string }).code.includes("already")) {
         toast({ title: "User already exists" });
       } else {
         toast({ title: "Error signing up", description: `${err}` });
