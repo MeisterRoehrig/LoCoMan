@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "locoman-d5128",
+    "locoman": "locoman-d5128"
+  },
+  "targets": {},
+  "etags": {}
+}
