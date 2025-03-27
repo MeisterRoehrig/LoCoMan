@@ -1,0 +1,213 @@
+[debug] [2025-03-27T07:56:04.074Z] ----------------------------------------------------------------------
+[debug] [2025-03-27T07:56:04.077Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js apphosting:backends:create --project locoman-f465a --location europe-west4
+[debug] [2025-03-27T07:56:04.077Z] CLI Version:   13.35.1
+[debug] [2025-03-27T07:56:04.077Z] Platform:      win32
+[debug] [2025-03-27T07:56:04.078Z] Node Version:  v23.8.0
+[debug] [2025-03-27T07:56:04.078Z] Time:          Thu Mar 27 2025 08:56:04 GMT+0100 (Central European Standard Time)
+[debug] [2025-03-27T07:56:04.078Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-03-27T07:56:04.299Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:04.299Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:04.300Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-03-27T07:56:04.301Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:05.252Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-03-27T07:56:05.252Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:05.252Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.253Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.253Z] >>> [apiv2][query] GET https://mobilesdk-pa.googleapis.com/v1/accessmanagement/tos:getStatus [none]
+[debug] [2025-03-27T07:56:05.524Z] <<< [apiv2][status] GET https://mobilesdk-pa.googleapis.com/v1/accessmanagement/tos:getStatus 200
+[debug] [2025-03-27T07:56:05.524Z] <<< [apiv2][body] GET https://mobilesdk-pa.googleapis.com/v1/accessmanagement/tos:getStatus {"overallStatus":"ACCEPTED","uTosStatus":{"tos":{"id":"firebase","tosId":"FIREBASE_UNIVERSAL"},"status":"ACCEPTED"},"childTosStatus":[{"tos":{"id":"cloud","tosId":"CLOUD_PLATFORM"},"status":"ACCEPTED"},{"tos":{"id":"firebase_b2b","tosId":"FIREBASE_B2B"},"status":"ACCEPTED"},{"tos":{"id":"universal","tosId":"GOOGLE_APIS"},"status":"ACCEPTED"}],"termsUrl":"https://firebase.google.com/terms","perServiceStatus":[{"tosId":"APP_CHECK","serviceStatus":{"tos":{"id":"app_check","tosId":"APP_CHECK"},"status":"ACCEPTED"}},{"tosId":"APP_HOSTING_TOS","serviceStatus":{"tos":{"id":"app_hosting","tosId":"APP_HOSTING_TOS"},"status":"ACCEPTED"}},{"tosId":"FIREBASE_DATA_CONNECT","serviceStatus":{"tos":{"id":"data_connect","tosId":"FIREBASE_DATA_CONNECT"},"status":"ACCEPTED"}},{"tosId":"CORE_APPS","serviceStatus":{"tos":{"id":"core_apps","tosId":"CORE_APPS"},"status":"ACCEPTED"}},{"tosId":"VERTEX_AI_IN_FIREBASE","serviceStatus":{"tos":{"id":"vertex_ai_in_firebase","tosId":"VERTEX_AI_IN_FIREBASE"},"status":"ACCEPTED"}},{"tosId":"FIREBASE_CRASHLYTICS_APP_DISTRIBUTION","serviceStatus":{"tos":{"id":"firebase_crashlytics_app_distribution","tosId":"FIREBASE_CRASHLYTICS_APP_DISTRIBUTION"},"status":"ACCEPTED"}},{"tosId":"GENERATIVE_LANGUAGE","serviceStatus":{"tos":{"id":"generative-language-api","tosId":"GENERATIVE_LANGUAGE"},"status":"NEVER_ACCEPTED"}}]}
+[warn] !  --location is being removed in the next major release. The CLI will prompt for a Primary Region where appropriate. 
+[debug] [2025-03-27T07:56:05.526Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.526Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.527Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.527Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.527Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.527Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.527Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.527Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.527Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.527Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.528Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.528Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:05.528Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/developerconnect.googleapis.com [none]
+[debug] [2025-03-27T07:56:05.528Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/developerconnect.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:05.529Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/cloudbuild.googleapis.com [none]
+[debug] [2025-03-27T07:56:05.529Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/cloudbuild.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:05.532Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/secretmanager.googleapis.com [none]
+[debug] [2025-03-27T07:56:05.532Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/secretmanager.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:05.535Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/run.googleapis.com [none]
+[debug] [2025-03-27T07:56:05.535Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/run.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:05.538Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/artifactregistry.googleapis.com [none]
+[debug] [2025-03-27T07:56:05.538Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/artifactregistry.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:05.541Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/iam.googleapis.com [none]
+[debug] [2025-03-27T07:56:05.541Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/iam.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:06.406Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/cloudbuild.googleapis.com 200
+[debug] [2025-03-27T07:56:06.406Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/cloudbuild.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:06.407Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/secretmanager.googleapis.com 200
+[debug] [2025-03-27T07:56:06.407Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/secretmanager.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:06.412Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/developerconnect.googleapis.com 200
+[debug] [2025-03-27T07:56:06.412Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/developerconnect.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:06.418Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/iam.googleapis.com 200
+[debug] [2025-03-27T07:56:06.419Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/iam.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:06.433Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/run.googleapis.com 200
+[debug] [2025-03-27T07:56:06.433Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/run.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:06.443Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/artifactregistry.googleapis.com 200
+[debug] [2025-03-27T07:56:06.443Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/artifactregistry.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:06.444Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:06.444Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:06.444Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-03-27T07:56:06.445Z] >>> [apiv2][(partial)header] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:06.445Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-03-27T07:56:06.662Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-03-27T07:56:06.662Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-03-27T07:56:06.663Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:06.663Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:06.663Z] >>> [apiv2][query] GET https://firebaseapphosting.googleapis.com/v1beta/projects/locoman-f465a/locations 
+[debug] [2025-03-27T07:56:07.463Z] <<< [apiv2][status] GET https://firebaseapphosting.googleapis.com/v1beta/projects/locoman-f465a/locations 200
+[debug] [2025-03-27T07:56:07.463Z] <<< [apiv2][body] GET https://firebaseapphosting.googleapis.com/v1beta/projects/locoman-f465a/locations {"locations":[{"name":"projects/locoman-f465a/locations/asia-east1","locationId":"asia-east1","displayName":"Taiwan"},{"name":"projects/locoman-f465a/locations/europe-west4","locationId":"europe-west4","displayName":"Netherlands"},{"name":"projects/locoman-f465a/locations/us-central1","locationId":"us-central1","displayName":"Iowa"}]}
+[info] i  === Import a GitHub repository 
+[debug] [2025-03-27T07:56:07.464Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:07.465Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:07.465Z] >>> [apiv2][query] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth [none]
+[debug] [2025-03-27T07:56:07.615Z] <<< [apiv2][status] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth 200
+[debug] [2025-03-27T07:56:07.615Z] <<< [apiv2][body] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth {"name":"projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth","createTime":"2025-03-27T07:48:09.999499079Z","updateTime":"2025-03-27T07:48:30.734058422Z","githubConfig":{"githubApp":"FIREBASE","authorizerCredential":{"oauthTokenSecretVersion":"projects/locoman-f465a/secrets/firebase-app-hosting-github-oauth-github-oauthtoken-b50e1d/versions/latest","username":"MeisterRoehrig"},"appInstallationId":"62536652","installationUri":"https://github.com/settings/installations/62536652"},"installationState":{"stage":"COMPLETE"}}
+[info] +  Connected with GitHub successfully
+ 
+[debug] [2025-03-27T07:56:07.616Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:07.616Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:07.617Z] >>> [apiv2][query] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth:fetchGitHubInstallations [none]
+[debug] [2025-03-27T07:56:08.019Z] <<< [apiv2][status] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth:fetchGitHubInstallations 200
+[debug] [2025-03-27T07:56:08.019Z] <<< [apiv2][body] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth:fetchGitHubInstallations {}
+[debug] [2025-03-27T07:56:08.021Z] TypeError: Cannot read properties of undefined (reading 'filter')
+    at listValidInstallations (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\githubConnections.js:198:35)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async promptGitHubInstallation (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\githubConnections.js:166:27)
+    at async getOrCreateGithubConnectionWithSentinel (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\githubConnections.js:73:26)
+    at async Object.linkGitHubRepository (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\githubConnections.js:102:24)
+    at async doSetup (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\backend.js:71:31)
+    at async Command.actionFn (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\commands\apphosting-backends-create.js:29:5)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-03-27T07:56:23.452Z] ----------------------------------------------------------------------
+[debug] [2025-03-27T07:56:23.455Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js apphosting:backends:create --project locoman-f465a
+[debug] [2025-03-27T07:56:23.456Z] CLI Version:   13.35.1
+[debug] [2025-03-27T07:56:23.456Z] Platform:      win32
+[debug] [2025-03-27T07:56:23.456Z] Node Version:  v23.8.0
+[debug] [2025-03-27T07:56:23.456Z] Time:          Thu Mar 27 2025 08:56:23 GMT+0100 (Central European Standard Time)
+[debug] [2025-03-27T07:56:23.457Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-03-27T07:56:23.675Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:23.675Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:23.676Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-03-27T07:56:23.676Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:24.612Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-03-27T07:56:24.612Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:24.613Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.613Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.613Z] >>> [apiv2][query] GET https://mobilesdk-pa.googleapis.com/v1/accessmanagement/tos:getStatus [none]
+[debug] [2025-03-27T07:56:24.891Z] <<< [apiv2][status] GET https://mobilesdk-pa.googleapis.com/v1/accessmanagement/tos:getStatus 200
+[debug] [2025-03-27T07:56:24.891Z] <<< [apiv2][body] GET https://mobilesdk-pa.googleapis.com/v1/accessmanagement/tos:getStatus {"overallStatus":"ACCEPTED","uTosStatus":{"tos":{"id":"firebase","tosId":"FIREBASE_UNIVERSAL"},"status":"ACCEPTED"},"childTosStatus":[{"tos":{"id":"cloud","tosId":"CLOUD_PLATFORM"},"status":"ACCEPTED"},{"tos":{"id":"firebase_b2b","tosId":"FIREBASE_B2B"},"status":"ACCEPTED"},{"tos":{"id":"universal","tosId":"GOOGLE_APIS"},"status":"ACCEPTED"}],"termsUrl":"https://firebase.google.com/terms","perServiceStatus":[{"tosId":"APP_CHECK","serviceStatus":{"tos":{"id":"app_check","tosId":"APP_CHECK"},"status":"ACCEPTED"}},{"tosId":"APP_HOSTING_TOS","serviceStatus":{"tos":{"id":"app_hosting","tosId":"APP_HOSTING_TOS"},"status":"ACCEPTED"}},{"tosId":"FIREBASE_DATA_CONNECT","serviceStatus":{"tos":{"id":"data_connect","tosId":"FIREBASE_DATA_CONNECT"},"status":"ACCEPTED"}},{"tosId":"CORE_APPS","serviceStatus":{"tos":{"id":"core_apps","tosId":"CORE_APPS"},"status":"ACCEPTED"}},{"tosId":"VERTEX_AI_IN_FIREBASE","serviceStatus":{"tos":{"id":"vertex_ai_in_firebase","tosId":"VERTEX_AI_IN_FIREBASE"},"status":"ACCEPTED"}},{"tosId":"FIREBASE_CRASHLYTICS_APP_DISTRIBUTION","serviceStatus":{"tos":{"id":"firebase_crashlytics_app_distribution","tosId":"FIREBASE_CRASHLYTICS_APP_DISTRIBUTION"},"status":"ACCEPTED"}},{"tosId":"GENERATIVE_LANGUAGE","serviceStatus":{"tos":{"id":"generative-language-api","tosId":"GENERATIVE_LANGUAGE"},"status":"NEVER_ACCEPTED"}}]}
+[debug] [2025-03-27T07:56:24.892Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.892Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.892Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.892Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.892Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.892Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.893Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.893Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.893Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.893Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.893Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.893Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:24.893Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/developerconnect.googleapis.com [none]
+[debug] [2025-03-27T07:56:24.893Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/developerconnect.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:24.894Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/cloudbuild.googleapis.com [none]
+[debug] [2025-03-27T07:56:24.894Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/cloudbuild.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:24.896Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/secretmanager.googleapis.com [none]
+[debug] [2025-03-27T07:56:24.896Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/secretmanager.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:24.899Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/run.googleapis.com [none]
+[debug] [2025-03-27T07:56:24.899Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/run.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:24.901Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/artifactregistry.googleapis.com [none]
+[debug] [2025-03-27T07:56:24.901Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/artifactregistry.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:24.903Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/iam.googleapis.com [none]
+[debug] [2025-03-27T07:56:24.903Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/iam.googleapis.com x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:25.237Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/developerconnect.googleapis.com 200
+[debug] [2025-03-27T07:56:25.237Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/developerconnect.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:25.754Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/artifactregistry.googleapis.com 200
+[debug] [2025-03-27T07:56:25.754Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/artifactregistry.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:25.755Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/secretmanager.googleapis.com 200
+[debug] [2025-03-27T07:56:25.755Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/secretmanager.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:25.772Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/cloudbuild.googleapis.com 200
+[debug] [2025-03-27T07:56:25.772Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/cloudbuild.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:25.785Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/run.googleapis.com 200
+[debug] [2025-03-27T07:56:25.786Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/run.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:26.389Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/iam.googleapis.com 200
+[debug] [2025-03-27T07:56:26.390Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/locoman-f465a/services/iam.googleapis.com [omitted]
+[debug] [2025-03-27T07:56:26.390Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:26.390Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:26.391Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-03-27T07:56:26.391Z] >>> [apiv2][(partial)header] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions x-goog-quota-user=projects/locoman-f465a
+[debug] [2025-03-27T07:56:26.391Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-03-27T07:56:27.074Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-03-27T07:56:27.075Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/locoman-f465a/serviceAccounts/firebase-app-hosting-compute@locoman-f465a.iam.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-03-27T07:56:27.075Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:27.075Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:27.076Z] >>> [apiv2][query] GET https://firebaseapphosting.googleapis.com/v1beta/projects/locoman-f465a/locations 
+[debug] [2025-03-27T07:56:27.873Z] <<< [apiv2][status] GET https://firebaseapphosting.googleapis.com/v1beta/projects/locoman-f465a/locations 200
+[debug] [2025-03-27T07:56:27.873Z] <<< [apiv2][body] GET https://firebaseapphosting.googleapis.com/v1beta/projects/locoman-f465a/locations {"locations":[{"name":"projects/locoman-f465a/locations/asia-east1","locationId":"asia-east1","displayName":"Taiwan"},{"name":"projects/locoman-f465a/locations/europe-west4","locationId":"europe-west4","displayName":"Netherlands"},{"name":"projects/locoman-f465a/locations/us-central1","locationId":"us-central1","displayName":"Iowa"}]}
+[debug] [2025-03-27T07:56:27.873Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:27.873Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:27.874Z] >>> [apiv2][query] GET https://firebaseapphosting.googleapis.com/v1beta/projects/locoman-f465a/locations 
+[debug] [2025-03-27T07:56:28.069Z] <<< [apiv2][status] GET https://firebaseapphosting.googleapis.com/v1beta/projects/locoman-f465a/locations 200
+[debug] [2025-03-27T07:56:28.069Z] <<< [apiv2][body] GET https://firebaseapphosting.googleapis.com/v1beta/projects/locoman-f465a/locations {"locations":[{"name":"projects/locoman-f465a/locations/asia-east1","locationId":"asia-east1","displayName":"Taiwan"},{"name":"projects/locoman-f465a/locations/europe-west4","locationId":"europe-west4","displayName":"Netherlands"},{"name":"projects/locoman-f465a/locations/us-central1","locationId":"us-central1","displayName":"Iowa"}]}
+[info] +  Location set to europe-west4.
+ 
+[info] i  === Import a GitHub repository 
+[debug] [2025-03-27T07:56:31.884Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:31.884Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:31.884Z] >>> [apiv2][query] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth [none]
+[debug] [2025-03-27T07:56:32.041Z] <<< [apiv2][status] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth 200
+[debug] [2025-03-27T07:56:32.042Z] <<< [apiv2][body] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth {"name":"projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth","createTime":"2025-03-27T07:48:09.999499079Z","updateTime":"2025-03-27T07:48:30.734058422Z","githubConfig":{"githubApp":"FIREBASE","authorizerCredential":{"oauthTokenSecretVersion":"projects/locoman-f465a/secrets/firebase-app-hosting-github-oauth-github-oauthtoken-b50e1d/versions/latest","username":"MeisterRoehrig"},"appInstallationId":"62536652","installationUri":"https://github.com/settings/installations/62536652"},"installationState":{"stage":"COMPLETE"}}
+[info] +  Connected with GitHub successfully
+ 
+[debug] [2025-03-27T07:56:32.043Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:32.043Z] Checked if tokens are valid: true, expires at: 1743065646150
+[debug] [2025-03-27T07:56:32.043Z] >>> [apiv2][query] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth:fetchGitHubInstallations [none]
+[debug] [2025-03-27T07:56:32.445Z] <<< [apiv2][status] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth:fetchGitHubInstallations 200
+[debug] [2025-03-27T07:56:32.445Z] <<< [apiv2][body] GET https://developerconnect.googleapis.com/v1/projects/locoman-f465a/locations/europe-west4/connections/firebase-app-hosting-github-oauth:fetchGitHubInstallations {}
+[debug] [2025-03-27T07:56:32.446Z] TypeError: Cannot read properties of undefined (reading 'filter')
+    at listValidInstallations (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\githubConnections.js:198:35)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async promptGitHubInstallation (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\githubConnections.js:166:27)
+    at async getOrCreateGithubConnectionWithSentinel (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\githubConnections.js:73:26)
+    at async Object.linkGitHubRepository (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\githubConnections.js:102:24)
+    at async doSetup (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\apphosting\backend.js:71:31)
+    at async Command.actionFn (C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\commands\apphosting-backends-create.js:29:5)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-03-27T07:56:57.368Z] ----------------------------------------------------------------------
+[debug] [2025-03-27T07:56:57.371Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2025-03-27T07:56:57.372Z] CLI Version:   13.35.1
+[debug] [2025-03-27T07:56:57.372Z] Platform:      win32
+[debug] [2025-03-27T07:56:57.372Z] Node Version:  v23.8.0
+[debug] [2025-03-27T07:56:57.372Z] Time:          Thu Mar 27 2025 08:56:57 GMT+0100 (Central European Standard Time)
+[debug] [2025-03-27T07:56:57.372Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-03-27T07:56:57.591Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-03-27T07:56:57.591Z] > authorizing via signed-in user (tech@linusvonmaltzan.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  D:\CODE\LoCoMan
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
