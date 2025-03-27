@@ -2,16 +2,12 @@
 
 import * as React from "react"
 import {
-  File,
   Frame,
   LifeBuoy,
-  Map,
-  PieChart,
   Send,
   Truck,
 } from "lucide-react"
 
-import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -25,17 +21,13 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
-import { useData } from "@/lib/data-provider"  // <-- import your data context
-
+import { useData } from "@/lib/data-provider" 
 import { NewProjectButton } from "@/components/new-project-dialog";
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // 1) Access Firestore projects via the DataProvider
-  const { projects, createProject, deleteProject, loading } = useData();
-
-  // 2) Optionally replace your static `data.projects` with the real projects
-  // (The "projects" array has the shape: { id, title, description, ... })
+  const {userProfile, projects } = useData();
 
   // Example: transform it into the shape the NavProjects component expects:
   const navProjects = React.useMemo(() => {
@@ -88,9 +80,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavUser
           user={{
-            name: "User",
-            email: "u@example.com",
-            avatar: "/avatars/shadcn.jpg",
+            name: userProfile?.displayName ?? "Loading...",
+            email: userProfile?.email ?? "",
+            avatar: userProfile?.avatarUrl ?? "/avatars/shadcn.jpg",
           }}
         />
       </SidebarFooter>

@@ -1,48 +1,47 @@
 "use client";
 
-import { Button } from "@/components/ui/button"
+import { Suspense, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
-import { useState } from "react"
-import { toast } from "sonner"
-import { FirebaseError } from "firebase/app"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useAuth } from "@/lib/auth-provider" 
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { toast } from "sonner";
+import { FirebaseError } from "firebase/app";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/lib/auth-provider";
 
-export default function SignUpPage() {
+function SignUpPage() {
   const { signup } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const redirectPath = searchParams.get("redirect") ?? "/dashboard";
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.warning("Passwords do not match")
-      return
+      toast.warning("Passwords do not match");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      await signup(email, password)
+      await signup(email, password);
       router.replace(redirectPath);
-
     } catch (error) {
       if (error instanceof FirebaseError) {
         toast.error(error.message);
@@ -50,9 +49,9 @@ export default function SignUpPage() {
         toast.error("An unexpected error occurred.");
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -123,5 +122,13 @@ export default function SignUpPage() {
         </Card>
       </div>
     </div>
-  )
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignUpPage />
+    </Suspense>
+  );
 }

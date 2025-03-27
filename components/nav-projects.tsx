@@ -5,21 +5,24 @@ import { type LucideIcon, Folder, MoreHorizontal, Share, Trash2 } from "lucide-r
 
 import { useSidebar, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation" // Next.js App Router
 
 // 1) Import your data layer
 import { useData } from "@/lib/data-provider"
+import Link from "next/link";
 
 export function NavProjects({
   projects,
 }: {
-  projects: {
-    id: string          // <-- Firestore doc ID
+  readonly projects: readonly {
+    id: string
     name: string
     url: string
     icon: LucideIcon
   }[]
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
   // 2) Access deleteProject from your data provider
   const { deleteProject } = useData()
 
@@ -36,9 +39,9 @@ export function NavProjects({
         {projects.map((item) => (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <Link href={`/dashboard/${item.id}`}>
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
 
             <DropdownMenu>
@@ -54,7 +57,11 @@ export function NavProjects({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    router.push(`/dashboard/${item.id}`)
+                  }}
+                >
                   <Folder className="text-muted-foreground" />
                   <span>View Project</span>
                 </DropdownMenuItem>

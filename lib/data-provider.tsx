@@ -1,136 +1,169 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  ReactNode,
-  useEffect,
-  useState,
-  useMemo,
-} from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react"
 import {
   collection,
+  doc,
   onSnapshot,
-  query,
   orderBy,
+  query,
   addDoc,
   serverTimestamp,
-  doc,
   deleteDoc,
-} from "firebase/firestore";
-import { firestore } from "@/lib/firebase-config"; // adjust import as needed
-import { useAuth } from "@/lib/auth-provider";
-import { toast } from "sonner";
+} from "firebase/firestore"
+import { firestore } from "@/lib/firebase-config"
+import { useAuth } from "@/lib/auth-provider"
+import { toast } from "sonner"
 
-// -- Project model
 type Project = {
-  id: string;
-  title: string;
-  description: string;
-  createdAt?: any; // Firestore Timestamp
-  updatedAt?: any; // Firestore Timestamp
-};
-
-interface DataContextProps {
-  projects: Project[];
-  loading: boolean;
-  createProject: (title: string, description: string) => Promise<void>;
-  deleteProject: (id: string) => Promise<void>;
-  // e.g. updateProject if you need it
+  id: string
+  title: string
+  description?: string
+  createdAt?: Date | null
+  updatedAt?: Date | null
 }
 
-// -- Create the DataContext with default values
+interface UserProfile {
+  displayName: string
+  email: string
+  avatarUrl?: string
+}
+
+interface DataContextProps {
+  userProfile: UserProfile | null
+  projects: Project[]
+  loading: boolean
+  createProject: (title: string, description: string) => Promise<void>
+  deleteProject: (id: string) => Promise<void>
+}
+
+// Create the Context
 const DataContext = createContext<DataContextProps>({
+  userProfile: null,
   projects: [],
   loading: false,
   createProject: async () => {},
   deleteProject: async () => {},
-});
+})
 
-export function DataProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+export function DataProvider({ children }: { readonly children: React.ReactNode }) {
+  const { user } = useAuth()
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(false)
 
-  // Real-time subscription to the user's projects
+  // 1) Real-time subscription to the user doc in /users/{uid}
   useEffect(() => {
-    if (!user || !user.uid) {
-      // if user is null or false, reset projects
-      setProjects([]);
-      return;
+    if (!user || typeof user !== "object" || !user.uid) {
+      setUserProfile(null)
+      return
     }
 
-    setLoading(true);
+    const userRef = doc(firestore, "users", user.uid)
+    const unsub = onSnapshot(
+      userRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.data()
+          setUserProfile({
+            displayName: data.displayName || "Unknown",
+            email: data.email || "",
+            avatarUrl: data.avatarUrl || "/avatars/default.jpg",
+          })
+        } else {
+          // If user doc doesn't exist
+          setUserProfile(null)
+        }
+      },
+      (error) => {
+        console.error("Error loading user profile:", error)
+        setUserProfile(null)
+      }
+    )
+
+    return () => unsub()
+  }, [user])
+
+  // 2) Real-time subscription to the user’s projects
+  useEffect(() => {
+    if (!user || typeof user !== "object" || !user.uid) {
+      setProjects([])
+      return
+    }
+
+    setLoading(true)
     const q = query(
       collection(firestore, "users", user.uid, "projects"),
       orderBy("createdAt", "desc")
-    );
+    )
 
-    // Subscribe to the "projects" subcollection in real time
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
         const projectData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...(doc.data() as Omit<Project, "id">),
-        }));
-        setProjects(projectData);
-        setLoading(false);
+        }))
+        setProjects(projectData)
+        setLoading(false)
       },
       (error) => {
-        console.error(error);
-        toast.error("Failed to load projects.");
-        setLoading(false);
+        console.error(error)
+        toast.error("Failed to load projects.")
+        setLoading(false)
       }
-    );
+    )
 
-    return () => unsubscribe();
-  }, [user]);
+    return () => unsubscribe()
+  }, [user])
 
-  // -- CREATE a project --
+  // 3) Create a project
   async function createProject(title: string, description: string) {
-    if (!user || !user.uid) return;
+    if (!user || typeof user !== "object" || !user.uid) return
     try {
       await addDoc(collection(firestore, "users", user.uid, "projects"), {
         title,
         description,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
-      toast.success("Project created successfully!");
+      })
+      toast.success("Project created successfully!")
     } catch (error) {
-      console.error("Error creating project:", error);
-      toast.error("Failed to create project.");
+      console.error("Error creating project:", error)
+      toast.error("Failed to create project.")
     }
   }
 
-  // -- DELETE a project --
+  // 4) Delete a project
   async function deleteProject(id: string) {
-    if (!user || !user.uid) return;
+    if (!user || typeof user !== "object" || !user.uid) return
     try {
-      await deleteDoc(doc(firestore, "users", user.uid, "projects", id));
-      toast.success("Project deleted successfully!");
+      await deleteDoc(doc(firestore, "users", user.uid, "projects", id))
+      toast.success("Project deleted successfully!")
     } catch (error) {
-      console.error("Error deleting project:", error);
-      toast.error("Failed to delete project.");
+      console.error("Error deleting project:", error)
+      toast.error("Failed to delete project.")
     }
   }
 
   const contextValue = useMemo(
     () => ({
+      userProfile,
       projects,
       loading,
       createProject,
       deleteProject,
     }),
-    [projects, loading]
-  );
+    [userProfile, projects, loading]
+  )
 
   return (
-    <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>
-  );
+    <DataContext.Provider value={contextValue}>
+      {children}
+    </DataContext.Provider>
+  )
 }
 
 export function useData() {
-  return useContext(DataContext);
+  return useContext(DataContext)
 }

@@ -1,6 +1,9 @@
 "use client"
 
+import React from "react"
 import { AppSidebar } from "@/components/app-sidebar"
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,60 +12,60 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger
-} from "@/components/ui/sidebar"
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable"
 
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { buttonVariants } from "@/components/ui/button"
+import ProtectedRoute from "@/components/protected-route"
 
-import Link from "next/link"
+// 1) Create a context for storing the current project's name (breadcrumbTitle)
+type DashboardContextProps = {
+  breadcrumbTitle: string
+  setBreadcrumbTitle: (title: string) => void
+}
 
-import { TreeView, TreeDataItem } from '@/components/ui/tree-view';
-import { CirclePlus } from "lucide-react";
-import { ScrollDiv } from "@/components/ui/scroll-div"
+export const DashboardContext = React.createContext<DashboardContextProps>({
+  breadcrumbTitle: "Neues Projekt",
+  setBreadcrumbTitle: () => {},
+})
 
-import ProtectedRoute from "@/components/protected-route";
+export default function DashboardLayout({ children }: { readonly children: React.ReactNode }) {
+  // 2) Use React state to store the current breadcrumb title
+  const [breadcrumbTitle, setBreadcrumbTitle] = React.useState("Neues Projekt")
 
-export default function ProtectedLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const contextValue = React.useMemo(() => ({ breadcrumbTitle, setBreadcrumbTitle }), [breadcrumbTitle, setBreadcrumbTitle]);
+
   return (
     <ProtectedRoute>
-      <SidebarProvider className="h-screen p-0 m-0" >
-        <AppSidebar />
-        <SidebarInset >
-          <header className="flex h-16 shrink-0 items-center gap-2">
-            <div className="flex items-center gap-2 px-4">
-              <SidebarTrigger className="-ml-1" />
-              <Separator orientation="vertical" className="mr-2 h-4" />
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">
-                      Neues Projekt
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Dateneingabe</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
-          </header>
+      {/* Provide the breadcrumb state to all children */}
+      <DashboardContext.Provider value={contextValue}>
+        <SidebarProvider className="h-screen p-0 m-0">
+          <AppSidebar />
+          <SidebarInset>
+            {/* --- Header in PARENT layout --- */}
+            <header className="flex h-16 shrink-0 items-center gap-2">
+              <div className="flex items-center gap-2 px-4">
+                <SidebarTrigger className="-ml-1" />
+                <Separator orientation="vertical" className="mr-2 h-4" />
 
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem className="hidden md:block">
+                      <BreadcrumbLink href="#">
+                        {breadcrumbTitle}
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>Dateneingabe</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+            </header>
 
-          {children}
-
-        </SidebarInset>
-      </SidebarProvider>
+            {/* Render the rest of the nested layouts/pages */}
+            {children}
+          </SidebarInset>
+        </SidebarProvider>
+      </DashboardContext.Provider>
     </ProtectedRoute>
-  );
+  )
 }

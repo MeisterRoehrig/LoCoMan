@@ -7,6 +7,7 @@ import {
   useState,
   useMemo,
   ReactNode,
+  useCallback,
 } from "react";
 import {
   onAuthStateChanged,
@@ -23,8 +24,6 @@ import {
 import { auth, firestore } from "@/lib/firebase-config";
 import { FirebaseError } from "firebase/app"
 import { toast } from "sonner"
-
-
 
 // Helper function to generate username
 function generateUsernameFromEmail(email: string) {
@@ -69,130 +68,85 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   }, []);
 
   // ----- LOGIN -----
-  async function login(email: string, password: string) {
+  const login = useCallback(async (email: string, password: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast.success("Logged in successfully!s")
+      toast.success("Logged in successfully!");
     } catch (error: unknown) {
-      const firebaseError = error as FirebaseError
+      const firebaseError = error as FirebaseError;
       switch (firebaseError.code) {
         case "auth/user-not-found":
-          toast.error("No user found with this email.")
-          break
+          toast.error("No user found with this email.");
+          break;
         case "auth/wrong-password":
-          toast.error("Incorrect password.")
-          break
+          toast.error("Incorrect password.");
+          break;
         case "auth/invalid-email":
-          toast.error("Please enter a valid email address.")
-          break
+          toast.error("Please enter a valid email address.");
+          break;
         default:
-          toast.error("Login failed. Please try again.")
+          toast.error("Login failed. Please try again.");
       }
     }
-  }
+  }, []);
 
   // ----- SIGNUP -----
-  async function signup(email: string, password: string) {
+  const signup = useCallback(async (email: string, password: string) => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      toast.success("Account created successfully!")
+      toast.success("Account created successfully!");
     } catch (error: unknown) {
-      const firebaseError = error as FirebaseError
+      const firebaseError = error as FirebaseError;
       switch (firebaseError.code) {
         case "auth/email-already-in-use":
-          toast.error("This email is already registered.")
-          break
+          toast.error("This email is already registered.");
+          break;
         case "auth/invalid-email":
-          toast.error("Please enter a valid email address.")
-          break
+          toast.error("Please enter a valid email address.");
+          break;
         case "auth/weak-password":
-          toast.error("Password should be at least 6 characters.")
-          break
+          toast.error("Password should be at least 6 characters.");
+          break;
         default:
-          toast.error("Sign up failed. Please try again.")
+          toast.error("Sign up failed. Please try again.");
       }
     }
-    
 
-    // 2) Firestore logic (example: create "users" doc + some sample projects)
     const userID = auth.currentUser?.uid;
     if (!userID) {
       throw new Error("UserID is undefined after sign-up.");
     }
 
-    const userMail = auth.currentUser?.email ?? 'e@mail.com';
+    const userMail = auth.currentUser?.email ?? "e@mail.com";
     const userName = generateUsernameFromEmail(userMail);
 
     const batch = writeBatch(firestore);
 
-    // Create doc in /users/{userID} with basic fields
-    const userRef = doc(firestore, 'users', userID);
+    const userRef = doc(firestore, "users", userID);
     batch.set(userRef, {
       displayName: userName,
       email: userMail,
       createdAt: serverTimestamp(),
     });
 
-    // // Example of creating some “projects” subcollection
-    // const exampleProjects = [
-    //   {
-    //     title: 'Project Alpha',
-    //     description: 'First project description',
-    //     texts: [
-    //       { content: 'Hello world from Alpha 1' },
-    //       { content: 'Another piece of Alpha text' }
-    //     ]
-    //   },
-    //   {
-    //     title: 'Project Beta',
-    //     description: 'Second project details',
-    //     texts: [
-    //       { content: 'Beta text A' },
-    //       { content: 'Beta text B with more depth' }
-    //     ]
-    //   }
-    // ];
-
-    // exampleProjects.forEach((project, pIndex) => {
-    //   const projectId = `project-${pIndex + 1}`;
-    //   const projectRef = doc(firestore, 'users', userID, 'projects', projectId);
-    //   batch.set(projectRef, {
-    //     title: project.title,
-    //     description: project.description,
-    //     createdAt: serverTimestamp(),
-    //     updatedAt: serverTimestamp(),
-    //   });
-
-    //   // Add “texts” subcollection
-    //   project.texts.forEach((text, tIndex) => {
-    //     const textId = `text-${tIndex + 1}`;
-    //     const textRef = doc(firestore, 'users', userID, 'projects', projectId, 'texts', textId);
-
-    //     batch.set(textRef, {
-    //       content: text.content,
-    //       createdAt: serverTimestamp(),
-    //       updatedAt: serverTimestamp(),
-    //     });
-    //   });
-    // });
-
-    // Commit the batch
     await batch.commit();
-  }
+  }, []);
 
   // ----- LOGOUT -----
-  async function logout() {
+  const logout = useCallback(async () => {
     await signOut(auth);
-    toast.success("Logged out successfully!s")
+    toast.success("Logged out successfully!");
+  }, []);
 
-  }
-
-  const contextValue = useMemo(() => ({
-    user,
-    login,
-    signup,
-    logout,
-  }), [user, login, signup, logout]);
+  const contextValue = useMemo(
+    () => ({
+      user,
+      login,
+      signup,
+      logout,
+    }),
+    [user, login, signup, logout]
+  );
 
   return (
     <AuthContext.Provider value={contextValue}>
