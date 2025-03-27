@@ -120,17 +120,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-@keyframes loading-indeterminate {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.animate-indeterminate {
-  animation: loading-indeterminate 1.5s linear infinite;
-}
-
