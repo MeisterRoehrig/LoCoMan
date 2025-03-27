@@ -27,6 +27,9 @@ import {
 import Link from "next/link"
 import { useData } from "@/lib/data-provider"  // <-- import your data context
 
+import { NewProjectButton } from "@/components/new-project-dialog";
+
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // 1) Access Firestore projects via the DataProvider
   const { projects, createProject, deleteProject, loading } = useData();
@@ -37,18 +40,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Example: transform it into the shape the NavProjects component expects:
   const navProjects = React.useMemo(() => {
     return projects.map((proj) => ({
+      id: proj.id, // include the id property
       name: proj.title,
       url: `#`, // or you can define a route like `/projects/${proj.id}`
       icon: Frame, // pick an icon for all or base it on project content
-      // you can store `proj.id` for use in a callback if you need it
     }));
   }, [projects]);
-
-
-  // Simple handler for new projects (could be replaced with a form, etc.)
-  const handleNewProject = () => {
-    createProject("Neues Projekt", "An optional description");
-  };
 
 
   return (
@@ -72,20 +69,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent>
-
         {/* Example of a "New Project" link or button in the main nav: */}
-        <NavMain
-          items={[
-            {
-              title: "Neues Projekt",
-              icon: File,
-              // By leaving out `url`, we ensure it calls onClick
-              onClick: () => {
-                createProject("Untitled Project", "Optional description here")
-              },
-              items: [],
-            },
-          ]}
+        <NewProjectButton
         />
 
         {/* Pass in the real projects array */}

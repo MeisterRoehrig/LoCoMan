@@ -133,48 +133,48 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       createdAt: serverTimestamp(),
     });
 
-    // Example of creating some “projects” subcollection
-    const exampleProjects = [
-      {
-        title: 'Project Alpha',
-        description: 'First project description',
-        texts: [
-          { content: 'Hello world from Alpha 1' },
-          { content: 'Another piece of Alpha text' }
-        ]
-      },
-      {
-        title: 'Project Beta',
-        description: 'Second project details',
-        texts: [
-          { content: 'Beta text A' },
-          { content: 'Beta text B with more depth' }
-        ]
-      }
-    ];
+    // // Example of creating some “projects” subcollection
+    // const exampleProjects = [
+    //   {
+    //     title: 'Project Alpha',
+    //     description: 'First project description',
+    //     texts: [
+    //       { content: 'Hello world from Alpha 1' },
+    //       { content: 'Another piece of Alpha text' }
+    //     ]
+    //   },
+    //   {
+    //     title: 'Project Beta',
+    //     description: 'Second project details',
+    //     texts: [
+    //       { content: 'Beta text A' },
+    //       { content: 'Beta text B with more depth' }
+    //     ]
+    //   }
+    // ];
 
-    exampleProjects.forEach((project, pIndex) => {
-      const projectId = `project-${pIndex + 1}`;
-      const projectRef = doc(firestore, 'users', userID, 'projects', projectId);
-      batch.set(projectRef, {
-        title: project.title,
-        description: project.description,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
+    // exampleProjects.forEach((project, pIndex) => {
+    //   const projectId = `project-${pIndex + 1}`;
+    //   const projectRef = doc(firestore, 'users', userID, 'projects', projectId);
+    //   batch.set(projectRef, {
+    //     title: project.title,
+    //     description: project.description,
+    //     createdAt: serverTimestamp(),
+    //     updatedAt: serverTimestamp(),
+    //   });
 
-      // Add “texts” subcollection
-      project.texts.forEach((text, tIndex) => {
-        const textId = `text-${tIndex + 1}`;
-        const textRef = doc(firestore, 'users', userID, 'projects', projectId, 'texts', textId);
+    //   // Add “texts” subcollection
+    //   project.texts.forEach((text, tIndex) => {
+    //     const textId = `text-${tIndex + 1}`;
+    //     const textRef = doc(firestore, 'users', userID, 'projects', projectId, 'texts', textId);
 
-        batch.set(textRef, {
-          content: text.content,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-      });
-    });
+    //     batch.set(textRef, {
+    //       content: text.content,
+    //       createdAt: serverTimestamp(),
+    //       updatedAt: serverTimestamp(),
+    //     });
+    //   });
+    // });
 
     // Commit the batch
     await batch.commit();
