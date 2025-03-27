@@ -2,7 +2,6 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyD4qFSZPUYMoo4J62Czfc1lCPwwpiy5wwk",
   authDomain: "locoman-f465a.firebaseapp.com",
@@ -12,9 +11,6 @@ const firebaseConfig = {
   appId: "1:385087703943:web:3fbbdfc003de2ca519a122",
   measurementId: "G-1CNNFHB9SP"
 };
-
-
-
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);

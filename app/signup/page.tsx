@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,25 +11,19 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { FirebaseError } from "firebase/app"
-
-import {useState } from 'react';
-import { auth, firestore } from "@/lib/firebase-config"
+import { useState } from "react"
 import { toast } from "sonner"
-import { createUserWithEmailAndPassword } from "firebase/auth"
-import { doc, writeBatch, serverTimestamp } from 'firebase/firestore';
-
-function generateUsernameFromEmail(email: string) {
-  if (!email || typeof email !== 'string') return null;
-
-  const base = email.split('@')[0];
-  return base
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')       // remove special chars
-    .slice(0, 20);                   // limit to 20 chars (optional)
-}
+import { FirebaseError } from "firebase/app"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useAuth } from "@/lib/auth-provider" 
 
 export default function SignUpPage() {
+  const { signup } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const redirectPath = searchParams.get("redirect") ?? "/dashboard";
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -46,87 +40,14 @@ export default function SignUpPage() {
     setLoading(true)
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password)
+      await signup(email, password)
+      router.replace(redirectPath);
 
-      const userID = auth.currentUser?.uid;
-      if (!userID) {
-        throw new Error("User ID is undefined");
-      }
-      const userMail = auth.currentUser?.email ?? 'e@mail.com'
-      const userName = generateUsernameFromEmail(userMail);
-      const batch = writeBatch(firestore);
-
-      const exampleProjects = [
-        {
-          title: 'Project Alpha',
-          description: 'First project description',
-          texts: [
-            { content: 'Hello world from Alpha 1' },
-            { content: 'Another piece of Alpha text' }
-          ]
-        },
-        {
-          title: 'Project Beta',
-          description: 'Second project details',
-          texts: [
-            { content: 'Beta text A' },
-            { content: 'Beta text B with more depth' }
-          ]
-        }
-      ];
-
-      const userRef = doc(firestore, 'users', userID);
-      batch.set(userRef, {
-        displayName: userName,
-        email: userMail,
-        createdAt: serverTimestamp(),
-      });
-
-      exampleProjects.forEach((project, pIndex) => {
-        const projectId = `project-${pIndex + 1}`;
-        const projectRef = doc(firestore, 'users', userID, 'projects', projectId);
-
-        batch.set(projectRef, {
-          title: project.title,
-          description: project.description,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-
-        // Add texts to each project
-        project.texts.forEach((text, tIndex) => {
-          const textId = `text-${tIndex + 1}`;
-          const textRef = doc(firestore, 'users', userID, 'projects', projectId, 'texts', textId);
-
-          batch.set(textRef, {
-            content: text.content,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-          });
-        });
-      });
-
-
-
-      await batch.commit();
-      toast.success("Account created successfully!", {
-        description: `User ID is: ${userID}`,
-      })
-      // Optional: redirect to login or dashboard
-    } catch (error: unknown) {
-      const firebaseError = error as FirebaseError
-      switch (firebaseError.code) {
-        case "auth/email-already-in-use":
-          toast.error("This email is already registered.")
-          break
-        case "auth/invalid-email":
-          toast.error("Please enter a valid email address.")
-          break
-        case "auth/weak-password":
-          toast.error("Password should be at least 6 characters.")
-          break
-        default:
-          toast.error("Sign up failed. Please try again.")
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred.");
       }
     } finally {
       setLoading(false)
@@ -181,7 +102,11 @@ export default function SignUpPage() {
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={loading}
+                  >
                     {loading ? "Creating account..." : "Sign Up"}
                   </Button>
                 </div>
