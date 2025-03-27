@@ -2,7 +2,6 @@
 import React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-// import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner"
 import { UserContext } from "@/lib/context";
 import { useUserData } from '@/lib/hooks';
@@ -36,7 +35,6 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <UserContext.Provider value={userContextValue}>
           <main>
-            {/* <Navbar /> */}
             {children}
           </main>
           <Toaster />

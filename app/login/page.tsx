@@ -14,7 +14,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { auth } from "@/lib/firebase-config"
 import { signInWithEmailAndPassword } from "firebase/auth"
-
+import { FirebaseError } from "firebase/app"
 import { toast } from "sonner"
 
 
@@ -38,8 +38,9 @@ export default function Page() {
       toast.success("Logged in successfully!")
       console.log("Successfully signed in!")
       // You can redirect, e.g. router.push('/dashboard'), once authenticated
-    } catch (error: any) {
-      switch (error.code) {
+    } catch (error: unknown) {
+      const firebaseError = error as FirebaseError
+      switch (firebaseError.code) {
         case "auth/user-not-found":
           toast.error("No user found with this email.")
           break

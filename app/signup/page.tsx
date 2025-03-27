@@ -11,8 +11,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { FirebaseError } from "firebase/app"
 
-import { useEffect, useState, useCallback, useContext } from 'react';
+import {useState } from 'react';
 import { auth, firestore } from "@/lib/firebase-config"
 import { toast } from "sonner"
 import { createUserWithEmailAndPassword } from "firebase/auth"
@@ -112,8 +113,9 @@ export default function SignUpPage() {
         description: `User ID is: ${userID}`,
       })
       // Optional: redirect to login or dashboard
-    } catch (error: any) {
-      switch (error.code) {
+    } catch (error: unknown) {
+      const firebaseError = error as FirebaseError
+      switch (firebaseError.code) {
         case "auth/email-already-in-use":
           toast.error("This email is already registered.")
           break
