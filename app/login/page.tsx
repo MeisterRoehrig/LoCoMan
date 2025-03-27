@@ -1,62 +1,48 @@
-"use client"
-import { Button } from "@/components/ui/button"
+"use client";
+
+import { Suspense, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
-import { useState } from "react"
-import { auth } from "@/lib/firebase-config"
-import { signInWithEmailAndPassword } from "firebase/auth"
-import { FirebaseError } from "firebase/app"
-import { toast } from "sonner"
+import { useAuth } from "@/lib/auth-provider";
+import { useRouter, useSearchParams } from "next/navigation";
 
+function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") ?? "/dashboard";
+  const { login } = useAuth();
 
-export default function Page() {
-  // State for email & password inputs
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // For showing error messages & loading state
-  const [errorMessage, setErrorMessage] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
-    setErrorMessage("")
+    e.preventDefault();
+    setLoading(true);
+    setErrorMessage("");
 
     try {
-      // Use the compat method for signing in with email and password
-      await signInWithEmailAndPassword(auth, email, password)
-      toast.success("Logged in successfully!")
-      console.log("Successfully signed in!")
-      // You can redirect, e.g. router.push('/dashboard'), once authenticated
-    } catch (error: unknown) {
-      const firebaseError = error as FirebaseError
-      switch (firebaseError.code) {
-        case "auth/user-not-found":
-          toast.error("No user found with this email.")
-          break
-        case "auth/wrong-password":
-          toast.error("Incorrect password.")
-          break
-        case "auth/invalid-email":
-          toast.error("Please enter a valid email address.")
-          break
-        default:
-          toast.error("Login failed. Please try again.")
-      }
+      await login(email, password);
+      router.replace(redirectPath);
+    } catch (error) {
+      setErrorMessage("Failed to log in. Please try again.");
+      console.error("Login error:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -101,16 +87,21 @@ export default function Page() {
                   />
                 </div>
                 <div className="flex flex-col gap-3">
-                  <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
+                  <Button
+                    type="submit"
+                    className="w-full cursor-pointer"
+                    disabled={loading}
+                  >
                     {loading ? "Logging in..." : "Login"}
                   </Button>
                 </div>
 
                 {/* Show error if any */}
                 {errorMessage && (
-                  <div className="text-red-600 text-sm mt-2">{errorMessage}</div>
+                  <div className="text-red-600 text-sm mt-2">
+                    {errorMessage}
+                  </div>
                 )}
-
               </div>
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
@@ -123,5 +114,13 @@ export default function Page() {
         </Card>
       </div>
     </div>
-  )
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPage />
+    </Suspense>
+  );
 }

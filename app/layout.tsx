@@ -3,8 +3,9 @@ import React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
-import { UserContext } from "@/lib/context";
-import { useUserData } from '@/lib/hooks';
+import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from '@/lib/auth-provider';
+import { DataProvider } from "@/lib/data-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,25 +22,24 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
-  const userData = useUserData();
-  let userContextValue;
-  if (userData.user) {
-    userContextValue = { user: userData.user };
-  } else {
-    userContextValue = { user: null };
-  }
 
   return (
-    <html lang="en">
+    <html lang="en" className="" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <UserContext.Provider value={userContextValue}>
-          <main>
-            {children}
-          </main>
-          <Toaster />
-        </UserContext.Provider>
-      </body>
+        <AuthProvider>
+          <DataProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem>
+              <main>
+                {children}
+              </main>
+              <Toaster />
+            </ThemeProvider>
+          </DataProvider>
+        </AuthProvider>
+      </body >
     </html >
   );
 }
