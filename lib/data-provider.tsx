@@ -235,7 +235,7 @@ export function DataProvider({ children }: { readonly children: React.ReactNode 
 
   // 5) Delete a project
   async function deleteProject(id: string) {
-    if (!user || !user.uid) return;
+    if (!user || typeof user !== "object" || !user.uid) return;
     try {
       await deleteDoc(doc(firestore, "users", user.uid, "projects", id));
       toast.success("Project deleted successfully!");
@@ -247,7 +247,7 @@ export function DataProvider({ children }: { readonly children: React.ReactNode 
 
   // 6) Create a new item in a project's tree
   async function createTreeItem(projectId: string, name: string, parentId?: string) {
-    if (!user || !user.uid) return;
+    if (!user || typeof user !== "object" || !user.uid) return;
     try {
       const treeColl = collection(
         firestore,
@@ -274,7 +274,7 @@ export function DataProvider({ children }: { readonly children: React.ReactNode 
 
   // 7) Delete an item from a project's tree
   async function deleteTreeItem(projectId: string, itemId: string) {
-    if (!user || !user.uid) return;
+    if (!user || typeof user !== "object" || !user.uid) return;
     try {
       const docRef = doc(
         firestore,
@@ -298,11 +298,11 @@ export function DataProvider({ children }: { readonly children: React.ReactNode 
    *    Firestore does not allow `undefined` for fields, so we remove them.
    */
   async function updateTreeItem(projectId: string, itemId: string, data: Partial<TreeDataItem>) {
-    if (!user || !user.uid) return;
+    if (!user || typeof user !== "object" || !user.uid) return;
 
     // Remove any undefined fields to avoid "Unsupported field value" error
     const updateData = Object.fromEntries(
-      Object.entries(data).filter(([_, v]) => v !== undefined)
+      Object.entries(data).filter(([, v]) => v !== undefined)
     );
 
     try {

@@ -160,7 +160,7 @@ function buildNestedTree(flatList: ViewTreeDataItem[]): ViewTreeDataItem[] {
       if (map[item.parentId]) {
         map[item.parentId].children?.push(map[item.id]);
       } else {
-        console.warn(`Parent ID ${item.parentId} not found for item`, item);
+        console.warn("Parent ID not found for item, item");
       }
     }
   });

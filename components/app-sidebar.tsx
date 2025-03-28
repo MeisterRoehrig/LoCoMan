@@ -3,8 +3,7 @@
 import * as React from "react"
 import {
   Frame,
-  LifeBuoy,
-  Send,
+  Sparkles,
   Truck,
 } from "lucide-react"
 
@@ -70,8 +69,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         <NavSecondary
           items={[
-            { title: "Support", url: "#", icon: LifeBuoy },
-            { title: "Feedback", url: "#", icon: Send },
+            { title: "Assistant", url: "/assistant", icon: Sparkles },
           ]}
           className="mt-auto"
         />
