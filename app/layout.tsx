@@ -5,7 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from '@/lib/auth-provider';
-import { DataProvider } from "@/lib/data-provider";
+// import { DataProvider } from "@/lib/data-provider";
 import { AppProviders } from "@/providers/app-provider";
 
 const geistSans = Geist({

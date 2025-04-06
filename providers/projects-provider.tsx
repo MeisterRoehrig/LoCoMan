@@ -20,6 +20,7 @@ import {
 import { firestore } from "@/lib/firebase-config";
 import { useAuth } from "@/lib/auth-provider";
 import { toast } from "sonner";
+import { loadDefaultTree } from "@/providers/tree-provider"; // or wherever you export it from
 
 export interface Project {
   id: string;
@@ -35,6 +36,7 @@ interface ProjectsContextValue {
   loadingProjects: boolean;
   loadProjects: () => Promise<void>;
   addProject: (title: string, description: string) => Promise<void>;
+  addProjectWithDefaultTree: (title: string, description: string) => Promise<void>;
   removeProject: (projectId: string) => Promise<void>;
 }
 
@@ -43,6 +45,7 @@ const ProjectsContext = createContext<ProjectsContextValue>({
   loadingProjects: false,
   loadProjects: async () => {},
   addProject: async () => {},
+  addProjectWithDefaultTree: async () => {},
   removeProject: async () => {},
 });
 
@@ -101,6 +104,28 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function addProjectWithDefaultTree(title: string, description: string) {
+    if (!user || !user.uid) return;
+  
+    const defaultTree = loadDefaultTree();
+  
+    try {
+      const ref = collection(firestore, "users", user.uid, "projects");
+      await addDoc(ref, {
+        title,
+        description,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        dataTree: defaultTree, // ⚡ Here we set the default tree
+      });
+      toast.success("Project with default tree created!");
+      await loadProjects(); // reload local state
+    } catch (error) {
+      console.error("Error creating project with tree:", error);
+      toast.error("Failed to create project with tree.");
+    }
+  }
+
   /** Remove a project */
   async function removeProject(projectId: string) {
     if (!user || !user.uid) return;
@@ -133,6 +158,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       loadProjects,
       addProject,
       removeProject,
+      addProjectWithDefaultTree,
     }),
     [projects, loadingProjects]
   );

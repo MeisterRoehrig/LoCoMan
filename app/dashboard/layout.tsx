@@ -50,10 +50,10 @@ export default function DashboardLayout({
                     <BreadcrumbItem className="hidden md:block">
                       <BreadcrumbLink href="#">{breadcrumbTitle}</BreadcrumbLink>
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator className="hidden md:block" />
+                    {/* <BreadcrumbSeparator className="hidden md:block" />
                     <BreadcrumbItem>
                       <BreadcrumbPage>Dateneingabe</BreadcrumbPage>
-                    </BreadcrumbItem>
+                    </BreadcrumbItem> */}
                   </BreadcrumbList>
                 </Breadcrumb>
               </div>

@@ -104,11 +104,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       >
                         <DropdownMenuItem
                           onClick={() => {
-                            router.push(`/dashboard/${item.id}`)
+                            router.push(`/dashboard/${item.id}/data`)
                           }}
                         >
                           <Folder className="text-muted-foreground" />
-                          <span>View Project</span>
+                          <span>Edit Data</span>
                         </DropdownMenuItem>
 
                         <DropdownMenuItem>

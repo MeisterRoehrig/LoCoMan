@@ -21,7 +21,7 @@ import { useAuth } from "@/lib/auth-provider";
 export interface TreeCategory {
   id: string;
   label: string;
-  children: Array<TreeCategory | TreeStep>; // can nest categories or steps
+  children: Array< TreeStep>; // can nest categories or steps
 }
 
 export interface TreeStep {
@@ -61,29 +61,34 @@ export function TreeProvider({ children }: { children: ReactNode }) {
   const [dataTree, setDataTree] = useState<TreeCategory[] | null>(null);
   const [loadingTree, setLoadingTree] = useState(false);
 
-  /** Load the dataTree from a project doc */
-  async function loadTree(projectId: string) {
-    if (!user || !user.uid) return;
-    try {
-      setLoadingTree(true);
-      const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
-      const snap = await getDoc(projectRef);
-      if (!snap.exists()) {
-        setDataTree(null);
-        setLoadingTree(false);
+/** Load the dataTree from a project doc */
+async function loadTree(projectId: string) {
+
+    if (!user || !user.uid) {
+        console.log("No user is logged in or user ID is missing.");
         return;
-      }
-      const data = snap.data();
-      // dataTree might be stored as a JSON object or array
-      const tree = data.dataTree || [];
-      setDataTree(tree);
-    } catch (error) {
-      console.error("Error loading tree:", error);
-      toast.error("Failed to load tree data.");
-    } finally {
-      setLoadingTree(false);
     }
-  }
+    try {
+        setLoadingTree(true);
+        const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
+        const snap = await getDoc(projectRef);
+        if (!snap.exists()) {
+            console.log("No project document found for the given project ID.");
+            setDataTree(null);
+            setLoadingTree(false);
+            return;
+        }
+        const data = snap.data();
+        // dataTree might be stored as a JSON object or array
+        const tree = data.dataTree || [];
+        setDataTree(tree);
+    } catch (error) {
+        console.error("Error loading tree:", error);
+        toast.error("Failed to load tree data.");
+    } finally {
+        setLoadingTree(false);
+    }
+}
 
   /** Internal helper to upload the updated dataTree to Firestore */
   async function saveDataTree(projectId: string, newTree: TreeCategory[]) {
@@ -159,36 +164,19 @@ export function TreeProvider({ children }: { children: ReactNode }) {
     await saveDataTree(projectId, newTree);
   }
 
-  /** Possibly provide a default tree structure */
-  function loadDefaultTree(): TreeCategory[] {
-    return [
-      {
-        id: "cat-1",
-        label: "Default Category 1",
-        children: [],
-      },
-      {
-        id: "cat-2",
-        label: "Default Category 2",
-        children: [],
-      },
-    ];
-  }
-
   const value = useMemo(
     () => ({
       dataTree,
       loadingTree,
       loadTree,
-
       addCategory,
       removeCategory,
       addStepToCategory,
       removeStepFromCategory,
-
       loadDefaultTree,
     }),
-    [dataTree, loadingTree]
+    // add `user` so that `loadTree` sees the current user
+    [dataTree, loadingTree, user]
   );
 
   return <TreeContext.Provider value={value}>{children}</TreeContext.Provider>;
@@ -197,3 +185,33 @@ export function TreeProvider({ children }: { children: ReactNode }) {
 export function useTree() {
   return useContext(TreeContext);
 }
+
+export function loadDefaultTree(): TreeCategory[] {
+    return [
+      {
+        id: "default-cat-1",
+        label: "Wareneingang",
+        children: [],
+      },
+      {
+        id: "default-cat-2",
+        label: "Kommissionierung",
+        children: [],
+      },
+      {
+        id: "default-cat-3",
+        label: "Verpackung",
+        children: [],
+      },
+      {
+        id: "default-cat-4",
+        label: "Transport",
+        children: [],
+      },
+      {
+        id: "default-cat-5",
+        label: "Retourenmanagement",
+        children: [],
+      },
+    ];
+  }

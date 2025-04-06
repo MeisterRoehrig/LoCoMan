@@ -21,7 +21,7 @@ import { useProjects } from "@/providers/projects-provider";
 
 
 export function NewProjectButton() {
-  const { addProject } = useProjects();
+  const { addProject, addProjectWithDefaultTree } = useProjects();
 
   // Local states for dialog usage
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -35,13 +35,18 @@ export function NewProjectButton() {
       return;
     }
 
+
+
     addProject(name, description);
     // Reset fields, close the dialog
     setName("");
     setDescription("");
     setDialogOpen(false);
   }
-
+    
+  function handleDefaulCreate() {
+    addProjectWithDefaultTree("Mein neues Logistik-Projekt", "Mit Standardbaumstruktur");
+ }
   return (
     <>
       {/* 
@@ -54,6 +59,16 @@ export function NewProjectButton() {
             title: "Neues Projekt",
             icon: File,
             onClick: () => setDialogOpen(true), // Open the dialog
+            items: [],
+          },
+        ]}
+      />
+      <NavMain
+        items={[
+          {
+            title: "Neues Default-Projekt",
+            icon: File,
+            onClick: () => handleDefaulCreate(), // Open the dialog
             items: [],
           },
         ]}

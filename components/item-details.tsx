@@ -113,7 +113,6 @@ export default function ItemDetails({ projectId, item }: ItemDetailsProps) {
         sum: sum.toString(),
       }));
     }
-     
   
     setDirty(true); // now we know the user typed something
     setFormValues((prev) => ({
