@@ -3,7 +3,7 @@
 import React, { useEffect } from "react"
 import { useParams } from "next/navigation"
 import { useData } from "@/lib/data-provider"
-import { DashboardContext } from "../layout"
+import { DashboardContext } from "@/lib/dashboard-context" // <-- new import
 
 export default function ProjectLayout({
   children,
@@ -20,12 +20,9 @@ export default function ProjectLayout({
   // Access the parent's context so we can set the breadcrumb
   const { setBreadcrumbTitle } = React.useContext(DashboardContext)
 
-  // Set the parent's breadcrumb when this layout mounts or changes project
   useEffect(() => {
     setBreadcrumbTitle(projectName)
-    // reset or leave as-is when unmounting? up to you.
   }, [projectName, setBreadcrumbTitle])
 
-  // We don't render a new header – it's handled by the parent
   return <>{children}</>
 }

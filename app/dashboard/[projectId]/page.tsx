@@ -21,54 +21,52 @@ import { useData, TreeDataItem as ProviderTreeDataItem } from "@/lib/data-provid
 import { CirclePlus } from "lucide-react";
 import ItemDetails from "@/components/item-details";
 
-/**
- * We'll treat top-level nodes as “categories” (they can have children,
- * but we do NOT display details in the right panel).
- * Only children (leaves) can be selected to display details on the right side.
- */
-
 export default function Page() {
-  const { projectId } = useParams();
+  const params = useParams();
+  const projectId = params.projectId;
+
+  // Hooks must be called on every render cycle — always declare before returns
   const { projects, trees, createTreeItem } = useData();
-
-  // 1) Find the active project
-  const project = projects.find((p) => p.id === projectId);
-  if (!project) {
-    return <Loader show={true} />;
-  }
-
-  // 2) Get the raw, flat array of tree items
-  const treeData = trees[project.id] || [];
-
-  // 3) Convert Firestore 'null' => 'undefined' for the tree-view if needed
-  const sanitizedData: ViewTreeDataItem[] = treeData.map(
-    (item: ProviderTreeDataItem) => ({
-      ...item,
-      parentId: item.parentId ?? undefined,
-    })
-  );
-
-  // 4) Build a nested structure
-  const nestedTree = buildNestedTree(sanitizedData);
-
-  // 5) State for selected child item
   const [selectedItem, setSelectedItem] = React.useState<ViewTreeDataItem | null>(null);
 
-  // 6) Node actions (only top-level gets a plus)
+  const handleSelectChange = React.useCallback(
+    (item: ViewTreeDataItem | undefined) => {
+      if (!item || !item.parentId) {
+        setSelectedItem(null);
+      } else {
+        setSelectedItem(item);
+      }
+    },
+    []
+  );
+
   const getNodeActions = React.useCallback(
     (node: ViewTreeDataItem) => {
       if (!node.parentId) {
+        // Must avoid nesting <button> inside <button> → use <div> with full accessibility
         return (
           <div
             role="button"
             tabIndex={0}
-            className="px-1"
             onClick={(e) => {
               e.stopPropagation();
               const childName =
                 prompt("Name for the new child node?") || "New child";
-              createTreeItem(project.id, childName, node.id);
+              if (typeof projectId === "string") {
+                createTreeItem(projectId, childName, node.id);
+              }
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                const childName =
+                  prompt("Name for the new child node?") || "New child";
+                if (typeof projectId === "string") {
+                  createTreeItem(projectId, childName, node.id);
+                }
+              }
+            }}
+            className="px-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-sm"
           >
             <CirclePlus size={16} />
           </div>
@@ -76,26 +74,33 @@ export default function Page() {
       }
       return null;
     },
-    [project.id, createTreeItem]
+    [projectId, createTreeItem]
   );
 
-  // 7) Only child leaves are selectable
-  const handleSelectChange = React.useCallback((item: ViewTreeDataItem | undefined) => {
-    if (!item) {
-      setSelectedItem(null);
-      return;
-    }
-    if (!item.parentId) {
-      // It's a top-level node => do not select
-      setSelectedItem(null);
-    } else {
-      setSelectedItem(item);
-    }
-  }, []);
+  // Guard: ensure projectId is a string
+  if (!projectId || Array.isArray(projectId)) {
+    return <Loader show={true} />;
+  }
+
+  // Lookup project
+  const project = projects.find((p) => p.id === projectId);
+  if (!project) {
+    return <Loader show={true} />;
+  }
+
+  // Prepare tree data
+  const treeData = trees[project.id] || [];
+  const sanitizedData: ViewTreeDataItem[] = treeData.map(
+    (item: ProviderTreeDataItem) => ({
+      ...item,
+      parentId: item.parentId ?? undefined,
+    })
+  );
+  const nestedTree = buildNestedTree(sanitizedData);
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1 flex-col">
-      {/* Left side: Tree View */}
+      {/* Left Panel: TreeView */}
       <ResizablePanel defaultSize={25}>
         <ScrollDiv className="h-full">
           <TreeView
@@ -109,7 +114,6 @@ export default function Page() {
             })}
           />
           <div className="p-4">
-            {/* Button to add a top-level category */}
             <button
               className={buttonVariants()}
               onClick={() => {
@@ -127,13 +131,11 @@ export default function Page() {
 
       <ResizableHandle withHandle={false} />
 
-      {/* Right side: item details */}
+      {/* Right Panel: Item Details */}
       <ResizablePanel defaultSize={75}>
         <ScrollArea type="scroll" className="flex-1 p-4 pt-0 rounded-md h-full">
           <Separator className="mb-2" />
-
           {selectedItem ? (
-            // Render our new, separate ItemDetails component
             <ItemDetails projectId={project.id} item={selectedItem} />
           ) : (
             <p>Wähle einen (untergeordneten) Knoten aus dem Baum aus ...</p>
@@ -144,7 +146,7 @@ export default function Page() {
   );
 }
 
-/** Helper to nest the flat array into a tree structure. */
+/** Helper to build nested tree from flat list */
 function buildNestedTree(flatList: ViewTreeDataItem[]): ViewTreeDataItem[] {
   const map: Record<string, ViewTreeDataItem & { children?: ViewTreeDataItem[] }> = {};
   flatList.forEach((item) => {
@@ -160,7 +162,7 @@ function buildNestedTree(flatList: ViewTreeDataItem[]): ViewTreeDataItem[] {
       if (map[item.parentId]) {
         map[item.parentId].children?.push(map[item.id]);
       } else {
-        console.warn("Parent ID not found for item, item");
+        console.warn("Parent ID not found for item", item);
       }
     }
   });
