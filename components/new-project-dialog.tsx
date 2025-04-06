@@ -3,7 +3,6 @@
 import * as React from "react";
 import { File } from "lucide-react";
 
-import { useData } from "@/lib/data-provider";
 import { NavMain } from "@/components/nav-main";
 
 // ShadCN UI imports (adjust paths as needed):
@@ -18,10 +17,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useProjects } from "@/providers/projects-provider";
 
 
 export function NewProjectButton() {
-  const { createProject } = useData();
+  const { addProject } = useProjects();
 
   // Local states for dialog usage
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -35,7 +35,7 @@ export function NewProjectButton() {
       return;
     }
 
-    createProject(name, description);
+    addProject(name, description);
     // Reset fields, close the dialog
     setName("");
     setDescription("");

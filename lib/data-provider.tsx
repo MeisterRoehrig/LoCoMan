@@ -52,6 +52,7 @@ export type TreeDataItem = {
 
   // New fields for "details" editing
   responsiblePerson?: string | null;
+  responsiblePersonValue?: number | null; // e.g. hours or days
   executionTime?: number | null; // e.g. hours or days
   costDriverLabel?: string | null;
   costDriverValue?: number | null;

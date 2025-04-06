@@ -113,17 +113,18 @@ export default function Page() {
               actions: getNodeActions(node),
             })}
           />
-          <div className="p-4">
+
+            <div className="px-4 flex justify-center items-center ">
             <button
-              className={buttonVariants()}
+              className={`${buttonVariants({ variant: "link" })} cursor-pointer`}
               onClick={() => {
-                const categoryName =
-                  prompt("Name for the new top-level category?") || "New Category";
-                createTreeItem(project.id, categoryName);
+              const categoryName =
+                prompt("Name for the new top-level category?") ?? "New Category";
+              createTreeItem(project.id, categoryName);
               }}
             >
               <CirclePlus className="mr-1 inline-block" size={16} />
-              Add Top-Level Category
+              Add Category
             </button>
           </div>
         </ScrollDiv>
