@@ -68,7 +68,7 @@ export default function StepDetails({ step, onSave }: StepDetailsProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-muted-foreground pb-2">Step Name</label>
+        <span className="block text-sm font-medium text-muted-foreground pb-2">Step Name</span>
         <div className="p-2 border rounded bg-muted text-muted-foreground">{step.name}</div>
       </div>
 

@@ -24,6 +24,8 @@ import {
 import { auth, firestore } from "@/lib/firebase-config";
 import { FirebaseError } from "firebase/app"
 import { toast } from "sonner"
+import { defaultStepsData } from "@/lib/default-steps";
+
 
 // Helper function to generate username
 function generateUsernameFromEmail(email: string) {
@@ -47,13 +49,14 @@ interface AuthContextProps {
 
 const AuthContext = createContext<AuthContextProps>({
   user: false,
-  login: async () => {},
-  signup: async () => {},
-  logout: async () => {},
+  login: async () => { },
+  signup: async () => { },
+  logout: async () => { },
 });
 
 export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const [user, setUser] = useState<AuthState>(false);
+
 
   useEffect(() => {
     // Subscribe to user changes once
@@ -90,47 +93,72 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     }
   }, []);
 
-  // ----- SIGNUP -----
-  const signup = useCallback(async (email: string, password: string) => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      toast.success("Account created successfully!");
-    } catch (error: unknown) {
-      const firebaseError = error as FirebaseError;
-      switch (firebaseError.code) {
-        case "auth/email-already-in-use":
-          toast.error("This email is already registered.");
-          break;
-        case "auth/invalid-email":
-          toast.error("Please enter a valid email address.");
-          break;
-        case "auth/weak-password":
-          toast.error("Password should be at least 6 characters.");
-          break;
-        default:
-          toast.error("Sign up failed. Please try again.");
+  const signup = useCallback(
+    async (email: string, password: string) => {
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        toast.success("Account created successfully!");
+      } catch (error: unknown) {
+        const firebaseError = error as FirebaseError;
+        switch (firebaseError.code) {
+          case "auth/email-already-in-use":
+            toast.error("This email is already registered.");
+            break;
+          case "auth/invalid-email":
+            toast.error("Please enter a valid email address.");
+            break;
+          case "auth/weak-password":
+            toast.error("Password should be at least 6 characters.");
+            break;
+          default:
+            toast.error("Sign up failed. Please try again.");
+        }
+        return;
       }
-    }
-
-    const userID = auth.currentUser?.uid;
-    if (!userID) {
-      throw new Error("UserID is undefined after sign-up.");
-    }
-
-    const userMail = auth.currentUser?.email ?? "e@mail.com";
-    const userName = generateUsernameFromEmail(userMail);
-
-    const batch = writeBatch(firestore);
-
-    const userRef = doc(firestore, "users", userID);
-    batch.set(userRef, {
-      displayName: userName,
-      email: userMail,
-      createdAt: serverTimestamp(),
-    });
-
-    await batch.commit();
-  }, []);
+  
+      const userID = auth.currentUser?.uid;
+      const userMail = auth.currentUser?.email ?? "unknown@mail.com";
+  
+      if (!userID) {
+        throw new Error("UserID is undefined after sign-up.");
+      }
+  
+      const userName = generateUsernameFromEmail(userMail);
+  
+      // 🔁 Create batch to set user doc + all default steps
+      const batch = writeBatch(firestore);
+  
+      // 1️⃣ Set the user document
+      const userRef = doc(firestore, "users", userID);
+      batch.set(userRef, {
+        displayName: userName,
+        email: userMail,
+        createdAt: serverTimestamp(),
+      });
+  
+      // 2️⃣ Add default steps to /users/{uid}/steps/{stepId}
+      for (const step of defaultStepsData) {
+        const stepRef = doc(firestore, "users", userID, "steps", step.id);
+        batch.set(stepRef, {
+          name: step.name,
+          person: step.person ?? "",
+          personMonthlySalary: step.personMonthlySalary ?? 0,
+          costDriver: step.costDriver ?? "",
+          costDriverValue: step.costDriverValue ?? 0,
+          stepDuration: step.stepDuration ?? 0,
+          additionalResources: step.additionalResources ?? "",
+          additionalResourcesValue: step.additionalResourcesValue ?? 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+  
+      // 3️⃣ Commit all writes
+      await batch.commit();
+      toast.success("User and default steps created!");
+    },
+    []
+  );
 
   // ----- LOGOUT -----
   const logout = useCallback(async () => {

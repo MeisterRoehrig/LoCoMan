@@ -14,6 +14,7 @@ import {
   getDocs,
   getDoc,
   addDoc,
+  setDoc,        // <-- Import setDoc
   updateDoc,
   deleteDoc,
   serverTimestamp,
@@ -22,11 +23,10 @@ import { firestore } from "@/lib/firebase-config";
 import { useAuth } from "@/lib/auth-provider";
 import { toast } from "sonner";
 
-/** Step doc shape */
 export interface StepDoc {
   id: string;
   name: string;
-  person?: string; // or responsiblePerson
+  person?: string;
   personMonthlySalary?: number;
   costDriver?: string;
   costDriverValue?: number;
@@ -45,21 +45,24 @@ interface StepsContextValue {
   loadSteps: () => Promise<void>;
   getStepById: (stepId: string) => StepDoc | null;
   addStep: (stepData: Omit<StepDoc, "id">) => Promise<string | undefined>;
+  /** NEW: Add a step but let us specify the Firestore doc ID. */
+  addStepWithId: (
+    stepData: Omit<StepDoc, "id">,
+    customId: string
+  ) => Promise<string | undefined>;
   createStepCopy: (originalStepId: string) => Promise<void>;
   updateStep: (stepId: string, data: Partial<StepDoc>) => Promise<void>;
   deleteStep: (stepId: string) => Promise<void>;
 }
 
-/**
- * Steps context
- */
+/** StepsContext + StepsProvider */
 const StepsContext = createContext<StepsContextValue>({
   steps: [],
   loadingSteps: false,
-
   loadSteps: async () => {},
   getStepById: () => null,
   addStep: async () => undefined,
+  addStepWithId: async () => undefined, // new
   createStepCopy: async () => {},
   updateStep: async () => {},
   deleteStep: async () => {},
@@ -104,14 +107,12 @@ export function StepsProvider({ children }: { children: ReactNode }) {
 
   /** 2. Retrieve a step from local state by ID */
   function getStepById(stepId: string): StepDoc | null {
-    const found = steps.find((s) => s.id === stepId);
-    return found || null;
+    return steps.find((s) => s.id === stepId) || null;
   }
 
-  /** 3. Add a new step to user’s steps collection */
+  /** 3. Add a new step with an AUTO-GENERATED doc ID. */
   async function addStep(stepData: Omit<StepDoc, "id">) {
     if (!user || !user.uid) return;
-
     try {
       const stepsRef = collection(firestore, "users", user.uid, "steps");
       const newStepRef = await addDoc(stepsRef, {
@@ -119,13 +120,7 @@ export function StepsProvider({ children }: { children: ReactNode }) {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      // await addDoc(stepsRef, {
-      //   ...stepData,
-      //   createdAt: serverTimestamp(),
-      //   updatedAt: serverTimestamp(),
-      // });
       toast.success("Step added!");
-      // reload or push to local state
       await loadSteps();
       return newStepRef.id;
     } catch (error) {
@@ -134,13 +129,38 @@ export function StepsProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  /** 4. Create a copy of an existing step with a new doc ID */
+  async function addStepWithId(stepData: Omit<StepDoc, "id">, customId: string) {
+    if (!user || !user.uid) {
+      console.warn("addStepWithId called with missing user");
+      return;
+    }
+  
+    try {
+      const docRef = doc(firestore, "users", user.uid, "steps", customId);
+      console.log("[addStepWithId] Creating step with ID:", customId);
+  
+      await setDoc(docRef, {
+        ...stepData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+  
+      console.log("[addStepWithId] Successfully created:", docRef.path);
+      await loadSteps();
+      return docRef.id;
+    } catch (error) {
+      console.error("Error adding step with custom ID:", error);
+      toast.error("Failed to add step with custom ID.");
+    }
+  }
+  
+  /** 4. Create a copy of an existing step with a new doc ID. */
   async function createStepCopy(originalStepId: string) {
     if (!user || !user.uid) return;
-    // first fetch or read from local
+
     let originalStep = getStepById(originalStepId);
+    // fallback: read from Firestore if needed
     if (!originalStep) {
-      // fallback: read from Firestore if needed
       const docRef = doc(firestore, "users", user.uid, "steps", originalStepId);
       const snap = await getDoc(docRef);
       if (!snap.exists()) {
@@ -151,19 +171,17 @@ export function StepsProvider({ children }: { children: ReactNode }) {
       originalStep = {
         id: snap.id,
         name: data.name || "",
-        // ...
       } as StepDoc;
     }
 
     const { id, createdAt, updatedAt, ...rest } = originalStep;
-    // now add a new doc
     await addStep({
       ...rest,
       name: `${rest.name} (Copy)`,
     });
   }
 
-  /** 5. Update an existing step doc in Firestore */
+  /** 5. Update an existing step doc in Firestore. */
   async function updateStep(stepId: string, data: Partial<StepDoc>) {
     if (!user || !user.uid) return;
 
@@ -174,7 +192,6 @@ export function StepsProvider({ children }: { children: ReactNode }) {
         updatedAt: serverTimestamp(),
       });
       toast.success("Step updated!");
-      // refresh local state
       await loadSteps();
     } catch (error) {
       console.error("Error updating step:", error);
@@ -182,7 +199,7 @@ export function StepsProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  /** 6. Delete a step by ID */
+  /** 6. Delete a step by ID. */
   async function deleteStep(stepId: string) {
     if (!user || !user.uid) return;
 
@@ -197,7 +214,7 @@ export function StepsProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Optionally load steps once on mount
+  /** Automatically load steps once on mount. */
   useEffect(() => {
     if (user && user.uid) {
       loadSteps();
@@ -213,6 +230,7 @@ export function StepsProvider({ children }: { children: ReactNode }) {
       loadSteps,
       getStepById,
       addStep,
+      addStepWithId, // new function
       createStepCopy,
       updateStep,
       deleteStep,

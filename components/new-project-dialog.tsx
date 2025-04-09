@@ -4,6 +4,7 @@ import * as React from "react";
 import { File } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
+import { defaultTreeData } from "@/lib/default-tree";
 
 // ShadCN UI imports (adjust paths as needed):
 import { Button } from "@/components/ui/button";
