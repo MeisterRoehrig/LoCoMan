@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 
 import { ScrollDiv } from "@/components/ui/scroll-div";
@@ -28,13 +28,19 @@ import { useAuth } from "@/lib/auth-provider";
 import { StepDoc, useSteps } from "@/providers/steps-provider";
 import { toast } from "sonner";
 import { useCreateAndInsertStep } from "@/hooks/create-insert-step";
+import { NewStepDialog } from "@/components/new-step-dialog";
+import StepDetails from "@/components/step-details";
 
 
 export default function Page() {
     const params = useParams();
     const projectId = String(params.projectId);
     const { user } = useAuth();
+    const { steps, loadingSteps, deleteStep, createStepCopy, addStep, getStepById, updateStep } = useSteps();
     const createAndInsertStep = useCreateAndInsertStep();
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+    const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
 
     const {
         dataTree,
@@ -47,7 +53,6 @@ export default function Page() {
         loadDefaultTree,
     } = useTree();
 
-    const { steps, loadingSteps, deleteStep, createStepCopy, addStep } = useSteps();
 
     React.useEffect(() => {
         if (user && user.uid && projectId) {
@@ -72,6 +77,8 @@ export default function Page() {
         addStepToCategory(projectId, catId, step);
     }
 
+    const selectedStep = selectedStepId ? getStepById(selectedStepId) : null;
+
 
     return (
         <ResizablePanelGroup direction="horizontal" className="flex-1 flex-col">
@@ -82,58 +89,83 @@ export default function Page() {
                         return (
                             <SidebarGroup key={cat.id}>
                                 <SidebarGroupLabel>{cat.label}</SidebarGroupLabel>
-                                <SidebarGroupAction onClick={() => createAndInsertStep(projectId, cat.id, {
-                                    name: "Verpackung vorbereiten",
-                                    person: "Lagerist",
-                                    personMonthlySalary: 3000,
-                                    costDriver: "Kisten pro Stunde",
-                                    costDriverValue: 15,
-                                    stepDuration: 20,
-                                    additionalResources: "Klebeband",
-                                    additionalResourcesValue: 50,
-                                    createdAt: null,
-                                    updatedAt: null,
-                                })}>
+                                <SidebarGroupAction
+                                    onClick={() => {
+                                        setSelectedCategoryId(cat.id);
+                                        setDialogOpen(true);
+                                    }}
+                                >
                                     <Plus /> <span className="sr-only">Add Step</span>
                                 </SidebarGroupAction>
+
                                 <SidebarGroupContent>
                                     <SidebarMenuSub>
-                                        {cat.children.map((child) => {
-                                            return (
-                                                <SidebarMenuSubItem key={child.id}>
-                                                    <SidebarMenuButton asChild>
-                                                        <a href={"#"}>
-                                                            <span>{child.name}</span>
-                                                        </a>
-                                                    </SidebarMenuButton >
-                                                    <DropdownMenu>
-                                                        <SidebarMenuAction onClick={() => removeStepFromCategory(projectId, cat.id, child.id)}>
-                                                            <Minus /> <span className="sr-only">Remove Step</span>
-                                                        </SidebarMenuAction>
-                                                    </DropdownMenu>
-                                                </SidebarMenuSubItem>
-                                            );
-                                        })}
+                                        {cat.children.map((child) => (
+                                            <SidebarMenuSubItem key={child.id}>
+                                                <SidebarMenuButton asChild>
+                                                    <button
+                                                        onClick={() => {
+                                                            // When a step is clicked, store its ID
+                                                            setSelectedStepId(child.id);
+                                                        }}
+                                                    >
+                                                        <span>{child.name}</span>
+                                                    </button>
+                                                </SidebarMenuButton>
+                                                <DropdownMenu>
+                                                    <SidebarMenuAction
+                                                        onClick={() =>
+                                                            removeStepFromCategory(projectId, cat.id, child.id)
+                                                        }
+                                                    >
+                                                        <Minus /> <span className="sr-only">Remove Step</span>
+                                                    </SidebarMenuAction>
+                                                </DropdownMenu>
+                                            </SidebarMenuSubItem>
+                                        ))}
                                     </SidebarMenuSub>
                                 </SidebarGroupContent>
                             </SidebarGroup>
                         );
                     })}
+                    {/* ✅ Add the dialog here, just once, outside the .map() */}
+                    {selectedCategoryId && (
+                        <NewStepDialog
+                            open={dialogOpen}
+                            onOpenChange={setDialogOpen}
+                            projectId={projectId}
+                            categoryId={selectedCategoryId}
+                        />
+                    )}
                 </SidebarContent>
 
             </ResizablePanel>
 
             <ResizableHandle withHandle={false} />
 
-            {/* Right Panel: Item Details */}
+            {/* RIGHT DETAILS PANEL */}
             <ResizablePanel defaultSize={75}>
                 <ScrollArea type="scroll" className="flex-1 p-4 pt-0 rounded-md h-full">
-                    <Separator className="mb-2" />
                     <div>
-                        <h2>Data Tree</h2>
-                        <pre>{JSON.stringify(dataTree, null, 2)}</pre>
+                        {selectedStep ? (
+                            <>
+                                <div className="pb-4">
+                                    <h2>Details for “{selectedStep.name}”</h2>
+                                    <Separator className="my-3" />
+                                </div>
+                                <StepDetails
+                                    step={selectedStep}
+                                    onSave={(updatedFields) => {
+                                        // Minimal calls to DB:
+                                        // we already have the step in local context, so just call update
+                                        updateStep(selectedStep.id, updatedFields);
+                                    }}
+                                />
+                            </>
+                        ) : (
+                            <p>Select a step in the sidebar to view details.</p>
+                        )}
                     </div>
-                    <span>{projectId}</span>
                 </ScrollArea>
             </ResizablePanel>
         </ResizablePanelGroup>
