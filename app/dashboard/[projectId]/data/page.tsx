@@ -25,13 +25,16 @@ import { TreeStep, useTree } from "@/providers/tree-provider";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { CollapsibleTrigger } from "@radix-ui/react-collapsible";
 import { useAuth } from "@/lib/auth-provider";
-
+import { StepDoc, useSteps } from "@/providers/steps-provider";
+import { toast } from "sonner";
+import { useCreateAndInsertStep } from "@/hooks/create-insert-step";
 
 
 export default function Page() {
     const params = useParams();
     const projectId = String(params.projectId);
     const { user } = useAuth();
+    const createAndInsertStep = useCreateAndInsertStep();
 
     const {
         dataTree,
@@ -39,9 +42,12 @@ export default function Page() {
         loadTree,
         addCategory,
         removeCategory,
+        removeStepFromCategory,
         addStepToCategory,
         loadDefaultTree,
     } = useTree();
+
+    const { steps, loadingSteps, deleteStep, createStepCopy, addStep } = useSteps();
 
     React.useEffect(() => {
         if (user && user.uid && projectId) {
@@ -62,6 +68,7 @@ export default function Page() {
             id: crypto.randomUUID(),
             name: "My New Step",
         };
+
         addStepToCategory(projectId, catId, step);
     }
 
@@ -75,7 +82,18 @@ export default function Page() {
                         return (
                             <SidebarGroup key={cat.id}>
                                 <SidebarGroupLabel>{cat.label}</SidebarGroupLabel>
-                                <SidebarGroupAction onClick={() => handleAddStep(cat.id)}>
+                                <SidebarGroupAction onClick={() => createAndInsertStep(projectId, cat.id, {
+                                    name: "Verpackung vorbereiten",
+                                    person: "Lagerist",
+                                    personMonthlySalary: 3000,
+                                    costDriver: "Kisten pro Stunde",
+                                    costDriverValue: 15,
+                                    stepDuration: 20,
+                                    additionalResources: "Klebeband",
+                                    additionalResourcesValue: 50,
+                                    createdAt: null,
+                                    updatedAt: null,
+                                })}>
                                     <Plus /> <span className="sr-only">Add Step</span>
                                 </SidebarGroupAction>
                                 <SidebarGroupContent>
@@ -89,7 +107,7 @@ export default function Page() {
                                                         </a>
                                                     </SidebarMenuButton >
                                                     <DropdownMenu>
-                                                        <SidebarMenuAction onClick={() => removeCategory(projectId, child.id)}>
+                                                        <SidebarMenuAction onClick={() => removeStepFromCategory(projectId, cat.id, child.id)}>
                                                             <Minus /> <span className="sr-only">Remove Step</span>
                                                         </SidebarMenuAction>
                                                     </DropdownMenu>

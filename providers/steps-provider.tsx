@@ -44,7 +44,7 @@ interface StepsContextValue {
 
   loadSteps: () => Promise<void>;
   getStepById: (stepId: string) => StepDoc | null;
-  addStep: (stepData: Omit<StepDoc, "id">) => Promise<void>;
+  addStep: (stepData: Omit<StepDoc, "id">) => Promise<string | undefined>;
   createStepCopy: (originalStepId: string) => Promise<void>;
   updateStep: (stepId: string, data: Partial<StepDoc>) => Promise<void>;
   deleteStep: (stepId: string) => Promise<void>;
@@ -59,7 +59,7 @@ const StepsContext = createContext<StepsContextValue>({
 
   loadSteps: async () => {},
   getStepById: () => null,
-  addStep: async () => {},
+  addStep: async () => undefined,
   createStepCopy: async () => {},
   updateStep: async () => {},
   deleteStep: async () => {},
@@ -114,14 +114,20 @@ export function StepsProvider({ children }: { children: ReactNode }) {
 
     try {
       const stepsRef = collection(firestore, "users", user.uid, "steps");
-      await addDoc(stepsRef, {
+      const newStepRef = await addDoc(stepsRef, {
         ...stepData,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+      // await addDoc(stepsRef, {
+      //   ...stepData,
+      //   createdAt: serverTimestamp(),
+      //   updatedAt: serverTimestamp(),
+      // });
       toast.success("Step added!");
       // reload or push to local state
       await loadSteps();
+      return newStepRef.id;
     } catch (error) {
       console.error("Error adding step:", error);
       toast.error("Failed to add step.");
