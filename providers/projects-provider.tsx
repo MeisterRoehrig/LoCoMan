@@ -15,6 +15,7 @@ import {
   addDoc,
   deleteDoc,
   serverTimestamp,
+  updateDoc,
   // If you want real-time: onSnapshot, query, orderBy
 } from "firebase/firestore";
 import { firestore } from "@/lib/firebase-config";
@@ -22,12 +23,31 @@ import { useAuth } from "@/lib/auth-provider";
 import { toast } from "sonner";
 import { defaultTreeData } from "@/lib/default-tree";
 
+interface StepCostSummary {
+  stepId: string;
+  stepName: string;
+  stepCost: number;
+}
+
+interface CategoryCostSummary {
+  categoryId: string;
+  categoryLabel: string;
+  totalCategoryCost: number;
+  steps: StepCostSummary[];
+}
+
+export interface ProjectCostSummary {
+  totalProjectCost: number;
+  categories: CategoryCostSummary[];
+}
+
 export interface Project {
   id: string;
   title: string;
   description?: string;
   createdAt?: Date | null;
   updatedAt?: Date | null;
+  summary?: ProjectCostSummary;
   // Possibly dataSummary, dataTree if you store them at top-level.
 }
 
@@ -38,6 +58,7 @@ interface ProjectsContextValue {
   addProject: (title: string, description: string) => Promise<void>;
   addProjectWithDefaultTree: (title: string, description: string) => Promise<void>;
   removeProject: (projectId: string) => Promise<void>;
+  updateProjectSummary: (projectId: string, summary: any) => Promise<void>;
 }
 
 const ProjectsContext = createContext<ProjectsContextValue>({
@@ -47,6 +68,7 @@ const ProjectsContext = createContext<ProjectsContextValue>({
   addProject: async () => {},
   addProjectWithDefaultTree: async () => {},
   removeProject: async () => {},
+  updateProjectSummary: async () => {},
 });
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
@@ -72,6 +94,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
           description: data.description || "",
           createdAt: data.createdAt?.toDate() || null,
           updatedAt: data.updatedAt?.toDate() || null,
+          summary: data.summary || null,
         };
       });
       setProjects(result);
@@ -140,6 +163,25 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function updateProjectSummary(projectId: string, summary: any) {
+    if (!user || !user.uid) return;
+
+    try {
+      const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
+      await updateDoc(projectRef, {
+        summary,              // store any arbitrary object or JSON you want
+        updatedAt: serverTimestamp(),
+      });
+      toast.success("Project summary updated!");
+      // Optionally re-fetch your projects or just update local state if needed.
+      await loadProjects(); 
+    } catch (error) {
+      console.error("Error updating project summary:", error);
+      toast.error("Failed to update project summary.");
+    }
+  }
+
+
   // Example: load projects automatically on mount
   useEffect(() => {
     if (user && user.uid) {
@@ -157,6 +199,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       addProject,
       removeProject,
       addProjectWithDefaultTree,
+      updateProjectSummary,
     }),
     [projects, loadingProjects]
   );

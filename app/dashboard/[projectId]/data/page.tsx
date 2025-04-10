@@ -3,11 +3,8 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 
-import { ScrollDiv } from "@/components/ui/scroll-div";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import Loader from "@/components/loader";
 
 import {
     ResizableHandle,
@@ -15,18 +12,13 @@ import {
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
 
-import { TreeView, TreeDataItem as ViewTreeDataItem } from "@/components/ui/tree-view";
-import { useData, TreeDataItem as ProviderTreeDataItem } from "@/lib/data-provider";
 
-import { CirclePlus, Minus, MoreHorizontal, Plus } from "lucide-react";
-import ItemDetails from "@/components/item-details";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupAction, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar";
-import { TreeStep, useTree } from "@/providers/tree-provider";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { CollapsibleTrigger } from "@radix-ui/react-collapsible";
+import { Minus, Plus } from "lucide-react";
+import { SidebarContent, SidebarGroup, SidebarGroupAction, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar";
+import { useTree } from "@/providers/tree-provider";
+import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { useAuth } from "@/lib/auth-provider";
-import { StepDoc, useSteps } from "@/providers/steps-provider";
-import { toast } from "sonner";
+import { useSteps } from "@/providers/steps-provider";
 import { useCreateAndInsertStep } from "@/hooks/create-insert-step";
 import { NewStepDialog } from "@/components/new-step-dialog";
 import StepDetails from "@/components/step-details";
@@ -53,32 +45,13 @@ export default function Page() {
         loadDefaultTree,
     } = useTree();
 
-
     React.useEffect(() => {
         if (user && user.uid && projectId) {
             loadTree(projectId);
         }
     }, [user, projectId, loadTree]);
 
-    function handleAddCategory() {
-        addCategory(projectId, "New Category");
-    }
-
-    function handleLoadDefaultTree() {
-        loadDefaultTree();
-    }
-
-    function handleAddStep(catId: string) {
-        const step: TreeStep = {
-            id: crypto.randomUUID(),
-            name: "My New Step",
-        };
-
-        addStepToCategory(projectId, catId, step);
-    }
-
     const selectedStep = selectedStepId ? getStepById(selectedStepId) : null;
-
 
     return (
         <ResizablePanelGroup direction="horizontal" className="flex-1 flex-col">
