@@ -14,12 +14,11 @@ import {
 
 
 import { Minus, Plus } from "lucide-react";
-import { SidebarContent, SidebarGroup, SidebarGroupAction, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar";
+import { SidebarContent, SidebarGroup, SidebarGroupAction, SidebarGroupContent, SidebarGroupLabel, SidebarMenuAction, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem } from "@/components/ui/sidebar";
 import { useTree } from "@/providers/tree-provider";
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { useAuth } from "@/lib/auth-provider";
 import { useSteps } from "@/providers/steps-provider";
-import { useCreateAndInsertStep } from "@/hooks/create-insert-step";
 import { NewStepDialog } from "@/components/new-step-dialog";
 import StepDetails from "@/components/step-details";
 
@@ -28,21 +27,15 @@ export default function Page() {
     const params = useParams();
     const projectId = String(params.projectId);
     const { user } = useAuth();
-    const { steps, loadingSteps, deleteStep, createStepCopy, addStep, getStepById, updateStep } = useSteps();
-    const createAndInsertStep = useCreateAndInsertStep();
+    const {getStepById, updateStep } = useSteps();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
 
     const {
         dataTree,
-        loadingTree,
         loadTree,
-        addCategory,
-        removeCategory,
         removeStepFromCategory,
-        addStepToCategory,
-        loadDefaultTree,
     } = useTree();
 
     React.useEffect(() => {

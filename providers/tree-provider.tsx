@@ -56,7 +56,7 @@ const TreeContext = createContext<TreeContextValue>({
   loadDefaultTree: () => [],
 });
 
-export function TreeProvider({ children }: { children: ReactNode }) {
+export function TreeProvider({ children }: { readonly children: ReactNode }) {
   const { user } = useAuth();
   const [dataTree, setDataTree] = useState<TreeCategory[] | null>(null);
   const [loadingTree, setLoadingTree] = useState(false);

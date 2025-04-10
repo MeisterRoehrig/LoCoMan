@@ -36,7 +36,22 @@ export default function Page() {
   const [aiLoading, setAiLoading] = React.useState(false);
   const [analysisTriggered, setAnalysisTriggered] = React.useState(false);
 
-  function buildPrompt(summaryData: any) {
+
+  type SummaryData = {
+    totalProjectCost?: number;
+    categories?: {
+      categoryId: string;
+      categoryLabel: string;
+      totalCategoryCost: number;
+      steps: {
+        stepId: string;
+        stepName: string;
+        stepCost: number;
+      }[];
+    }[];
+  };
+
+  function buildPrompt(summaryData: SummaryData) {
     return `
       Sie sind ein KI-Assistent, der in eine Logistikmanagement-Anwendung integriert ist.
       Erstellen Sie einen prägnanten, professionellen Kostenanalysebericht auf der Grundlage der folgenden Daten. 
@@ -49,7 +64,7 @@ export default function Page() {
     `.trim();
   }
 
-  async function handleAiAnalysis(summaryData: any) {
+  async function handleAiAnalysis(summaryData: SummaryData) {
     if (!summaryData) return;
 
     try {
@@ -111,6 +126,7 @@ export default function Page() {
     try {
       await updateProjectSummary(projectId, summary);
     } catch (err) {
+      console.error("Error updating project summary:", err);
     }
   }
 
@@ -225,26 +241,30 @@ export default function Page() {
        * Adjust breakpoints and # of columns as desired.
        */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {project.summary.categories?.map((cat: any) => (
-              <Card key={cat.categoryId}>
-                <CardHeader>
-                  <CardDescription>Category</CardDescription>
-                  <CardTitle className="text-2xl font-semibold tabular-nums">
-                    {cat.categoryLabel}
-                  </CardTitle>
-                </CardHeader>
-                <CardFooter className="flex flex-col gap-1 text-sm">
-                  <div>Total Cost: ${cat.totalCategoryCost.toFixed(2)}</div>
-                  <ul className="pl-5 list-disc">
-                    {cat.steps.map((s: any) => (
-                      <li key={s.stepId}>
-                        {s.stepName}: ${s.stepCost.toFixed(2)}
-                      </li>
-                    ))}
-                  </ul>
-                </CardFooter>
-              </Card>
-            ))}
+            {project.summary.categories?.map(
+              (cat) => (
+                <Card key={cat.categoryId}>
+                  <CardHeader>
+                    <CardDescription>Category</CardDescription>
+                    <CardTitle className="text-2xl font-semibold tabular-nums">
+                      {cat.categoryLabel}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardFooter className="flex flex-col gap-1 text-sm">
+                    <div>Total Cost: ${cat.totalCategoryCost.toFixed(2)}</div>
+                    <ul className="pl-5 list-disc">
+                      {cat.steps.map(
+                        (s) => (
+                          <li key={s.stepId}>
+                            {s.stepName}: ${s.stepCost.toFixed(2)}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </CardFooter>
+                </Card>
+              )
+            )}
           </div>
 
           {/**
@@ -269,7 +289,7 @@ export default function Page() {
 
       {!project.summary && (
         <div className="text-sm text-muted-foreground mt-4">
-          No summary generated yet. Click "Generate Report" to create one.
+          No summary generated yet. Click &quot;Generate Report&quot; to create one.
         </div>
       )}
     </ScrollArea>

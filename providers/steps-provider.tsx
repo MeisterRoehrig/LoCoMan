@@ -68,7 +68,7 @@ const StepsContext = createContext<StepsContextValue>({
   deleteStep: async () => {},
 });
 
-export function StepsProvider({ children }: { children: ReactNode }) {
+export function StepsProvider({ children }: { readonly children: ReactNode }) {
   const { user } = useAuth();
   const [steps, setSteps] = useState<StepDoc[]>([]);
   const [loadingSteps, setLoadingSteps] = useState(false);

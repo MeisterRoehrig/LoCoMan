@@ -71,7 +71,7 @@ const ProjectsContext = createContext<ProjectsContextValue>({
   updateProjectSummary: async () => {},
 });
 
-export function ProjectsProvider({ children }: { children: ReactNode }) {
+export function ProjectsProvider({ children }: { readonly children: ReactNode }) {
   const { user } = useAuth();
 
   const [projects, setProjects] = useState<Project[]>([]);
