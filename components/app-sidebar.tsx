@@ -2,12 +2,15 @@
 
 import * as React from "react"
 import {
-  Frame,
   Sparkles,
   Truck,
+  Folder, 
+  MoreHorizontal, 
+  Share, 
+  Trash2
 } from "lucide-react"
+import { useRouter } from "next/navigation" // Next.js App Router
 
-import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -18,26 +21,23 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar, 
+  SidebarGroup, 
+  SidebarGroupLabel, 
+  SidebarMenuAction
 } from "@/components/ui/sidebar"
 import Link from "next/link"
-import { useData } from "@/lib/data-provider" 
 import { NewProjectButton } from "@/components/new-project-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
+import { useUser } from "@/providers/user-provider";
+import { useProjects } from "@/providers/projects-provider";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  // 1) Access Firestore projects via the DataProvider
-  const {userProfile, projects } = useData();
-
-  // Example: transform it into the shape the NavProjects component expects:
-  const navProjects = React.useMemo(() => {
-    return projects.map((proj) => ({
-      id: proj.id, // include the id property
-      name: proj.title,
-      url: `#`, // or you can define a route like `/projects/${proj.id}`
-      icon: Frame, // pick an icon for all or base it on project content
-    }));
-  }, [projects]);
-
+  const { userProfile } = useUser();
+  const { projects, loadingProjects, removeProject } = useProjects();
+  const { isMobile } = useSidebar()
+  const router = useRouter()
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -61,11 +61,75 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         {/* Example of a "New Project" link or button in the main nav: */}
-        <NewProjectButton
-        />
+        <NewProjectButton />
+          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+            <SidebarGroupLabel>Projekte</SidebarGroupLabel>
+            {/* 5) Use the loading state to show a spinner or skeleton */}
+            {loadingProjects && (
+              <div className="flex items-center justify-center py-2">
+                <span className="text-sm text-muted-foreground">Loading...</span>
+              </div>
+            )}
 
-        {/* Pass in the real projects array */}
-        <NavProjects projects={navProjects} />
+            {/* 6) Use the projects data to render the list */}
+            {!loadingProjects && projects.length === 0 && (
+              <div className="flex items-center justify-center py-2">
+                <span className="text-sm text-muted-foreground">No projects found</span>
+              </div>
+            )}
+
+            {/* 7) Render the project list */}
+            {!loadingProjects && projects.length > 0 && (
+              <SidebarMenu>
+                {projects.map((item) => (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton asChild>
+                      <Link href={`/dashboard/${item.id}`}>
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <SidebarMenuAction showOnHover>
+                          <MoreHorizontal />
+                          <span className="sr-only">More</span>
+                        </SidebarMenuAction>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent
+                        className="w-48"
+                        side={isMobile ? "bottom" : "right"}
+                        align={isMobile ? "end" : "start"}
+                      >
+                        <DropdownMenuItem
+                          onClick={() => {
+                            router.push(`/dashboard/${item.id}/data`)
+                          }}
+                        >
+                          <Folder className="text-muted-foreground" />
+                          <span>Edit Data</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem>
+                          <Share className="text-muted-foreground" />
+                          <span>Share Project</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+
+                        {/* 4) Here’s the “Delete Project” click */}
+                        <DropdownMenuItem onClick={() => removeProject(item.id)}>
+                          <Trash2 className="text-muted-foreground" />
+                          <span>Delete Project</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            )}
+          </SidebarGroup>
 
         <NavSecondary
           items={[

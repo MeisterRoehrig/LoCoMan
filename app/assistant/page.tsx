@@ -30,7 +30,7 @@ Sie sind ein KI-Assistent, der in eine Logistikmanagement-Anwendung eingebettet 
       const fullPrompt = `${prePrompt}\n\nUser: ${userPrompt}\n\nAssistant:`
 
       const result = await model.generateContent(fullPrompt)
-      const text = await result.response.text()
+      const text =  result.response.text()
       setAssistantResponse(text)
     } catch (error) {
       console.error("Error generating content:", error)

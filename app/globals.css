@@ -1,7 +1,9 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 /* Removed @plugin "tailwindcss-animate"; as it should be imported in the Tailwind CSS configuration file */
-
 
 :root {
   --background: oklch(1 0 0);
@@ -220,7 +222,48 @@
   }
 }
 
+@keyframes shine {
+  0% {
+    background-position: 200% 0;
+  }
+  25% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .animate-indeterminate {
   animation: loading-indeterminate 1.5s linear infinite;
+}
+
+.animate-shine {
+  animation: shine 3s ease-out infinite;
+}
+
+.animate-gradient-flow {
+  animation: gradientFlow 10s ease 0s infinite normal none running;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 

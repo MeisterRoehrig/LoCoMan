@@ -23,6 +23,7 @@ export default function ItemDetails({ projectId, item }: ItemDetailsProps) {
   // We store all relevant fields in one local state object
   const [formValues, setFormValues] = React.useState({
     responsiblePerson: "",
+    responsiblePersonValue: "",
     executionTime: "",
     costDriverLabel: "",
     costDriverValue: "",
@@ -39,6 +40,7 @@ export default function ItemDetails({ projectId, item }: ItemDetailsProps) {
   React.useEffect(() => {
     setFormValues({
       responsiblePerson: item.responsiblePerson ?? "",
+      responsiblePersonValue: item.responsiblePersonValue?.toString() ?? "",
       executionTime: item.executionTime?.toString() ?? "",
       costDriverLabel: item.costDriverLabel ?? "",
       costDriverValue: item.costDriverValue?.toString() ?? "",
@@ -64,6 +66,10 @@ export default function ItemDetails({ projectId, item }: ItemDetailsProps) {
         debouncedFormValues.responsiblePerson.trim() === ""
           ? null
           : debouncedFormValues.responsiblePerson.trim(),
+      responsiblePersonValue:
+        debouncedFormValues.responsiblePersonValue.trim() === ""
+          ? null
+          : parseFloat(debouncedFormValues.responsiblePersonValue),
       executionTime:
         debouncedFormValues.executionTime.trim() === ""
           ? null
@@ -95,6 +101,19 @@ export default function ItemDetails({ projectId, item }: ItemDetailsProps) {
 
   /** Helper for changing any field in the form */
   function handleChange(e: React.ChangeEvent<HTMLInputElement>, key: keyof typeof formValues) {
+    // Calcuulate Summe based on entrys the sum is the sum of (responsiblePersonValue / executionTime) * costDriverValue + helperValue
+    if (key === "responsiblePersonValue" || key === "executionTime" || key === "costDriverValue" || key === "helperValue") {
+      const responsiblePersonValue = parseFloat(formValues.responsiblePersonValue) || 0;
+      const executionTime = parseFloat(formValues.executionTime) || 0;
+      const costDriverValue = parseFloat(formValues.costDriverValue) || 0;
+      const helperValue = parseFloat(formValues.helperValue) || 0;
+      const sum = (responsiblePersonValue / executionTime) * costDriverValue + helperValue;
+      setFormValues((prev) => ({
+        ...prev,
+        sum: sum.toString(),
+      }));
+    }
+  
     setDirty(true); // now we know the user typed something
     setFormValues((prev) => ({
       ...prev,
@@ -118,6 +137,12 @@ export default function ItemDetails({ projectId, item }: ItemDetailsProps) {
           placeholder="Vertriebsmitarbeiter"
           value={formValues.responsiblePerson}
           onChange={(e) => handleChange(e, "responsiblePerson")}
+        />
+        <Input
+          type="number"
+          placeholder="5400"
+          value={formValues.responsiblePersonValue}
+          onChange={(e) => handleChange(e, "responsiblePersonValue")}
         />
       </div>
 
