@@ -10,6 +10,7 @@ import { Download, Edit, Sparkles, TrendingUp } from "lucide-react";
 import {
   Card,
   CardAction,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -22,6 +23,43 @@ import { useTree } from "@/providers/tree-provider";
 import { useProjects } from "@/providers/projects-provider";
 import { model } from "@/lib/firebase-config"; // or wherever your model is exported
 import { generateProjectSummary } from "@/lib/summary-report";
+
+
+import { Label, Pie, PieChart } from "recharts"
+
+import {
+  ChartConfig,
+  ChartTooltip,
+  ChartContainer,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
+
+const chartConfig = {
+  visitors: {
+    label: "Visitors",
+  },
+  chrome: {
+    label: "Chrome",
+    color: "hsl(var(--chart-1))",
+  },
+  safari: {
+    label: "Safari",
+    color: "hsl(var(--chart-2))",
+  },
+  firefox: {
+    label: "Firefox",
+    color: "hsl(var(--chart-3))",
+  },
+  edge: {
+    label: "Edge",
+    color: "hsl(var(--chart-4))",
+  },
+  other: {
+    label: "Other",
+    color: "hsl(var(--chart-5))",
+  },
+} satisfies ChartConfig
+
 
 export default function Page() {
   const params = useParams();
@@ -64,6 +102,8 @@ export default function Page() {
     `.trim();
   }
 
+
+
   async function handleAiAnalysis(summaryData: SummaryData) {
     if (!summaryData) return;
 
@@ -105,6 +145,35 @@ export default function Page() {
     }
   }, [project?.summary, analysisTriggered]);
 
+  const chartData = React.useMemo(() => {
+    if (!project?.summary?.categories) return [];
+  
+    const cssVarNames = [
+      "--chart-1",
+      "--chart-2",
+      "--chart-3",
+      "--chart-4",
+      "--chart-5",
+      "--chart-6",
+      "--chart-7",
+    ];
+  
+    const resolveCssVariable = (varName: string) => {
+      if (typeof window === "undefined") return "#ccc"; // fallback during SSR
+      return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || "#ccc";
+    };
+  
+    return project.summary.categories.map((cat, index) => ({
+      name: cat.categoryLabel,
+      value: cat.totalCategoryCost,
+      fill: resolveCssVariable(cssVarNames[index % cssVarNames.length]),
+    }));
+  }, [project?.summary?.categories]);
+  
+  const totalCategoryCost = React.useMemo(() => {
+    return chartData.reduce((acc, curr) => acc + curr.value, 0);
+  }, [chartData]);
+
   // If we don't have the project ID or a valid project, show a loader or a fallback
   if (!projectId) {
     return <Loader show={true} />;
@@ -112,7 +181,6 @@ export default function Page() {
   if (!project) {
     return <Loader show={true} />;
   }
-
 
   // This is the function that runs the cost calculations and saves them to Firestore
   async function handleGenerateReport() {
@@ -155,7 +223,7 @@ export default function Page() {
       <Separator className="mb-3" />
       <div className="flex justify-between items-center px-1">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Report</h1>
           <h2>Details for “{project.title}”</h2>
         </div>
         <div className="flex gap-2">
@@ -193,9 +261,9 @@ export default function Page() {
             {/* Left column (20%) => Project Cost Card */}
             <Card>
               <CardHeader>
-                <CardDescription>Total Project Cost</CardDescription>
+                <CardDescription>Project Cost</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
-                  ${project.summary.totalProjectCost?.toFixed(2)}
+                  Total
                 </CardTitle>
                 <CardAction>
                   <Badge variant="outline">
@@ -204,14 +272,54 @@ export default function Page() {
                   </Badge>
                 </CardAction>
               </CardHeader>
-              <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                <div className="line-clamp-1 flex gap-2 font-medium">
-                  Some tagline about costs
-                </div>
-                <div className="text-muted-foreground">
-                  Some helpful note or timeframe
-                </div>
-              </CardFooter>
+              <CardContent className="flex-1 pb-0">
+              <ChartContainer
+                  config={chartConfig}
+                  className="mx-auto aspect-square max-h-[250px]"
+                >
+                  <PieChart>
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                    <Pie
+                      data={chartData}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={85}
+                      outerRadius={110}
+                      strokeWidth={5}
+                    >
+                      <Label
+                        content={({ viewBox }) => {
+                          if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                            return (
+                              <text
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                              >
+                                <tspan
+                                  x={viewBox.cx}
+                                  y={viewBox.cy}
+                                  className="fill-foreground text-2xl font-bold"
+                                >
+                                  ${totalCategoryCost.toFixed(2)}
+                                </tspan>
+                                <tspan
+                                  x={viewBox.cx}
+                                  y={(viewBox.cy ?? 0) + 20}
+                                  className="fill-muted-foreground text-xs"
+                                >
+                                  Total Cost
+                                </tspan>
+                              </text>
+                            );
+                          }
+                        }}
+                      />
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+              </CardContent>
             </Card>
 
             {/* Right column => AI Report Card */}
@@ -295,3 +403,6 @@ export default function Page() {
     </ScrollArea>
   );
 }
+
+
+

@@ -33,7 +33,7 @@ function computeStepCost(step: StepDoc): number {
   const additionalResourcesValue = step.additionalResourcesValue ?? 0;
 
   return (
-    (personMonthlySalary / 160) * costDriverValue * stepDuration +
+    (personMonthlySalary / (8*21*60)) * costDriverValue * 21 * stepDuration +
     additionalResourcesValue
   );
 }
