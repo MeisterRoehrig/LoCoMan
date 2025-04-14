@@ -117,7 +117,7 @@ export default function StepDetails({ step, onSave }: StepDetailsProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="duration">Step Duration (hours)</label>
+        <label className="block text-sm font-medium pb-2" htmlFor="duration">Step Duration (min)</label>
         <input
           id="duration"
           type="number"
