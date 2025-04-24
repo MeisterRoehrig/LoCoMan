@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AutoComplete, type Option } from "@/lib/autocomplete";
 import { useSteps } from "@/providers/steps-provider";
 import { useTree } from "@/providers/tree-provider";
 import { StepDoc } from "@/providers/steps-provider";
@@ -27,8 +28,16 @@ export function NewStepDialog({
   projectId: string;
   categoryId: string;
 }) {
-  const { addStep } = useSteps();
+  const { addStep, steps } = useSteps();
+  const [loadingSteps, setLoadingSteps] = React.useState(false); // Add loadingSteps state
   const { addStepToCategory } = useTree();
+
+  const stepOptions: Option[] = steps.map((step) => ({
+    value: step.id,
+    label: step.name,
+  }));
+
+  const [selected, setSelected] = React.useState<Option | undefined>(undefined);
 
   const [name, setName] = React.useState("");
   const [person, setPerson] = React.useState("");
@@ -40,6 +49,7 @@ export function NewStepDialog({
   const [resourceValue, setResourceValue] = React.useState<number | "">("");
 
   const resetForm = () => {
+    setSelected(undefined);
     setName("");
     setPerson("");
     setSalary("");
@@ -51,6 +61,16 @@ export function NewStepDialog({
   };
 
   async function handleSubmit() {
+    if (selected) {
+      await addStepToCategory(projectId, categoryId, {
+        id: selected.value,
+        name: selected.label,
+      });
+      resetForm();
+      onOpenChange(false);
+      return;
+    }
+
     if (!name.trim()) {
       alert("Bitte Schrittname eingeben");
       return;
@@ -83,95 +103,122 @@ export function NewStepDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        if (!value) resetForm();
+        onOpenChange(value);
+      }}
+    >
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Neuen Schritt hinzufügen</DialogTitle>
           <DialogDescription>
-            Erstelle einen neuen Schritt direkt in dieser Kategorie.
+            Wähle einen bestehenden Schritt oder erstelle einen neuen.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Name</Label>
-            <Input
-              className="col-span-3"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="z.B. Verpackung vorbereiten"
-            />
-          </div>
+        <AutoComplete
+          options={stepOptions}
+          emptyMessage="Keine Ergebnisse"
+          placeholder="Vorhandenen Schritt suchen..."
+          onValueChange={setSelected}
+          value={selected}
+          disabled={false}
+          isLoading={loadingSteps}
+        />
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Person</Label>
-            <Input
-              className="col-span-3"
-              value={person}
-              onChange={(e) => setPerson(e.target.value)}
-              placeholder="z.B. Lagerist"
-            />
-          </div>
+        {!selected && (
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Name</Label>
+              <Input
+                className="col-span-3"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="z.B. Verpackung vorbereiten"
+              />
+            </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Gehalt (€)</Label>
-            <Input
-              type="number"
-              className="col-span-3"
-              value={salary}
-              onChange={(e) => setSalary(e.target.valueAsNumber || "")}
-            />
-          </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Person</Label>
+              <Input
+                className="col-span-3"
+                value={person}
+                onChange={(e) => setPerson(e.target.value)}
+                placeholder="z.B. Lagerist"
+              />
+            </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Kosten-Treiber</Label>
-            <Input
-              className="col-span-3"
-              value={driver}
-              onChange={(e) => setDriver(e.target.value)}
-              placeholder="z.B. Pakete pro Tag"
-            />
-          </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Gehalt (€)</Label>
+              <Input
+                type="number"
+                className="col-span-3"
+                value={salary}
+                onChange={(e) => setSalary(e.target.valueAsNumber || "")}
+              />
+            </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Treiberwert</Label>
-            <Input
-              type="number"
-              className="col-span-3"
-              value={driverValue}
-              onChange={(e) => setDriverValue(e.target.valueAsNumber || "")}
-            />
-          </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Kosten-Treiber</Label>
+              <Input
+                className="col-span-3"
+                value={driver}
+                onChange={(e) => setDriver(e.target.value)}
+                placeholder="z.B. Pakete pro Tag"
+              />
+            </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Dauer (min)</Label>
-            <Input
-              type="number"
-              className="col-span-3"
-              value={duration}
-              onChange={(e) => setDuration(e.target.valueAsNumber || "")}
-            />
-          </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Treiberwert</Label>
+              <Input
+                type="number"
+                className="col-span-3"
+                value={driverValue}
+                onChange={(e) => setDriverValue(e.target.valueAsNumber || "")}
+              />
+            </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Zusatzressourcen</Label>
-            <Input
-              className="col-span-3"
-              value={resources}
-              onChange={(e) => setResources(e.target.value)}
-            />
-          </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Dauer (min)</Label>
+              <Input
+                type="number"
+                className="col-span-3"
+                value={duration}
+                onChange={(e) => setDuration(e.target.valueAsNumber || "")}
+              />
+            </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Ressourcenkosten (€)</Label>
-            <Input
-              type="number"
-              className="col-span-3"
-              value={resourceValue}
-              onChange={(e) => setResourceValue(e.target.valueAsNumber || "")}
-            />
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Zusatzressourcen</Label>
+              <Input
+                className="col-span-3"
+                value={resources}
+                onChange={(e) => setResources(e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Ressourcenkosten (€)</Label>
+              <Input
+                type="number"
+                className="col-span-3"
+                value={resourceValue}
+                onChange={(e) => setResourceValue(e.target.valueAsNumber || "")}
+              />
+            </div>
           </div>
-        </div>
+        )}
+
+        {selected && (
+          <div className="mt-2 flex items-center gap-2 text-sm">
+            <span>Ausgewählter Schritt: <strong>{selected.label}</strong></span>
+            <Button variant="ghost" size="sm" onClick={() => setSelected(undefined)}>
+              Auswahl entfernen
+            </Button>
+          </div>
+        )}
 
         <DialogFooter>
           <Button onClick={handleSubmit}>Speichern</Button>
