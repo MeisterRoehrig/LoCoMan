@@ -25,7 +25,7 @@ import { model } from "@/lib/firebase-config"; // or wherever your model is expo
 import { generateProjectSummary } from "@/lib/summary-report";
 
 
-import { Label, Pie, PieChart } from "recharts"
+import {Pie, PieChart } from "recharts"
 
 import {
   ChartConfig,
@@ -147,7 +147,7 @@ export default function Page() {
 
   const chartData = React.useMemo(() => {
     if (!project?.summary?.categories) return [];
-  
+
     const cssVarNames = [
       "--chart-1",
       "--chart-2",
@@ -157,19 +157,19 @@ export default function Page() {
       "--chart-6",
       "--chart-7",
     ];
-  
+
     const resolveCssVariable = (varName: string) => {
       if (typeof window === "undefined") return "#ccc"; // fallback during SSR
       return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || "#ccc";
     };
-  
+
     return project.summary.categories.map((cat, index) => ({
       name: cat.categoryLabel,
       value: cat.totalCategoryCost,
       fill: resolveCssVariable(cssVarNames[index % cssVarNames.length]),
     }));
   }, [project?.summary?.categories]);
-  
+
   const totalCategoryCost = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.value, 0);
   }, [chartData]);
@@ -259,11 +259,11 @@ export default function Page() {
        */}
           <div className="grid grid-cols-1 md:grid-cols-[1fr_4fr] gap-4">
             {/* Left column (20%) => Project Cost Card */}
-            <Card>
+            <Card className="min-w-0">
               <CardHeader>
                 <CardDescription>Project Cost</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
-                  Total
+                €{totalCategoryCost.toFixed(2)}
                 </CardTitle>
                 <CardAction>
                   <Badge variant="outline">
@@ -272,55 +272,26 @@ export default function Page() {
                   </Badge>
                 </CardAction>
               </CardHeader>
-              <CardContent className="flex-1 pb-0">
-              <ChartContainer
-                  config={chartConfig}
-                  className="mx-auto aspect-square max-h-[250px]"
-                >
-                  <PieChart>
-                    <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                    <Pie
-                      data={chartData}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={85}
-                      outerRadius={110}
-                      strokeWidth={5}
-                    >
-                      <Label
-                        content={({ viewBox }) => {
-                          if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                            return (
-                              <text
-                                x={viewBox.cx}
-                                y={viewBox.cy}
-                                textAnchor="middle"
-                                dominantBaseline="middle"
-                              >
-                                <tspan
-                                  x={viewBox.cx}
-                                  y={viewBox.cy}
-                                  className="fill-foreground text-2xl font-bold"
-                                >
-                                  ${totalCategoryCost.toFixed(2)}
-                                </tspan>
-                                <tspan
-                                  x={viewBox.cx}
-                                  y={(viewBox.cy ?? 0) + 20}
-                                  className="fill-muted-foreground text-xs"
-                                >
-                                  Total Cost
-                                </tspan>
-                              </text>
-                            );
-                          }
-                        }}
-                      />
-                    </Pie>
-                  </PieChart>
-                </ChartContainer>
+              <CardContent className="flex justify-center items-center pb-0">
+                <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-square">
+                  <ChartContainer config={chartConfig} className="w-full h-full">
+                    <PieChart width={300} height={300}>
+                      <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                      <Pie
+                        data={chartData}
+                        dataKey="value"
+                        nameKey="name"
+                        // innerRadius="65%"
+                        // outerRadius="90%"
+                        // strokeWidth={5}
+                      >
+                      </Pie>
+                    </PieChart>
+                  </ChartContainer>
+                </div>
               </CardContent>
             </Card>
+
 
             {/* Right column => AI Report Card */}
             <Card>
@@ -359,12 +330,12 @@ export default function Page() {
                     </CardTitle>
                   </CardHeader>
                   <CardFooter className="flex flex-col gap-1 text-sm">
-                    <div>Total Cost: ${cat.totalCategoryCost.toFixed(2)}</div>
+                    <div>Total Cost: €{cat.totalCategoryCost.toFixed(2)}</div>
                     <ul className="pl-5 list-disc">
                       {cat.steps.map(
                         (s) => (
                           <li key={s.stepId}>
-                            {s.stepName}: ${s.stepCost.toFixed(2)}
+                            {s.stepName}: €{s.stepCost.toFixed(2)}
                           </li>
                         )
                       )}

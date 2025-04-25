@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useProjects } from "@/providers/projects-provider";
 
 export function NewProjectButton() {
@@ -24,7 +25,7 @@ export function NewProjectButton() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [mode, setMode] = React.useState<"custom" | "default">("custom");
+  const [useDefault, setUseDefault] = React.useState(true);
 
   function handleCreate() {
     if (!name.trim()) {
@@ -32,7 +33,7 @@ export function NewProjectButton() {
       return;
     }
 
-    if (mode === "default") {
+    if (useDefault) {
       addProjectWithDefaultTree(name, description);
     } else {
       addProject(name, description);
@@ -41,28 +42,18 @@ export function NewProjectButton() {
     // Cleanup
     setName("");
     setDescription("");
+    setUseDefault(false);
     setDialogOpen(false);
   }
 
   return (
     <>
-      {/* Standard project creation */}
       <NavMain
         items={[
           {
             title: "Neues Projekt",
             icon: File,
             onClick: () => {
-              setMode("custom");
-              setDialogOpen(true);
-            },
-            items: [],
-          },
-          {
-            title: "Neues Default-Projekt",
-            icon: File,
-            onClick: () => {
-              setMode("default");
               setDialogOpen(true);
             },
             items: [],
@@ -70,13 +61,10 @@ export function NewProjectButton() {
         ]}
       />
 
-      {/* Unified dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>
-              {mode === "default" ? "Neues Standard-Projekt" : "Neues Projekt"}
-            </DialogTitle>
+            <DialogTitle>Neues Projekt</DialogTitle>
             <DialogDescription>
               Bitte geben Sie Ihrem neuen Projekt einen Namen und eine Beschreibung.
             </DialogDescription>
@@ -106,6 +94,16 @@ export function NewProjectButton() {
                 placeholder="Kurze Beschreibung..."
                 onChange={(e) => setDescription(e.target.value)}
               />
+            </div>
+            <div className="flex items-center space-x-3 px-1">
+              <Switch
+                id="default-project-switch"
+                checked={useDefault}
+                onCheckedChange={setUseDefault}
+              />
+              <Label htmlFor="default-project-switch">
+                Standardstruktur verwenden
+              </Label>
             </div>
           </div>
 
