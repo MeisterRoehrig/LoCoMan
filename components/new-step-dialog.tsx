@@ -29,7 +29,7 @@ export function NewStepDialog({
   categoryId: string;
 }) {
   const { addStep, steps } = useSteps();
-  const [loadingSteps, setLoadingSteps] = React.useState(false); // Add loadingSteps state
+  const [loadingSteps] = React.useState(false); // Add loadingSteps state
   const { addStepToCategory } = useTree();
 
   const stepOptions: Option[] = steps.map((step) => ({
