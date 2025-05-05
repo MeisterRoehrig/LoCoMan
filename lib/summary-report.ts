@@ -12,6 +12,7 @@ export type ProjectCostSummary = {
   categories: Array<{
     categoryId: string;
     categoryLabel: string;
+    categoryColor: string;
     totalCategoryCost: number;
     steps: Array<{
       stepId: string;
@@ -85,6 +86,7 @@ export function generateProjectSummary(
     return {
       categoryId: category.id,
       categoryLabel: category.label,
+      categoryColor: category.color,
       totalCategoryCost,
       steps: validSteps,
     };

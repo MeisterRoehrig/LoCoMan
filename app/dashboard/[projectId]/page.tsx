@@ -25,7 +25,8 @@ import { model } from "@/lib/firebase-config"; // or wherever your model is expo
 import { generateProjectSummary } from "@/lib/summary-report";
 
 
-import {Pie, PieChart } from "recharts"
+import { Pie, PieChart } from "recharts"
+import CostTreemap from "@/components/cost-treemap";
 
 import {
   ChartConfig,
@@ -33,6 +34,7 @@ import {
   ChartContainer,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+
 
 const chartConfig = {
   visitors: {
@@ -81,6 +83,7 @@ export default function Page() {
       categoryId: string;
       categoryLabel: string;
       totalCategoryCost: number;
+      categoryColor: string;
       steps: {
         stepId: string;
         stepName: string;
@@ -147,32 +150,14 @@ export default function Page() {
 
   const chartData = React.useMemo(() => {
     if (!project?.summary?.categories) return [];
-
-    const cssVarNames = [
-      "--chart-1",
-      "--chart-2",
-      "--chart-3",
-      "--chart-4",
-      "--chart-5",
-      "--chart-6",
-      "--chart-7",
-    ];
-
-    const resolveCssVariable = (varName: string) => {
-      if (typeof window === "undefined") return "#ccc"; // fallback during SSR
-      return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || "#ccc";
-    };
-
-    return project.summary.categories.map((cat, index) => ({
+    return project.summary.categories.map((cat) => ({
       name: cat.categoryLabel,
       value: cat.totalCategoryCost,
-      fill: resolveCssVariable(cssVarNames[index % cssVarNames.length]),
+      fill: cat.categoryColor ?? "#cccccc",
     }));
   }, [project?.summary?.categories]);
 
-  const totalCategoryCost = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.value, 0);
-  }, [chartData]);
+  const totalCategoryCost = React.useMemo(() => chartData.reduce((acc, curr) => acc + curr.value, 0), [chartData]);
 
   // If we don't have the project ID or a valid project, show a loader or a fallback
   if (!projectId) {
@@ -263,7 +248,7 @@ export default function Page() {
               <CardHeader>
                 <CardDescription>Project Cost</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
-                €{totalCategoryCost.toFixed(2)}
+                  €{totalCategoryCost.toFixed(2)}
                 </CardTitle>
                 <CardAction>
                   <Badge variant="outline">
@@ -273,17 +258,17 @@ export default function Page() {
                 </CardAction>
               </CardHeader>
               <CardContent className="flex justify-center items-center pb-0">
-                <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-square">
-                  <ChartContainer config={chartConfig} className="w-full h-full">
-                    <PieChart width={300} height={300}>
+                <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-square p-0">
+                  <ChartContainer config={chartConfig} className="w-full h-full p-0">
+                    <PieChart width={100} height={100} className="p-0">
                       <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
                       <Pie
                         data={chartData}
                         dataKey="value"
                         nameKey="name"
-                        // innerRadius="65%"
-                        // outerRadius="90%"
-                        // strokeWidth={5}
+                       innerRadius="60%"
+                      // outerRadius="90%"
+                      // strokeWidth={5}
                       >
                       </Pie>
                     </PieChart>
@@ -346,10 +331,25 @@ export default function Page() {
             )}
           </div>
 
+
+          {/* ---------- TREEMAP CARD ---------- */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Kostenstruktur</CardTitle>
+              <CardDescription className="text-sm">
+                Treemap
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="-my-4">
+              <CostTreemap categories={project.summary.categories} />
+            </CardContent>
+          </Card>
+
           {/**
        * BOTTOM: JSON Card 
        * Full width by default, placed after the grids above.
        */}
+
           <Card>
             <CardHeader>
               <CardTitle>Raw Summary JSON</CardTitle>

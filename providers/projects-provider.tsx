@@ -33,6 +33,7 @@ interface CategoryCostSummary {
   categoryId: string;
   categoryLabel: string;
   totalCategoryCost: number;
+  categoryColor: string;
   steps: StepCostSummary[];
 }
 
