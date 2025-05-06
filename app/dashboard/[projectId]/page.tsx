@@ -24,8 +24,7 @@ import { useProjects } from "@/providers/projects-provider";
 import { model } from "@/lib/firebase-config"; // or wherever your model is exported
 import { generateProjectSummary } from "@/lib/summary-report";
 
-
-import { Pie, PieChart } from "recharts"
+import { Pie, PieChart } from "recharts";
 import CostTreemap from "@/components/cost-treemap";
 
 import {
@@ -33,35 +32,24 @@ import {
   ChartTooltip,
   ChartContainer,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from "@/components/ui/chart";
 
+function parseHSL(str?: string) {
+  const m = str?.match(/hsl\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*\)/i);
+  return m ? { h: +m[1], s: +m[2], l: +m[3] } : null;
+}
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
+function childColor(parent?: string, idx = 0, total = 1) {
+  const hsl = parseHSL(parent);
+  if (!hsl) return undefined;
+  // Spread the children across a lightness span to get clearly distinct colours
+  const span = 20; // percentage points
+  const l = clamp(hsl.l - ((idx / Math.max(1, total - 1)) - 0.5) * span, 10, 90);
+  return `hsl(${hsl.h}, ${hsl.s}%, ${l}%)`;
+}
 
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig
-
+} satisfies ChartConfig;
 
 export default function Page() {
   const params = useParams();
@@ -75,7 +63,6 @@ export default function Page() {
   const [aiResponse, setAiResponse] = React.useState("");
   const [aiLoading, setAiLoading] = React.useState(false);
   const [analysisTriggered, setAnalysisTriggered] = React.useState(false);
-
 
   type SummaryData = {
     totalProjectCost?: number;
@@ -105,7 +92,7 @@ export default function Page() {
     `.trim();
   }
 
-
+  
 
   async function handleAiAnalysis(summaryData: SummaryData) {
     if (!summaryData) return;
@@ -136,7 +123,7 @@ export default function Page() {
   // Load the tree for this project if needed
   React.useEffect(() => {
     if (projectId) {
-      loadTree(projectId)
+      loadTree(projectId);
     }
   }, [projectId, loadTree]);
 
@@ -157,7 +144,10 @@ export default function Page() {
     }));
   }, [project?.summary?.categories]);
 
-  const totalCategoryCost = React.useMemo(() => chartData.reduce((acc, curr) => acc + curr.value, 0), [chartData]);
+  const totalCategoryCost = React.useMemo(
+    () => chartData.reduce((acc, curr) => acc + curr.value, 0),
+    [chartData]
+  );
 
   // If we don't have the project ID or a valid project, show a loader or a fallback
   if (!projectId) {
@@ -197,7 +187,6 @@ export default function Page() {
     link.download = `project_${projectId}_summary.json`;
     link.click();
     URL.revokeObjectURL(url);
-
   }
 
   return (
@@ -232,16 +221,7 @@ export default function Page() {
 
       {project.summary && (
         <div className="flex flex-col gap-4">
-
-          {/** 
-       * TOP GRID: 2 columns with a 20:80 ratio on md+ 
-       * 
-       * On mobile (below md), it’ll stack into 1 column automatically,
-       * because we set grid-cols-1 by default. 
-       * 
-       * Using `md:grid-cols-[1fr_4fr]` is effectively 20/80.
-       * You can adjust the ratio by changing 1fr_4fr to something else if needed.
-       */}
+          {/* TOP GRID */}
           <div className="grid grid-cols-1 md:grid-cols-[1fr_4fr] gap-4">
             {/* Left column (20%) => Project Cost Card */}
             <Card className="min-w-0">
@@ -266,17 +246,15 @@ export default function Page() {
                         data={chartData}
                         dataKey="value"
                         nameKey="name"
-                       innerRadius="60%"
-                      // outerRadius="90%"
-                      // strokeWidth={5}
-                      >
-                      </Pie>
+                        innerRadius="60%"
+                        paddingAngle={1}
+                        stroke="#fff"
+                      />
                     </PieChart>
                   </ChartContainer>
                 </div>
               </CardContent>
             </Card>
-
 
             {/* Right column => AI Report Card */}
             <Card>
@@ -287,69 +265,78 @@ export default function Page() {
                 </CardDescription>
               </CardHeader>
               <CardFooter className="text-sm">
-                {/* 6) Display the AI response or loading text here */}
-                {aiLoading
-                  ? "Fetching AI Analysis..."
-                  : aiResponse || "No AI analysis available yet."}
+                {aiLoading ? "Fetching AI Analysis..." : aiResponse || "No AI analysis available yet."}
               </CardFooter>
             </Card>
           </div>
 
-          {/** 
-       * MIDDLE GRID: Categories laid out responsively.
-       * 
-       * - `grid-cols-1` => always at least 1 column.
-       * - `sm:grid-cols-2` => from small screens upwards, 2 columns if space allows.
-       * - `md:grid-cols-3` => from medium screens upwards, 3 columns if space allows.
-       * 
-       * Adjust breakpoints and # of columns as desired.
-       */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {project.summary.categories?.map(
-              (cat) => (
-                <Card key={cat.categoryId}>
+          {/* MIDDLE GRID: Categories */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {project.summary.categories?.map((cat) => {
+              const stepData = cat.steps.map((s, i) => ({
+                name: s.stepName,
+                value: s.stepCost,
+                fill: childColor(cat.categoryColor, i, cat.steps.length) ?? cat.categoryColor ?? "#ccc",
+              }));
+
+              return (
+                <Card key={cat.categoryId} className="flex flex-col">
                   <CardHeader>
                     <CardDescription>Category</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums">
                       {cat.categoryLabel}
                     </CardTitle>
                   </CardHeader>
-                  <CardFooter className="flex flex-col gap-1 text-sm">
-                    <div>Total Cost: €{cat.totalCategoryCost.toFixed(2)}</div>
-                    <ul className="pl-5 list-disc">
-                      {cat.steps.map(
-                        (s) => (
+                  <CardContent  /* Category card body */
+                    className="flex flex-col sm:flex-row items-center gap-4 pb-0">
+                    {/* Pie chart ― fixed square that never stretches the row */}
+                    <div className="shrink-0 w-40 aspect-square">
+                      <ChartContainer config={chartConfig} className="w-full h-full p-0">
+                        <PieChart width={160} height={160}>
+                          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                          <Pie
+                            data={stepData}
+                            dataKey="value"
+                            nameKey="name"
+                            innerRadius="60%"
+                            paddingAngle={1}
+                            stroke="#fff"
+                          />
+                        </PieChart>
+                      </ChartContainer>
+                    </div>
+
+                    {/* Cost breakdown */}
+                    <div className="flex flex-col justify-center gap-1 text-sm text-center sm:text-left">
+                      <div className="font-medium">
+                        Total Cost: €{cat.totalCategoryCost.toFixed(2)}
+                      </div>
+                      <ul className="list-disc list-inside">
+                        {cat.steps.map((s) => (
                           <li key={s.stepId}>
                             {s.stepName}: €{s.stepCost.toFixed(2)}
                           </li>
-                        )
-                      )}
-                    </ul>
-                  </CardFooter>
+                        ))}
+                      </ul>
+                    </div>
+                  </CardContent>
                 </Card>
-              )
-            )}
+              );
+            })}
           </div>
 
-
-          {/* ---------- TREEMAP CARD ---------- */}
+          {/* TREEMAP CARD */}
           <Card>
             <CardHeader>
               <CardTitle>Kostenstruktur</CardTitle>
-              <CardDescription className="text-sm">
-                Treemap
-              </CardDescription>
+              <CardDescription className="text-sm">Treemap</CardDescription>
             </CardHeader>
             <CardContent className="-my-4">
               <CostTreemap categories={project.summary.categories} />
             </CardContent>
           </Card>
 
-          {/**
-       * BOTTOM: JSON Card 
-       * Full width by default, placed after the grids above.
-       */}
-
+          {/* RAW JSON CARD */}
           <Card>
             <CardHeader>
               <CardTitle>Raw Summary JSON</CardTitle>
@@ -374,6 +361,3 @@ export default function Page() {
     </ScrollArea>
   );
 }
-
-
-
