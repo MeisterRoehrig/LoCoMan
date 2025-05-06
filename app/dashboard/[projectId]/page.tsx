@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
 import { Download, Edit, Sparkles, TrendingUp } from "lucide-react";
+import { Report, forceRefreshReports } from "@/lib/report-manager";
 import {
   Card,
   CardAction,
@@ -22,7 +23,7 @@ import { useSteps } from "@/providers/steps-provider";
 import { useTree } from "@/providers/tree-provider";
 import { useProjects } from "@/providers/projects-provider";
 import { model } from "@/lib/firebase-config"; // or wherever your model is exported
-import { generateProjectSummary } from "@/lib/summary-report";
+import { generateProjectSummary } from "@/lib/summary-manager";
 
 import { Pie, PieChart } from "recharts";
 import CostTreemap from "@/components/cost-treemap";
@@ -92,7 +93,7 @@ export default function Page() {
     `.trim();
   }
 
-  
+
 
   async function handleAiAnalysis(summaryData: SummaryData) {
     if (!summaryData) return;
@@ -173,6 +174,23 @@ export default function Page() {
     }
   }
 
+  // This is the function that runs the cost calculations and saves them to Firestore
+  async function handleUpdateReport() {
+    if (!dataTree) {
+      return;
+    }
+    // 1) Compute the summary
+    const summary = generateProjectSummary(dataTree, steps);
+
+    // 2) Store it in Firestore for the project
+    try {
+      await updateProjectSummary(projectId, summary);
+      forceRefreshReports(projectId);   // ⬅ triggers refetch on next paint
+    } catch (err) {
+      console.error("Error updating project summary:", err);
+    }
+  }
+
   // Helper to download the summary JSON
   function handleDownloadSummary() {
     if (!project?.summary) {
@@ -211,9 +229,16 @@ export default function Page() {
           >
             <Edit /> Edit Data
           </Button>
-          <Button className="cursor-pointer" onClick={handleGenerateReport}>
-            <Sparkles /> Generate Report
-          </Button>
+          {!project.summary && (
+            <Button className="cursor-pointer" onClick={handleGenerateReport}>
+              <Sparkles /> Generate Report
+            </Button>
+          )}
+          {project.summary && (
+            <Button className="cursor-pointer" onClick={handleUpdateReport}>
+              <Sparkles /> Update Report
+            </Button>
+          )}
         </div>
       </div>
 
@@ -265,7 +290,7 @@ export default function Page() {
                 </CardDescription>
               </CardHeader>
               <CardFooter className="text-sm">
-                {aiLoading ? "Fetching AI Analysis..." : aiResponse || "No AI analysis available yet."}
+                <Report project={project} kind="overview" responseType="text" wordRange={[250, 300]} />
               </CardFooter>
             </Card>
           </div>
@@ -311,13 +336,14 @@ export default function Page() {
                       <div className="font-medium">
                         Total Cost: €{cat.totalCategoryCost.toFixed(2)}
                       </div>
-                      <ul className="list-disc list-inside">
+                      {/* <ul className="list-disc list-inside">
                         {cat.steps.map((s) => (
                           <li key={s.stepId}>
                             {s.stepName}: €{s.stepCost.toFixed(2)}
                           </li>
                         ))}
-                      </ul>
+                      </ul> */}
+                      <Report project={project} kind="category" categoryId={cat.categoryId} responseType="bullet" wordRange={[10, 50]}  />
                     </div>
                   </CardContent>
                 </Card>

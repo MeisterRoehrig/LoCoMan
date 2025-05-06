@@ -77,7 +77,7 @@ export function buildPrompt(opts: AIRequestOptions): string {
   const formatInstr = responseType === "highlight"
     ? ""
     : L(
-        `Ausgabeformat: ${responseType === "bullet" ? "Bullet Points" : "Fließtext"}.`,
+        `Antworten Sie ausschließlich in ein bis zwei kurzen Sätzen mit den wichtigsten Inhalten: ${responseType === "bullet" ? "Bullet Points" : "Fließtext"}.`,
         `Output format: ${responseType === "bullet" ? "bullet points" : "continuous text"}.`
       );
 
@@ -127,6 +127,7 @@ export async function getAIAnalysis(
   opts: AIRequestOptions
 ): Promise<string | boolean> {
   const prompt = buildPrompt(opts);
+  console.debug("[AI] Prompt:", prompt);
   const res    = await model.generateContent(prompt);
   const text   = res.response.text().trim();
 
