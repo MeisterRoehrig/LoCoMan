@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
-import { Download, Edit, Sparkles, TrendingUp } from "lucide-react";
+import { BellRing, Download, Edit, OctagonAlert, Siren, Sparkles, TrendingUp, TriangleAlert } from "lucide-react";
 import { Report, forceRefreshReports } from "@/lib/report-manager";
 import {
   Card,
@@ -34,6 +34,7 @@ import {
   ChartContainer,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { formatEuro } from "@/lib/utils";
 
 function parseHSL(str?: string) {
   const m = str?.match(/hsl\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*\)/i);
@@ -215,8 +216,8 @@ export default function Page() {
       <Separator className="mb-3" />
       <div className="flex justify-between items-center px-1">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Report</h1>
-          <h2>Details for “{project.title}”</h2>
+          <h1 className="text-3xl font-bold tracking-tight">{project.title}</h1>
+          <h2>{project.description}</h2>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="cursor-pointer" onClick={handleDownloadSummary}>
@@ -251,34 +252,75 @@ export default function Page() {
             {/* Left column (20%) => Project Cost Card */}
             <Card className="min-w-0">
               <CardHeader>
-                <CardDescription>Project Cost</CardDescription>
+                <CardDescription>Gesamtkosten</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
-                  €{totalCategoryCost.toFixed(2)}
+                  {formatEuro(totalCategoryCost)}
                 </CardTitle>
                 <CardAction>
                   <Badge variant="outline">
-                    <TrendingUp />
-                    +12.5%
+                    <BellRing size={64} color="var(--destructive-highlight)" />
                   </Badge>
                 </CardAction>
               </CardHeader>
-              <CardContent className="flex justify-center items-center pb-0">
-                <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-square p-0">
-                  <ChartContainer config={chartConfig} className="w-full h-full p-0">
-                    <PieChart width={100} height={100} className="p-0">
-                      <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                      <Pie
-                        data={chartData}
-                        dataKey="value"
-                        nameKey="name"
-                        innerRadius="60%"
-                        paddingAngle={1}
-                        stroke="#fff"
-                      />
-                    </PieChart>
-                  </ChartContainer>
-                </div>
-              </CardContent>
+              <ChartContainer config={chartConfig} className="w-full h-full p-0">
+                <PieChart width={100} height={100} className="p-0">
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                  <Pie
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius="60%"
+                    paddingAngle={1}
+                    stroke="#fff"
+                    labelLine={false}
+                    label={({ cx, cy, midAngle, outerRadius, payload }) => {
+                      const RADIAN = Math.PI / 180;
+                      const offset = 10;
+
+                      // Normalize angle to [0, 360)
+                      const normalizedAngle = (midAngle + 360) % 360;
+
+                      const radius = outerRadius + offset;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+                      let textAnchor = 'start';
+                      let dominantBaseline = 'hanging';
+
+                      if (normalizedAngle >= 45 && normalizedAngle < 135) {
+                        // Bottom-right quadrant (true quadrant II by Cartesian)
+                        textAnchor = 'start';
+                        dominantBaseline = 'baseline';
+                      } else if (normalizedAngle >= 135 && normalizedAngle < 225) {
+                        // Bottom-left
+                        textAnchor = 'end';
+                        dominantBaseline = 'baseline';
+                      } else if (normalizedAngle >= 225 && normalizedAngle < 315) {
+                        // Top-left
+                        textAnchor = 'end';
+                        dominantBaseline = 'hanging';
+                      } else {
+                        // Top-right
+                        textAnchor = 'start';
+                        dominantBaseline = 'hanging';
+                      }
+
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          textAnchor={textAnchor}
+                          dominantBaseline={dominantBaseline}
+                          fill={payload.fill}
+                          fontSize={10}
+                        >
+                          {payload.name}
+                        </text>
+                      );
+                    }}
+                  />
+                </PieChart>
+              </ChartContainer>
             </Card>
 
             {/* Right column => AI Report Card */}
@@ -286,11 +328,11 @@ export default function Page() {
               <CardHeader>
                 <CardTitle>AI Report</CardTitle>
                 <CardDescription>
-                  Next steps or summary from an AI perspective
+                  Eine kurze Zusammenfassung der Kostenstruktur aus Sicht der KI.
                 </CardDescription>
               </CardHeader>
               <CardFooter className="text-sm">
-                <Report project={project} kind="overview" responseType="text" wordRange={[250, 300]} />
+                <Report project={project} kind="overview" responseType="text" wordRange={[300, 400]} />
               </CardFooter>
             </Card>
           </div>
@@ -307,9 +349,9 @@ export default function Page() {
               return (
                 <Card key={cat.categoryId} className="flex flex-col">
                   <CardHeader>
-                    <CardDescription>Category</CardDescription>
+                    <CardDescription>{cat.categoryLabel}</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums">
-                      {cat.categoryLabel}
+                      {formatEuro(cat.totalCategoryCost)}
                     </CardTitle>
                   </CardHeader>
                   <CardContent  /* Category card body */
@@ -326,6 +368,7 @@ export default function Page() {
                             innerRadius="60%"
                             paddingAngle={1}
                             stroke="#fff"
+
                           />
                         </PieChart>
                       </ChartContainer>
@@ -333,9 +376,6 @@ export default function Page() {
 
                     {/* Cost breakdown */}
                     <div className="flex flex-col justify-center gap-1 text-sm text-center sm:text-left">
-                      <div className="font-medium">
-                        Total Cost: €{cat.totalCategoryCost.toFixed(2)}
-                      </div>
                       {/* <ul className="list-disc list-inside">
                         {cat.steps.map((s) => (
                           <li key={s.stepId}>
@@ -343,7 +383,8 @@ export default function Page() {
                           </li>
                         ))}
                       </ul> */}
-                      <Report project={project} kind="category" categoryId={cat.categoryId} responseType="bullet" wordRange={[10, 50]}  />
+                      {/* <Report project={project} kind="highlight" categoryId={cat.categoryId}/> */}
+                      <Report project={project} kind="category" categoryId={cat.categoryId} responseType="bullet" wordRange={[10, 50]} />
                     </div>
                   </CardContent>
                 </Card>
@@ -387,3 +428,6 @@ export default function Page() {
     </ScrollArea>
   );
 }
+
+
+

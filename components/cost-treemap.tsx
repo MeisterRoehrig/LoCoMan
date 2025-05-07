@@ -3,6 +3,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import type { ApexOptions } from "apexcharts";
+import { formatEuro } from "@/lib/utils";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -111,7 +112,7 @@ export default function CostTreemap({ categories = [] }: CostTreemapProps) {
         formatter: (txt, o) => {
           const v = o.w.globals.series[o.seriesIndex][o.dataPointIndex] as number;
          // return `${txt}: €${v.toFixed(0)}`;
-         return `€${v.toFixed(0)}`;
+         return `${formatEuro(v)}`;
         },
       },
       tooltip: {

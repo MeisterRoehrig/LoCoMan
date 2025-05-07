@@ -160,6 +160,5 @@ export function useAIAnalysis(initialOpts: AIRequestOptions) {
     },
     [initialOpts]
   );
-
   return { loading, result, error, run } as const;
 }
