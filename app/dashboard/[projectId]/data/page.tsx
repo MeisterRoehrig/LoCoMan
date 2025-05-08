@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import FixedCostSection from "@/components/fixed-cost-details";
 
 
 
@@ -40,6 +41,7 @@ export default function Page() {
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
 
+    const [viewMode, setViewMode] = useState<"step" | "fixed-costs" | null>(null);
 
     const {
         dataTree,
@@ -59,8 +61,21 @@ export default function Page() {
 
     return (
         <ResizablePanelGroup direction="horizontal" className="flex-1 flex-col">
-            <ResizablePanel defaultSize={25}>
-                <SidebarContent className="h-full">
+            <ResizablePanel className="flex flex-col h-full" defaultSize={25}>
+                <div className="flex flex-col justify-center px-4 ">
+                    <Button
+                        className="cursor-pointer w-full"
+                        variant="secondary"
+                        onClick={() => {
+                            setSelectedStepId(null); // clear step if needed
+                            setViewMode("fixed-costs");
+                        }}
+                    >
+                        Fixkosten verwalten
+                    </Button>
+                    <Separator className="mt-3" />
+                </div>
+                <SidebarContent className="h-full flex-1 overflow-hidden">
                     <ScrollDiv className="h-full">
                         {dataTree?.map((cat) => {
                             return (
@@ -92,9 +107,10 @@ export default function Page() {
                                                             className="cursor-pointer"
 
                                                             onClick={() => {
-                                                                // When a step is clicked, store its ID
                                                                 setSelectedStepId(child.id);
+                                                                setViewMode("step");
                                                             }}
+
                                                         >
                                                             <span>{child.name}</span>
                                                         </button>
@@ -120,7 +136,7 @@ export default function Page() {
 
                         <Dialog>
                             <DialogTrigger asChild>
-                                <div className="flex justify-center">
+                                <div className="flex justify-center mb-3">
                                     <Button
                                         className="cursor-pointer"
                                         variant="link"
@@ -131,7 +147,7 @@ export default function Page() {
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
-                                    <DialogTitle>Edit profile</DialogTitle>
+                                    <DialogTitle>Add Category</DialogTitle>
                                     <DialogDescription>
                                         Make changes to your profile here. Click save when you&apos;re done.
                                     </DialogDescription>
@@ -185,7 +201,7 @@ export default function Page() {
             <ResizablePanel defaultSize={75}>
                 <ScrollArea type="scroll" className="flex-1 p-4 pt-0 rounded-md h-full">
                     <div>
-                        {selectedStep ? (
+                        {viewMode === "step" && selectedStep ? (
                             <>
                                 <div className="pb-4">
                                     <h2>Details for “{selectedStep.name}”</h2>
@@ -194,14 +210,21 @@ export default function Page() {
                                 <StepDetails
                                     step={selectedStep}
                                     onSave={(updatedFields) => {
-                                        // Minimal calls to DB:
-                                        // we already have the step in local context, so just call update
                                         updateStep(selectedStep.id, updatedFields);
                                     }}
                                 />
                             </>
+                        ) : viewMode === "fixed-costs" ? (
+                            <>
+                                <div className="pb-4">
+                                    <h2>Fixkosten</h2>
+                                    <Separator className="my-3" />
+                                    <FixedCostSection />
+                                </div>
+                                
+                            </>
                         ) : (
-                            <p>Select a step in the sidebar to view details.</p>
+                            <p>Select a step or open fixed costs to view details.</p>
                         )}
                     </div>
                 </ScrollArea>

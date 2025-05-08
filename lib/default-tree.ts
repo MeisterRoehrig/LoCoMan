@@ -4,6 +4,7 @@ export const defaultTreeData: TreeCategory[] = [
     {
         id: "default-cat-1",
         label: "Beauftragung",
+        color: "hsl(0.0, 65%, 55%)",
         children: [
             { id: "step-1", name: "Transportbedarf überprüfen" },
             { id: "step-2", name: "Angebot vorbereiten und übermitteln" },
@@ -13,6 +14,7 @@ export const defaultTreeData: TreeCategory[] = [
     {
         id: "default-cat-2",
         label: "Disposition",
+        color: "hsl(137.5, 65%, 55%)",
         children: [
             { id: "step-4", name: "Verfügbarkeit von Personal und Fuhrpark überprüfen" },
             { id: "step-5", name: "Touren planen" },
@@ -24,6 +26,7 @@ export const defaultTreeData: TreeCategory[] = [
     {
         id: "default-cat-3",
         label: "Beladung",
+        color: "hsl(275.0, 65%, 55%)",
         children: [
             { id: "step-9", name: "Zum Abhol-WA fahren" },
             { id: "step-10", name: "Verladepapiere an Erfassung übergeben" },
@@ -35,6 +38,7 @@ export const defaultTreeData: TreeCategory[] = [
     {
         id: "default-cat-4",
         label: "Transport",
+        color: "hsl(52.5, 65%, 55%)",
         children: [
             { id: "step-14", name: "Sendung überprüfen (visuell)" },
             { id: "step-15", name: "Fahrzeugzustand prüfen und vorbereiten" },
@@ -44,6 +48,7 @@ export const defaultTreeData: TreeCategory[] = [
     {
         id: "default-cat-5",
         label: "Entladung",
+        color: "hsl(190.0, 65%, 55%)",
         children: [
             { id: "step-17", name: "Zum Entlade-WE fahren" },
             { id: "step-18", name: "Entladepapiere an Erfassung übergeben" },
@@ -56,6 +61,7 @@ export const defaultTreeData: TreeCategory[] = [
     {
         id: "default-cat-6",
         label: "Abrechnung",
+        color: "hsl(327.5, 65%, 55%)",
         children: [
             { id: "step-23", name: "Zurück zum Fuhrpark fahren und die Fahrerkarte auslesen lassen" },
             { id: "step-24", name: "Dokumente an Disponenten übergeben (Schadensbericht, Beschwerden)" },

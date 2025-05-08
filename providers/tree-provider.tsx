@@ -21,7 +21,8 @@ import { useAuth } from "@/lib/auth-provider";
 export interface TreeCategory {
   id: string;
   label: string;
-  children: Array< TreeStep>; // can nest categories or steps
+  color: string; // optional, for color-coding categories
+  children: Array<TreeStep>; // can nest categories or steps
 }
 
 export interface TreeStep {
@@ -34,26 +35,21 @@ interface TreeContextValue {
   dataTree: TreeCategory[] | null;
   loadingTree: boolean;
   loadTree: (projectId: string) => Promise<void>;
-
   addCategory: (projectId: string, categoryLabel: string) => Promise<void>;
   removeCategory: (projectId: string, categoryId: string) => Promise<void>;
   addStepToCategory: (projectId: string, categoryId: string, step: TreeStep) => Promise<void>;
   removeStepFromCategory: (projectId: string, categoryId: string, stepId: string) => Promise<void>;
-
-  loadDefaultTree: () => TreeCategory[];
 }
 
 const TreeContext = createContext<TreeContextValue>({
   dataTree: null,
   loadingTree: false,
-  loadTree: async () => {},
+  loadTree: async () => { },
 
-  addCategory: async () => {},
-  removeCategory: async () => {},
-  addStepToCategory: async () => {},
-  removeStepFromCategory: async () => {},
-
-  loadDefaultTree: () => [],
+  addCategory: async () => { },
+  removeCategory: async () => { },
+  addStepToCategory: async () => { },
+  removeStepFromCategory: async () => { },
 });
 
 export function TreeProvider({ children }: { readonly children: ReactNode }) {
@@ -61,34 +57,36 @@ export function TreeProvider({ children }: { readonly children: ReactNode }) {
   const [dataTree, setDataTree] = useState<TreeCategory[] | null>(null);
   const [loadingTree, setLoadingTree] = useState(false);
 
-/** Load the dataTree from a project doc */
-async function loadTree(projectId: string) {
+  /** Load the dataTree from a project doc */
+  async function loadTree(projectId: string) {
 
     if (!user || !user.uid) {
-        console.log("No user is logged in or user ID is missing.");
-        return;
+      console.log("No user is logged in or user ID is missing.");
+      return;
     }
     try {
-        setLoadingTree(true);
-        const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
-        const snap = await getDoc(projectRef);
-        if (!snap.exists()) {
-            console.log("No project document found for the given project ID.");
-            setDataTree(null);
-            setLoadingTree(false);
-            return;
-        }
-        const data = snap.data();
-        // dataTree might be stored as a JSON object or array
-        const tree = data.dataTree || [];
-        setDataTree(tree);
-    } catch (error) {
-        console.error("Error loading tree:", error);
-        toast.error("Failed to load tree data.");
-    } finally {
+      setLoadingTree(true);
+      const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
+      const snap = await getDoc(projectRef);
+      if (!snap.exists()) {
+        console.log("No project document found for the given project ID.");
+        setDataTree(null);
         setLoadingTree(false);
+        return;
+      }
+      const data = snap.data();
+      // dataTree might be stored as a JSON object or array
+      const tree = data.dataTree || [];
+      setDataTree(tree);
+    } catch (error) {
+      console.error("Error loading tree:", error);
+      toast.error("Failed to load tree data.");
+    } finally {
+      setLoadingTree(false);
     }
-}
+  }
+
+
 
   /** Internal helper to upload the updated dataTree to Firestore */
   async function saveDataTree(projectId: string, newTree: TreeCategory[]) {
@@ -112,6 +110,7 @@ async function loadTree(projectId: string) {
     const newCat: TreeCategory = {
       id: crypto.randomUUID(),
       label: categoryLabel,
+      color: getCategoryColor(dataTree.length),
       children: [],
     };
     const newTree = [...dataTree, newCat];
@@ -173,7 +172,6 @@ async function loadTree(projectId: string) {
       removeCategory,
       addStepToCategory,
       removeStepFromCategory,
-      loadDefaultTree,
     }),
     // add `user` so that `loadTree` sees the current user
     [dataTree, loadingTree, user]
@@ -186,32 +184,14 @@ export function useTree() {
   return useContext(TreeContext);
 }
 
-export function loadDefaultTree(): TreeCategory[] {
-    return [
-      {
-        id: "default-cat-1",
-        label: "Wareneingang",
-        children: [],
-      },
-      {
-        id: "default-cat-2",
-        label: "Kommissionierung",
-        children: [],
-      },
-      {
-        id: "default-cat-3",
-        label: "Verpackung",
-        children: [],
-      },
-      {
-        id: "default-cat-4",
-        label: "Transport",
-        children: [],
-      },
-      {
-        id: "default-cat-5",
-        label: "Retourenmanagement",
-        children: [],
-      },
-    ];
-  }
+
+
+export const getCategoryColor = (
+  index: number,
+  sat = 65,
+  light = 55
+): string => {
+  const GOLDEN_ANGLE = 137.508;
+  const hue = (index * GOLDEN_ANGLE) % 360;
+  return `hsl(${hue.toFixed(1)}, ${sat}%, ${light}%)`;
+};

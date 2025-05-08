@@ -23,22 +23,38 @@ import { useAuth } from "@/lib/auth-provider";
 import { toast } from "sonner";
 import { defaultTreeData } from "@/lib/default-tree";
 
-interface StepCostSummary {
-  stepId: string;
-  stepName: string;
-  stepCost: number;
+
+
+export interface ProjectCostSummary {
+  totalProjectCost: number;
+  categories: CategoryCostSummary[];
 }
 
 interface CategoryCostSummary {
   categoryId: string;
   categoryLabel: string;
   totalCategoryCost: number;
+  categoryColor: string;
   steps: StepCostSummary[];
 }
 
-export interface ProjectCostSummary {
-  totalProjectCost: number;
-  categories: CategoryCostSummary[];
+interface StepCostSummary {
+  stepId: string;
+  stepName: string;
+  stepCost: number;
+}
+
+export interface ProjectCostReport {
+  projectOverview: string;
+  projectRecommendation: string;
+  categories: CategoryCostReport[];
+}
+
+interface CategoryCostReport {
+  categoryId: string;
+  categoryLabel: string;
+  categoryReport: string;
+  categoryHighlight: boolean;
 }
 
 export interface Project {
@@ -48,7 +64,9 @@ export interface Project {
   createdAt?: Date | null;
   updatedAt?: Date | null;
   summary?: ProjectCostSummary;
-  // Possibly dataSummary, dataTree if you store them at top-level.
+  summaryUpdatedAt?: Date | null;
+  report?: ProjectCostReport;
+  reportUpdatedAt?: Date | null;
 }
 
 interface ProjectsContextValue {
@@ -59,6 +77,8 @@ interface ProjectsContextValue {
   addProjectWithDefaultTree: (title: string, description: string) => Promise<void>;
   removeProject: (projectId: string) => Promise<void>;
   updateProjectSummary: (projectId: string, summary: any) => Promise<void>;
+  updateProjectReport: (projectId: string, fieldPath: string, value: any) => Promise<void>;
+
 }
 
 const ProjectsContext = createContext<ProjectsContextValue>({
@@ -69,6 +89,7 @@ const ProjectsContext = createContext<ProjectsContextValue>({
   addProjectWithDefaultTree: async () => {},
   removeProject: async () => {},
   updateProjectSummary: async () => {},
+  updateProjectReport: async () => {},
 });
 
 export function ProjectsProvider({ children }: { readonly children: ReactNode }) {
@@ -95,6 +116,9 @@ export function ProjectsProvider({ children }: { readonly children: ReactNode })
           createdAt: data.createdAt?.toDate() || null,
           updatedAt: data.updatedAt?.toDate() || null,
           summary: data.summary || null,
+          summaryUpdatedAt: data.summaryUpdatedAt?.toDate() || null,
+          report: data.report || null,
+          reportUpdatedAt: data.reportUpdatedAt?.toDate() || null,
         };
       });
       setProjects(result);
@@ -169,11 +193,11 @@ export function ProjectsProvider({ children }: { readonly children: ReactNode })
     try {
       const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
       await updateDoc(projectRef, {
-        summary,              // store any arbitrary object or JSON you want
+        summary,
+        summaryUpdatedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
       toast.success("Project summary updated!");
-      // Optionally re-fetch your projects or just update local state if needed.
       await loadProjects(); 
     } catch (error) {
       console.error("Error updating project summary:", error);
@@ -181,6 +205,65 @@ export function ProjectsProvider({ children }: { readonly children: ReactNode })
     }
   }
 
+  // async function updateProjectReport(projectId: string, report: any) {
+  //   if (!user || !user.uid) return;
+
+  //   try {
+  //     const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
+  //     await updateDoc(projectRef, {
+  //       report,
+  //       reportUpdatedAt: serverTimestamp(),
+  //       updatedAt: serverTimestamp(),
+  //     });
+  //     toast.success("Project report updated!");
+  //     await loadProjects(); 
+  //   } catch (error) {
+  //     console.error("Error updating project report:", error);
+  //     toast.error("Failed to update project report.");
+  //   }
+  // }
+
+  async function updateProjectReport(
+    projectId: string,
+    fieldPath: string,     // e.g. "projectOverview" or "categories.default-cat-1"
+    value: any             // usually { text: "AI output" }
+  ) {
+    if (!user || typeof user !== "object" || !user.uid) return;
+  
+    // optimistic local update
+    setProjects(prev =>
+          prev.map(p =>
+            p.id === projectId
+              ? {
+                  ...p,
+                  report: {
+                    ...(p.report ?? {}),
+                    categories: fieldPath.startsWith("categories")
+                      ? {
+                          ...(p.report?.categories ?? {}),
+                          [fieldPath.split(".")[1]]: value,
+                        }
+                      : p.report?.categories ?? [],
+                    [fieldPath as keyof ProjectCostReport]: !fieldPath.startsWith("categories") ? value : p.report?.[fieldPath as keyof ProjectCostReport],
+                  } as ProjectCostReport,
+                }
+              : p
+          )
+        );
+  
+    // write the single field to Firestore
+    const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
+    await updateDoc(projectRef, {
+      [`report.${fieldPath}`]: value,
+      reportUpdatedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }).catch(err => {
+      console.error("updateProjectReport failed:", err);
+      toast.error("Failed to update project report.");
+    });
+    toast.success("Project report updated!");
+  }
+  
 
   // Example: load projects automatically on mount
   useEffect(() => {
@@ -200,6 +283,7 @@ export function ProjectsProvider({ children }: { readonly children: ReactNode })
       removeProject,
       addProjectWithDefaultTree,
       updateProjectSummary,
+      updateProjectReport,
     }),
     [projects, loadingProjects]
   );
