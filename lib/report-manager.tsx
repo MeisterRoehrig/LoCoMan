@@ -65,7 +65,7 @@ export function useReport(project: Project | undefined, opts: Options): HookStat
   const cached = React.useMemo(() => {
     if (!project?.report || isHighlight) return null;
     return opts.kind === "overview"
-      ? (project.report as any).projectOverview ?? null
+      ? (project.report as { projectOverview?: string }).projectOverview ?? null
       : (project.report.categories as any)?.[opts.categoryId!] ?? null;
   }, [project, opts, isHighlight]);
 

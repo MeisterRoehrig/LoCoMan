@@ -7,7 +7,8 @@ import { TreeProvider } from "@/providers/tree-provider";
 import { StepsProvider } from "@/providers/steps-provider";
 import { EmployeesProvider } from "@/providers/employees-provider";
 import { FixedCostObjectsProvider } from "@/providers/fixed-cost-provider";
-import { ResourcesProvider  } from "@/providers/resources-provider";
+import { ResourcesProvider } from "@/providers/resources-provider";
+import { FixedTreeProvider } from "./fixed-tree-provider";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -17,9 +18,11 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           <EmployeesProvider>
             <FixedCostObjectsProvider>
               <ResourcesProvider>
-                <TreeProvider>
-                  {children}
-                </TreeProvider>
+                <FixedTreeProvider>
+                  <TreeProvider>
+                    {children}
+                  </TreeProvider>
+                </FixedTreeProvider>
               </ResourcesProvider>
             </FixedCostObjectsProvider>
           </EmployeesProvider>

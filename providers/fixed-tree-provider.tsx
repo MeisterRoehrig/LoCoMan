@@ -144,6 +144,8 @@ export function FixedTreeProvider({
       [kind]: [...fixedCosts[kind], id],
     };
 
+    console.log("newFixed", newFixed);
+
     await saveFixedCosts(projectId, newFixed);
   }
 

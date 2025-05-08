@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
-import { BellRing, Download, Edit, OctagonAlert, Siren, Sparkles, TrendingUp, TriangleAlert } from "lucide-react";
+import { BellRing, Download, Edit, Sparkles } from "lucide-react";
 import { Report, forceRefreshReports } from "@/lib/report-manager";
 import {
   Card,
@@ -22,7 +22,6 @@ import { Badge } from "@/components/ui/badge";
 import { useSteps } from "@/providers/steps-provider";
 import { useTree } from "@/providers/tree-provider";
 import { useProjects } from "@/providers/projects-provider";
-import { model } from "@/lib/firebase-config"; // or wherever your model is exported
 import { generateProjectSummary } from "@/lib/summary-manager";
 
 import { Pie, PieChart } from "recharts";
@@ -62,59 +61,6 @@ export default function Page() {
   const { dataTree, loadTree } = useTree();
   const { projects, updateProjectSummary } = useProjects();
 
-  const [aiResponse, setAiResponse] = React.useState("");
-  const [aiLoading, setAiLoading] = React.useState(false);
-  const [analysisTriggered, setAnalysisTriggered] = React.useState(false);
-
-  type SummaryData = {
-    totalProjectCost?: number;
-    categories?: {
-      categoryId: string;
-      categoryLabel: string;
-      totalCategoryCost: number;
-      categoryColor: string;
-      steps: {
-        stepId: string;
-        stepName: string;
-        stepCost: number;
-      }[];
-    }[];
-  };
-
-  function buildPrompt(summaryData: SummaryData) {
-    return `
-      Sie sind ein KI-Assistent, der in eine Logistikmanagement-Anwendung integriert ist.
-      Erstellen Sie einen prägnanten, professionellen Kostenanalysebericht auf der Grundlage der folgenden Daten. 
-      Konzentrieren Sie sich auf die wichtigsten Kostentreiber, potenzielle Einsparungen und die empfohlenen nächsten Schritte.
-
-      Hier ist die Projektzusammenfassung (JSON):
-      ${JSON.stringify(summaryData, null, 2)}
-
-       Bitte antworten Sie mit einer kurzen Zusammenfassung und allen verwertbaren Erkenntnissen der text sollte in einem Block geschrieben sein und keine formatierungen enthalten.:
-    `.trim();
-  }
-
-
-
-  async function handleAiAnalysis(summaryData: SummaryData) {
-    if (!summaryData) return;
-
-    try {
-      setAiLoading(true);
-      setAiResponse("");
-
-      const prompt = buildPrompt(summaryData);
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
-
-      setAiResponse(text);
-    } catch (error) {
-      console.error("Error generating AI analysis:", error);
-      setAiResponse("An error occurred while fetching the AI response.");
-    } finally {
-      setAiLoading(false);
-    }
-  }
 
   // Find the relevant project from our ProjectsContext
   const project = React.useMemo(() => {
@@ -129,13 +75,7 @@ export default function Page() {
     }
   }, [projectId, loadTree]);
 
-  // Only run the AI analysis once when summary is first loaded.
-  React.useEffect(() => {
-    if (project?.summary && !analysisTriggered) {
-      setAnalysisTriggered(true);
-      handleAiAnalysis(project.summary);
-    }
-  }, [project?.summary, analysisTriggered]);
+
 
   const chartData = React.useMemo(() => {
     if (!project?.summary?.categories) return [];

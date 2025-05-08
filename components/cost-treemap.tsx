@@ -30,15 +30,22 @@ export interface CostTreemapProps {
  *  HSL utilities
  * ---------------------------------------------------------------- */
 function parseHSL(str?: string) {
-  const m = str?.match(/hsl\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*\)/i);
+  const m = str?.match(
+    /hsl\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*\)/i,
+  );
   return m ? { h: +m[1], s: +m[2], l: +m[3] } : null;
 }
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
+const clamp = (n: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, n));
 function childColor(parent?: string, idx = 0, total = 1) {
   const hsl = parseHSL(parent);
   if (!hsl) return undefined;
   const span = 12;
-  const l = clamp(hsl.l + ((idx / Math.max(1, total - 1)) - 0.5) * span, 10, 90);
+  const l = clamp(
+    hsl.l + ((idx / Math.max(1, total - 1)) - 0.5) * span,
+    10,
+    90,
+  );
   return `hsl(${hsl.h}, ${hsl.s}%, ${l}%)`;
 }
 
@@ -57,42 +64,43 @@ export default function CostTreemap({ categories = [] }: CostTreemapProps) {
           fillColor: childColor(cat.categoryColor, i, cat.steps.length),
         })),
       })),
-    [categories]
+    [categories],
   );
 
-  if (!categories.length) {
-    return <p className="text-muted-foreground text-sm">Noch keine Kostendaten vorhanden.</p>;
-  }
+  /* ---- Tooltip – memoised renderer ---- */
+  type TooltipCtx = {
+    seriesIndex: number;
+    dataPointIndex: number;
+    w: {
+      globals: { series: number[][] };
+      config: {
+        series: { data: { x: string; fillColor?: string }[] }[];
+      };
+    };
+  };
 
-  /* ----------------------------------------------------------------
-   *  Tooltip – dynamic width per label, still memoised function
-   * ----------------------------------------------------------------*/
-  const tooltipHtml = React.useMemo(() => {
-    return ({ seriesIndex, dataPointIndex, w }: any) => {
-      const rawVal = w.globals.series[seriesIndex][dataPointIndex] as number;
-      const value = rawVal.toFixed(2);
-      const point = (w.config.series as any)[seriesIndex].data[dataPointIndex];
-      const label =  point.x as string;
-      const color = point.fillColor || "#666";
+  const tooltipHtml = React.useMemo(
+    () =>
+      ({ seriesIndex, dataPointIndex, w }: TooltipCtx): string => {
+        const rawVal = w.globals.series[seriesIndex][dataPointIndex];
+        const point =
+          w.config.series[seriesIndex].data[dataPointIndex];
 
-      const avgCharWidthRem = 0.55; // a conservative estimate for monospace/sans
-      const widthRem = (Math.min(24, Math.max(1, label.length * avgCharWidthRem))).toFixed(2);
-
-
-      return `
+        return `
       <div class="border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl">
         <div class="grid gap-1.5">
           <div class="[&>svg]:text-muted-foreground flex w-full items-center gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5">
-            <div style=\"width:10px;height:10px;border-radius:2px;background:${color};flex-shrink:0;\"></div>
+            <div style="width:10px;height:10px;border-radius:2px;background:${point.fillColor ?? "#666"};flex-shrink:0;"></div>
             <div class="flex flex-1 justify-between items-center leading-none">
-              <span class="text-muted-foreground" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:14rem;">${label}</span>
-              <span class="text-foreground font-mono font-medium tabular-nums pl-1">€${value}</span>
+              <span class="text-muted-foreground" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:14rem;">${point.x}</span>
+              <span class="text-foreground font-mono font-medium tabular-nums pl-1">${formatEuro(rawVal)}</span>
             </div>
           </div>
         </div>
       </div>`;
-    };
-  }, []);
+      },
+    [],
+  );
 
   /* ---- Chart options ---- */
   const options: ApexOptions = React.useMemo(
@@ -108,12 +116,15 @@ export default function CostTreemap({ categories = [] }: CostTreemapProps) {
       legend: { show: false },
       dataLabels: {
         enabled: true,
-        style: { fontSize: "20px", fontWeight: "bold", colors: ["var(--foreground)"] },
-        formatter: (txt, o) => {
-          const v = o.w.globals.series[o.seriesIndex][o.dataPointIndex] as number;
-         // return `${txt}: €${v.toFixed(0)}`;
-         return `${formatEuro(v)}`;
+        style: {
+          fontSize: "20px",
+          fontWeight: "bold",
+          colors: ["var(--foreground)"],
         },
+        formatter: (_txt, o) =>
+          formatEuro(
+            o.w.globals.series[o.seriesIndex][o.dataPointIndex] as number,
+          ),
       },
       tooltip: {
         followCursor: true,
@@ -125,30 +136,38 @@ export default function CostTreemap({ categories = [] }: CostTreemapProps) {
         custom: tooltipHtml,
       },
       states: {
-        active: {
-          filter: { type: "none", value: 0 }   // no dimming when selected
-        },
-        hover: {
-            filter: { type: "none", value: 0 }
-        }
+        active: { filter: { type: "none", value: 0 } },
+        hover: { filter: { type: "none", value: 0 } },
       },
-
     }),
-    [tooltipHtml]
+    [tooltipHtml],
   );
 
+  /* ---- Render ---- */
   return (
     <>
-      <ReactApexChart type="treemap" height={550} options={options} series={series} />
-      {/* Override default apex tooltip container */}
-      <style jsx global>{`
-        .apexcharts-tooltip {
-          background: transparent !important;
-          border: none !important;
-          box-shadow: none !important;
-          padding: 0 !important;
-        }
-      `}</style>
+      {categories.length ? (
+        <>
+          <ReactApexChart
+            type="treemap"
+            height={550}
+            options={options}
+            series={series}
+          />
+          <style jsx global>{`
+            .apexcharts-tooltip {
+              background: transparent !important;
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+            }
+          `}</style>
+        </>
+      ) : (
+        <p className="text-muted-foreground text-sm">
+          Noch keine Kostendaten vorhanden.
+        </p>
+      )}
     </>
   );
 }
