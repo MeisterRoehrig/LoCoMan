@@ -38,9 +38,8 @@ interface FixedCostObjectsContextValue {
 
   loadFixedCostObjects: () => Promise<void>;
   getFixedCostObjectById: (id: string) => FixedCostObjectDoc | null;
-  addFixedCostObject: (
-    data: Omit<FixedCostObjectDoc, "id">
-  ) => Promise<string | undefined>;
+  addFixedCostObject: (data: Omit<FixedCostObjectDoc, "id">) => Promise<string | undefined>;
+  
   addFixedCostObjectWithId: (
     data: Omit<FixedCostObjectDoc, "id">,
     customId: string
