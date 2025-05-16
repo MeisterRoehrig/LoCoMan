@@ -35,6 +35,13 @@ import {
 } from "@/components/ui/chart";
 import { formatEuro } from "@/lib/utils";
 
+
+import  { useEmployees } from "@/providers/employees-provider";
+import  { useResources } from "@/providers/resources-provider";
+import  { useFixedCostObjects } from "@/providers/fixed-cost-provider";
+import  { useFixedTree } from "@/providers/fixed-tree-provider";
+import { debug } from "console";
+
 function parseHSL(str?: string) {
   const m = str?.match(/hsl\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*\)/i);
   return m ? { h: +m[1], s: +m[2], l: +m[3] } : null;
@@ -59,6 +66,10 @@ export default function Page() {
 
   const { steps } = useSteps();
   const { dataTree, loadTree } = useTree();
+  const { employees, loadEmployees } = useEmployees();
+  const { resources, loadResources } = useResources();
+  const { fixedCosts, loadFixedTree } = useFixedTree();
+  const { fixedCostObjects, loadFixedCostObjects } = useFixedCostObjects();
   const { projects, updateProjectSummary } = useProjects();
 
 
@@ -72,6 +83,10 @@ export default function Page() {
   React.useEffect(() => {
     if (projectId) {
       loadTree(projectId);
+      loadEmployees();
+      loadResources();
+      loadFixedTree(projectId);
+      loadFixedCostObjects();
     }
   }, [projectId, loadTree]);
 
@@ -101,11 +116,11 @@ export default function Page() {
 
   // This is the function that runs the cost calculations and saves them to Firestore
   async function handleGenerateReport() {
-    if (!dataTree) {
+    if (!dataTree || !fixedCosts) {
       return;
     }
     // 1) Compute the summary
-    const summary = generateProjectSummary(dataTree, steps);
+    const summary = generateProjectSummary(dataTree, steps, employees, resources, fixedCosts, fixedCostObjects);
 
     // 2) Store it in Firestore for the project
     try {
@@ -115,22 +130,22 @@ export default function Page() {
     }
   }
 
-  // This is the function that runs the cost calculations and saves them to Firestore
-  async function handleUpdateReport() {
-    if (!dataTree) {
-      return;
-    }
-    // 1) Compute the summary
-    const summary = generateProjectSummary(dataTree, steps);
+  // // This is the function that runs the cost calculations and saves them to Firestore
+  // async function handleUpdateReport() {
+  //   if (!dataTree) {
+  //     return;
+  //   }
+  //   // 1) Compute the summary
+  //   const summary = generateProjectSummary(dataTree, steps);
 
-    // 2) Store it in Firestore for the project
-    try {
-      await updateProjectSummary(projectId, summary);
-      forceRefreshReports(projectId);   // ⬅ triggers refetch on next paint
-    } catch (err) {
-      console.error("Error updating project summary:", err);
-    }
-  }
+  //   // 2) Store it in Firestore for the project
+  //   try {
+  //     await updateProjectSummary(projectId, summary);
+  //     forceRefreshReports(projectId);   // ⬅ triggers refetch on next paint
+  //   } catch (err) {
+  //     console.error("Error updating project summary:", err);
+  //   }
+  // }
 
   // Helper to download the summary JSON
   function handleDownloadSummary() {
@@ -176,7 +191,9 @@ export default function Page() {
             </Button>
           )}
           {project.summary && (
-            <Button className="cursor-pointer" onClick={handleUpdateReport}>
+            <Button className="cursor-pointer" onClick={handleGenerateReport}>
+
+            {/* <Button className="cursor-pointer" onClick={handleUpdateReport}> */}
               <Sparkles /> Update Report
             </Button>
           )}
