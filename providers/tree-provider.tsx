@@ -68,6 +68,7 @@ export function TreeProvider({ children }: { readonly children: ReactNode }) {
       setLoadingTree(true);
       const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
       const snap = await getDoc(projectRef);
+
       if (!snap.exists()) {
         console.log("No project document found for the given project ID.");
         setDataTree(null);

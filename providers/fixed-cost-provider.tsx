@@ -39,7 +39,7 @@ interface FixedCostObjectsContextValue {
   loadFixedCostObjects: () => Promise<void>;
   getFixedCostObjectById: (id: string) => FixedCostObjectDoc | null;
   addFixedCostObject: (data: Omit<FixedCostObjectDoc, "id">) => Promise<string | undefined>;
-  
+
   addFixedCostObjectWithId: (
     data: Omit<FixedCostObjectDoc, "id">,
     customId: string
@@ -55,12 +55,12 @@ interface FixedCostObjectsContextValue {
 const FixedCostObjectsContext = createContext<FixedCostObjectsContextValue>({
   fixedCostObjects: [],
   loadingFixedCostObjects: false,
-  loadFixedCostObjects: async () => {},
+  loadFixedCostObjects: async () => { },
   getFixedCostObjectById: () => null,
   addFixedCostObject: async () => undefined,
   addFixedCostObjectWithId: async () => undefined,
-  updateFixedCostObject: async () => {},
-  deleteFixedCostObject: async () => {},
+  updateFixedCostObject: async () => { },
+  deleteFixedCostObject: async () => { },
 });
 
 export function FixedCostObjectsProvider({
@@ -77,6 +77,15 @@ export function FixedCostObjectsProvider({
   /* ---------- 3.1 Load ---------- */
   async function loadFixedCostObjects() {
     if (!user || typeof user !== "object" || !("uid" in user)) return;
+
+    /* --------------------  NEW: prevent duplicate fetches  -------------------- */
+    if (fixedCostObjects.length) {          // we already have the data
+      setLoadingFixedCostObjects(false);    // make sure the flag is not left true
+      return;
+    }
+    /* ------------------------------------------------------------------------- */
+
+
     setLoadingFixedCostObjects(true);
     try {
       const ref = collection(

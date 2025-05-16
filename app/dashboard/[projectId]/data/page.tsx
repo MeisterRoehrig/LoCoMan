@@ -19,6 +19,7 @@ import { Minus, Plus } from "lucide-react";
 import { SidebarContent, SidebarGroup, SidebarGroupAction, SidebarGroupContent, SidebarGroupLabel, SidebarMenuAction, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem } from "@/components/ui/sidebar";
 
 import { useTree } from "@/providers/tree-provider";
+import { useFixedTree } from "@/providers/fixed-tree-provider";   // ← add this line
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { useAuth } from "@/lib/auth-provider";
 import { useSteps } from "@/providers/steps-provider";
@@ -37,6 +38,7 @@ export default function Page() {
     const projectId = String(params.projectId);
     const { user } = useAuth();
     const { getStepById, updateStep } = useSteps();
+    const { loadFixedTree } = useFixedTree();                // ← add this line
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
@@ -54,6 +56,7 @@ export default function Page() {
     React.useEffect(() => {
         if (user && user.uid && projectId) {
             loadTree(projectId);
+            loadFixedTree(projectId);     // ← add this lineF
         }
     }, [user, projectId, loadTree]);
 
@@ -200,33 +203,32 @@ export default function Page() {
             {/* RIGHT DETAILS PANEL */}
             <ResizablePanel defaultSize={75}>
                 <ScrollArea type="scroll" className="flex-1 p-4 pt-0 rounded-md h-full">
-                    <div>
-                        {viewMode === "step" && selectedStep ? (
-                            <>
+                    {(() => {
+                        if (viewMode === "step" && selectedStep) {
+                            return (
                                 <div className="pb-4">
                                     <h2>Details for “{selectedStep.name}”</h2>
                                     <Separator className="my-3" />
+                                    <StepDetails
+                                        step={selectedStep}
+                                        onSave={(updatedFields) => {
+                                            updateStep(selectedStep.id, updatedFields);
+                                        }}
+                                    />
                                 </div>
-                                <StepDetails
-                                    step={selectedStep}
-                                    onSave={(updatedFields) => {
-                                        updateStep(selectedStep.id, updatedFields);
-                                    }}
-                                />
-                            </>
-                        ) : viewMode === "fixed-costs" ? (
-                            <>
+                            );
+                        } else if (viewMode === "fixed-costs") {
+                            return (
                                 <div className="pb-4">
                                     <h2>Fixkosten</h2>
                                     <Separator className="my-3" />
                                     <FixedCostSection />
                                 </div>
-                                
-                            </>
-                        ) : (
-                            <p>Select a step or open fixed costs to view details.</p>
-                        )}
-                    </div>
+                            );
+                        } else {
+                            return <p>Select a step or open fixed costs to view details.</p>;
+                        }
+                    })()}
                 </ScrollArea>
             </ResizablePanel>
         </ResizablePanelGroup>
