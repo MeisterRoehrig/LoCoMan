@@ -136,10 +136,10 @@ export function useReport(
     /* -------------------- actually call the AI manager ------------------- */
 
     const summaryData: SummaryData = isHighlight || opts.kind === "overview"
-      ? project.summary
+      ? project.summary.projectCosts
       : {
-          totalProjectCost: project.summary.totalProjectCost,
-          categories: project.summary.categories.filter(
+          totalProjectCost: project.summary.projectCosts.totalProjectCost,
+          categories: project.summary.projectCosts.categories.filter(
             (c) => c.categoryId === opts.categoryId,
           ),
         };

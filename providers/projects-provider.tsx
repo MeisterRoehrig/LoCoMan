@@ -41,23 +41,46 @@ const defaultFixedCostsTree = {
 /* -------------------------------------------------------------------------- */
 export type FixedCostsTree = typeof defaultFixedCostsTree;
 
-export interface ProjectCostSummary {
-  totalProjectCost: number;
-  categories: CategoryCostSummary[];
-}
-
-interface CategoryCostSummary {
-  categoryId: string;
-  categoryLabel: string;
-  totalCategoryCost: number;
-  categoryColor: string;
-  steps: StepCostSummary[];
-}
-
-interface StepCostSummary {
+export interface StepCostBreakdown {
   stepId: string;
   stepName: string;
-  stepCost: number;
+  minutes: number;
+  employeeIds: string[];
+  employeeCost: number; // aggregated over all employees
+  resourceIds: string[];
+  resourceCost: number;
+  fixedCost: number;
+  stepCost: number; // grand total for the step
+}
+
+export interface ProjectCategorySummary {
+  categoryId: string;
+  categoryLabel: string;
+  categoryColor: string;
+  totalCategoryCost: number;
+  steps: StepCostBreakdown[];
+}
+
+export interface ProjectCostSummary {
+  projectCosts: {
+    totalProjectCost: number;
+    categories: ProjectCategorySummary[];
+  };
+  fixedCosts: {
+    totalFixedCost: number;
+    objects: Array<{ id: string; name: string; monthlyCostEuro: number }>;
+  };
+  employees: {
+    totalEmployeeCost: number;
+    list: Array<{
+      employeeId: string;
+      jobtitel: string;
+      totalMinutes: number;
+      perMinuteCost: number;
+      totalCost: number;
+      steps: Array<{ stepId: string; minutes: number; cost: number }>;
+    }>;
+  };
 }
 
 export interface ProjectCostReport {
