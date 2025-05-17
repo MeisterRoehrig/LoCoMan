@@ -4,9 +4,9 @@ import * as React from "react"
 import {
   Sparkles,
   Truck,
-  Folder, 
-  MoreHorizontal, 
-  Share, 
+  Folder,
+  MoreHorizontal,
+  Share,
   Trash2
 } from "lucide-react"
 import { useRouter } from "next/navigation" // Next.js App Router
@@ -21,9 +21,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar, 
-  SidebarGroup, 
-  SidebarGroupLabel, 
+  useSidebar,
+  SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenuAction
 } from "@/components/ui/sidebar"
 import Link from "next/link"
@@ -32,12 +32,42 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 import { useUser } from "@/providers/user-provider";
 import { useProjects } from "@/providers/projects-provider";
+import { toast } from "sonner";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { userProfile } = useUser();
   const { projects, loadingProjects, removeProject } = useProjects();
   const { isMobile } = useSidebar()
   const router = useRouter()
+
+  const handleShareProject = React.useCallback(
+    async (projectId: string) => {
+      try {
+        if (typeof window === "undefined") return;
+        const url = `${window.location.origin}/dashboard/${projectId}`;
+
+        if (navigator?.clipboard?.writeText) {
+          await navigator.clipboard.writeText(url);
+        } else {
+          // Fallback for very old browsers: create a temporary textarea
+          const textarea = document.createElement("textarea");
+          textarea.value = url;
+          textarea.style.position = "fixed"; // ensure it isn't scrolled into view
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textarea);
+        }
+        toast("Project link copied to your clipboard.");
+      } catch (err) {
+        console.error("Error copying project link:", err);
+        toast("Something went wrong while copying. Please try again.");
+      }
+    },
+    [toast]
+  );
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -62,74 +92,75 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {/* Example of a "New Project" link or button in the main nav: */}
         <NewProjectButton />
-          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-            <SidebarGroupLabel>Projekte</SidebarGroupLabel>
-            {/* 5) Use the loading state to show a spinner or skeleton */}
-            {loadingProjects && (
-              <div className="flex items-center justify-center py-2">
-                <span className="text-sm text-muted-foreground">Loading...</span>
-              </div>
-            )}
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel>Projekte</SidebarGroupLabel>
+          {/* 5) Use the loading state to show a spinner or skeleton */}
+          {loadingProjects && (
+            <div className="flex items-center justify-center py-2">
+              <span className="text-sm text-muted-foreground">Loading...</span>
+            </div>
+          )}
 
-            {/* 6) Use the projects data to render the list */}
-            {!loadingProjects && projects.length === 0 && (
-              <div className="flex items-center justify-center py-2">
-                <span className="text-sm text-muted-foreground">No projects found</span>
-              </div>
-            )}
+          {/* 6) Use the projects data to render the list */}
+          {!loadingProjects && projects.length === 0 && (
+            <div className="flex items-center justify-center py-2">
+              <span className="text-sm text-muted-foreground">No projects found</span>
+            </div>
+          )}
 
-            {/* 7) Render the project list */}
-            {!loadingProjects && projects.length > 0 && (
-              <SidebarMenu>
-                {projects.map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton asChild>
-                      <Link href={`/dashboard/${item.id}`}>
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+          {/* 7) Render the project list */}
+          {!loadingProjects && projects.length > 0 && (
+            <SidebarMenu>
+              {projects.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton asChild>
+                    <Link href={`/dashboard/${item.id}`}>
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <SidebarMenuAction showOnHover>
-                          <MoreHorizontal />
-                          <span className="sr-only">More</span>
-                        </SidebarMenuAction>
-                      </DropdownMenuTrigger>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuAction showOnHover>
+                        <MoreHorizontal />
+                        <span className="sr-only">More</span>
+                      </SidebarMenuAction>
+                    </DropdownMenuTrigger>
 
-                      <DropdownMenuContent
-                        className="w-48"
-                        side={isMobile ? "bottom" : "right"}
-                        align={isMobile ? "end" : "start"}
+                    <DropdownMenuContent
+                      className="w-48"
+                      side={isMobile ? "bottom" : "right"}
+                      align={isMobile ? "end" : "start"}
+                    >
+                      <DropdownMenuItem
+                        onClick={() => {
+                          router.push(`/dashboard/${item.id}/data`)
+                        }}
                       >
-                        <DropdownMenuItem
-                          onClick={() => {
-                            router.push(`/dashboard/${item.id}/data`)
-                          }}
-                        >
-                          <Folder className="text-muted-foreground" />
-                          <span>Edit Data</span>
-                        </DropdownMenuItem>
+                        <Folder className="text-muted-foreground" />
+                        <span>Edit Data</span>
+                      </DropdownMenuItem>
 
-                        <DropdownMenuItem>
-                          <Share className="text-muted-foreground" />
-                          <span>Share Project</span>
-                        </DropdownMenuItem>
 
-                        <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => handleShareProject(item.id)}>
+                        <Share className="text-muted-foreground" />
+                        <span>Share Project</span>
+                      </DropdownMenuItem>
 
-                        {/* 4) Here’s the “Delete Project” click */}
-                        <DropdownMenuItem onClick={() => removeProject(item.id)}>
-                          <Trash2 className="text-muted-foreground" />
-                          <span>Delete Project</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            )}
-          </SidebarGroup>
+                      <DropdownMenuSeparator />
+
+                      {/* 4) Here’s the “Delete Project” click */}
+                      <DropdownMenuItem onClick={() => removeProject(item.id)}>
+                        <Trash2 className="text-muted-foreground" />
+                        <span>Delete Project</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          )}
+        </SidebarGroup>
 
         <NavSecondary
           items={[

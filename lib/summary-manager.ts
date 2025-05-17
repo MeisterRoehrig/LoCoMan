@@ -1,29 +1,26 @@
-// file: /lib/summary-utils.ts
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type { TreeCategory }  from "@/providers/tree-provider";
-import type { StepDoc }       from "@/providers/steps-provider";
-import type { EmployeeDoc }   from "@/providers/employees-provider";
-import type { ResourceDoc }   from "@/providers/resources-provider";
-import type {
-  FixedCostsBucket,
-} from "@/providers/fixed-tree-provider";
+import type { TreeCategory } from "@/providers/tree-provider";
+import type { StepDoc } from "@/providers/steps-provider";
+import type { EmployeeDoc } from "@/providers/employees-provider";
+import type { ResourceDoc } from "@/providers/resources-provider";
+import type { FixedCostsBucket } from "@/providers/fixed-tree-provider";
 import type { FixedCostObjectDoc } from "@/providers/fixed-cost-provider";
 
 /* ─────────────────────────────────────────────────────────── */
-/* 1 ─ Public result types                                     */
+/* 1 ─ Public result types                                    */
 /* ─────────────────────────────────────────────────────────── */
 
 export interface StepCostBreakdown {
   stepId: string;
   stepName: string;
   minutes: number;
-  employeeId: string | null;
-  employeeCost: number;
+  employeeIds: string[];
+  employeeCost: number; // aggregated over all employees
   resourceIds: string[];
   resourceCost: number;
   fixedCost: number;
-  stepCost: number;
+  stepCost: number; // grand total for the step
 }
 
 export interface ProjectCategorySummary {
@@ -57,7 +54,7 @@ export interface ProjectSummary {
 }
 
 /* ─────────────────────────────────────────────────────────── */
-/* 2 ─ Internal helpers                                        */
+/* 2 ─ Helpers                                                */
 /* ─────────────────────────────────────────────────────────── */
 
 function isTreeStep(child: unknown): child is { id: string; name: string } {
@@ -65,79 +62,70 @@ function isTreeStep(child: unknown): child is { id: string; name: string } {
 }
 
 function collectStepIds(categories: TreeCategory[]): Set<string> {
-  const ids = new Set<string>();
+  const set = new Set<string>();
   const walk = (cat: TreeCategory) => {
-    cat.children.forEach(child => {
-      if (isTreeStep(child)) ids.add(child.id);
-      else walk(child as unknown as TreeCategory); // nested category
+    cat.children.forEach((ch) => {
+      if (isTreeStep(ch)) set.add(ch.id);
+      else walk(ch as unknown as TreeCategory);
     });
   };
   categories.forEach(walk);
-  return ids;
+  return set;
 }
 
 function collectStepIdsForCategory(cat: TreeCategory): string[] {
   const ids: string[] = [];
   const walk = (c: TreeCategory) => {
-    c.children.forEach(child => {
-      if (isTreeStep(child)) ids.push(child.id);
-      else walk(child as unknown as TreeCategory);
+    c.children.forEach((ch) => {
+      if (isTreeStep(ch)) ids.push(ch.id);
+      else walk(ch as unknown as TreeCategory);
     });
   };
   walk(cat);
   return ids;
 }
 
-const minutesPerMonth = 160 * 60;
-
-const safeArray = <T>(x: T | T[] | null | undefined): T[] =>
-  x === undefined || x === null
-    ? []
-    : Array.isArray(x)
-    ? x
-    : [x];
+/** Guarantee an array */
+const arr = <T>(x: T | T[] | null | undefined): T[] =>
+  x === undefined || x === null ? [] : Array.isArray(x) ? x : [x];
 
 /* ─────────────────────────────────────────────────────────── */
-/* 3 ─ Main generator                                          */
+/* 3 ─ Main generator                                         */
 /* ─────────────────────────────────────────────────────────── */
 
-/**
- * Build a complete project summary starting *strictly* from the dataTree.
- */
 export function generateProjectSummary(
   dataTree: TreeCategory[],
   steps: StepDoc[],
   employees: EmployeeDoc[],
   resources: ResourceDoc[],
   fixedBucket: FixedCostsBucket,
-  fixedCostObjects: FixedCostObjectDoc[]
+  fixedCostObjects: FixedCostObjectDoc[],
 ): ProjectSummary {
-  /* ───── 3.1  maps & filters — only project steps ─────────── */
-  const projectStepIds     = collectStepIds(dataTree);
-  const projectSteps       = steps.filter(s => projectStepIds.has(s.id));
+  /* ---------- 3.1 Filter to project scope ---------- */
+  const projectStepIds = collectStepIds(dataTree);
+  const projectSteps = steps.filter((s) => projectStepIds.has(s.id));
 
-  const employeeMap  = Object.fromEntries(employees.map(e => [e.id, e]));
-  const resourceMap  = Object.fromEntries(resources.map(r => [r.id, r]));
-  const stepMap      = Object.fromEntries(projectSteps.map(s => [s.id, s]));
+  /* ---------- 3.2 Lookup maps ---------- */
+  const employeeMap = Object.fromEntries(employees.map((e) => [e.id, e]));
+  const resourceMap = Object.fromEntries(resources.map((r) => [r.id, r]));
 
-  /* ───── 3.2  minutes per employee / resource  ────────────── */
+  /* ---------- 3.3 Minute buckets ---------- */
   const employeeMinutes: Record<string, number> = {};
   const resourceMinutes: Record<string, number> = {};
 
-  projectSteps.forEach(step => {
+  projectSteps.forEach((step) => {
     const minutes = (step.stepDuration ?? 0) * (step.costDriverValue ?? 0);
 
-    if (step.person) {
-      employeeMinutes[step.person] =
-        (employeeMinutes[step.person] ?? 0) + minutes;
-    }
+    arr(step.person).forEach((empId) => {
+      employeeMinutes[empId] = (employeeMinutes[empId] ?? 0) + minutes;
+    });
 
-    safeArray(step.additionalResources).forEach(resId => {
+    arr(step.additionalResources).forEach((resId) => {
       resourceMinutes[resId] = (resourceMinutes[resId] ?? 0) + minutes;
     });
   });
 
-  /* ───── 3.3  pro-rata per-minute rates  ──────────────────── */
+  /* ---------- 3.4 Per‑minute rates ---------- */
   const employeeRate: Record<string, number> = {};
   for (const [empId, mins] of Object.entries(employeeMinutes)) {
     const salary = employeeMap[empId]?.monthlySalaryEuro ?? 0;
@@ -150,125 +138,118 @@ export function generateProjectSummary(
     resourceRate[resId] = mins === 0 ? 0 : rent / mins;
   }
 
-  /* ───── 3.4  fixed-cost pot  ─────────────────────────────── */
+  /* ---------- 3.5 Fixed‑cost pot ---------- */
   const fixedCostObjs = fixedBucket.fixedCosts
-    .map(id => fixedCostObjects.find(f => f.id === id))
+    .map((id) => fixedCostObjects.find((o) => o.id === id))
     .filter(Boolean) as FixedCostObjectDoc[];
 
   const totalFixedCost = fixedCostObjs.reduce(
-    (acc, obj) => acc + (obj.costPerMonthEuro ?? 0),
-    0
+    (acc, o) => acc + (o.costPerMonthEuro ?? 0),
+    0,
   );
 
-  /* ───── 3.5  per-step breakdown  ─────────────────────────── */
+  /* ---------- 3.6 Step breakdown ---------- */
   const stepBreakdown: Record<string, StepCostBreakdown> = {};
-  let baseProjectCost = 0;
+  let variablePool = 0; // employee + resource costs (denominator for fixed allocation)
 
-  projectSteps.forEach(step => {
+  projectSteps.forEach((step) => {
     const minutes = (step.stepDuration ?? 0) * (step.costDriverValue ?? 0);
 
-    const empId   = step.person ?? null;
-    const empCost = empId ? minutes * (employeeRate[empId] ?? 0) : 0;
-
-    const resIds  = safeArray(step.additionalResources);
-    const resCost = resIds.reduce(
-      (sum, resId) => sum + minutes * (resourceRate[resId] ?? 0),
-      0
+    const empIds = arr(step.person);
+    const empCost = empIds.reduce(
+      (sum, id) => sum + minutes * (employeeRate[id] ?? 0),
+      0,
     );
 
-    baseProjectCost += empCost + resCost;
+    const resIds = arr(step.additionalResources);
+    const resCost = resIds.reduce(
+      (sum, id) => sum + minutes * (resourceRate[id] ?? 0),
+      0,
+    );
+
+    variablePool += empCost + resCost;
 
     stepBreakdown[step.id] = {
       stepId: step.id,
       stepName: step.name,
       minutes,
-      employeeId: empId,
+      employeeIds: empIds,
       employeeCost: empCost,
       resourceIds: resIds,
       resourceCost: resCost,
-      fixedCost: 0, // filled below
-      stepCost: 0
+      fixedCost: 0, // filled later
+      stepCost: 0,
     };
   });
 
-  const denominator = baseProjectCost || 1;
+  const denominator = variablePool || 1;
 
-  /* allocate fixed-costs proportionally */
-  Object.values(stepBreakdown).forEach(sb => {
-    const share    = sb.employeeCost + sb.resourceCost;
-    const fixed    = (share / denominator) * totalFixedCost;
-    sb.fixedCost   = fixed;
-    sb.stepCost    = share + fixed;
+  Object.values(stepBreakdown).forEach((sb) => {
+    const share = sb.employeeCost + sb.resourceCost;
+    const fixedShare = (share / denominator) * totalFixedCost;
+    sb.fixedCost = fixedShare;
+    sb.stepCost = share + fixedShare;
   });
 
-  /* ───── 3.6  category aggregation (recursive) ────────────── */
-  const buildCategorySummary = (cat: TreeCategory): ProjectCategorySummary => {
-    const stepIds = collectStepIdsForCategory(cat);
-    const stepsInCat = stepIds
-      .map(id => stepBreakdown[id])
-      .filter(Boolean) as StepCostBreakdown[];
-
-    const total = stepsInCat.reduce((acc, s) => acc + s.stepCost, 0);
-
+  /* ---------- 3.7 Category summaries ---------- */
+  const buildCat = (cat: TreeCategory): ProjectCategorySummary => {
+    const ids = collectStepIdsForCategory(cat);
+    const stepsArr = ids.map((id) => stepBreakdown[id]).filter(Boolean) as StepCostBreakdown[];
+    const total = stepsArr.reduce((acc, s) => acc + s.stepCost, 0);
     return {
-      categoryId:  cat.id,
+      categoryId: cat.id,
       categoryLabel: cat.label,
       categoryColor: cat.color,
       totalCategoryCost: total,
-      steps: stepsInCat
+      steps: stepsArr,
     };
   };
+  const categories = dataTree.map(buildCat);
+  const totalProjectCost = categories.reduce((acc, c) => acc + c.totalCategoryCost, 0);
 
-  const categories = dataTree.map(buildCategorySummary);
-  const totalProjectCost = categories.reduce(
-    (acc, c) => acc + c.totalCategoryCost,
-    0
-  );
+  /* ---------- 3.8 Employee section ---------- */
+  const employeeSection = Object.entries(employeeMinutes).map(([empId, mins]) => {
+    const rate = employeeRate[empId] ?? 0;
+    const totalCost = rate * mins;
+    const jobtitel = employeeMap[empId]?.jobtitel ?? "";
 
-  /* ───── 3.7  employee section  ───────────────────────────── */
-  const employeeSection = Object.entries(employeeMinutes).map(
-    ([empId, mins]) => {
-      const rate      = employeeRate[empId] ?? 0;
-      const totalCost = rate * mins;
-      const jobtitel  = employeeMap[empId]?.jobtitel ?? "";
+    const stepsArr = Object.values(stepBreakdown)
+      .filter((sb) => sb.employeeIds.includes(empId))
+      .map((sb) => ({
+        stepId: sb.stepId,
+        minutes: sb.minutes,
+        cost: sb.minutes * rate,
+      }));
 
-      const stepsArr = Object.values(stepBreakdown)
-        .filter(sb => sb.employeeId === empId)
-        .map(sb => ({ stepId: sb.stepId, minutes: sb.minutes, cost: sb.employeeCost }));
+    return {
+      employeeId: empId,
+      jobtitel,
+      totalMinutes: mins,
+      perMinuteCost: rate,
+      totalCost,
+      steps: stepsArr,
+    };
+  });
 
-      return {
-        employeeId: empId,
-        jobtitel,
-        totalMinutes: mins,
-        perMinuteCost: rate,
-        totalCost,
-        steps: stepsArr
-      };
-    }
-  );
+  const totalEmployeeCost = employeeSection.reduce((acc, e) => acc + e.totalCost, 0);
 
-  const totalEmployeeCost = employeeSection.reduce(
-    (acc, e) => acc + e.totalCost,
-    0
-  );
-
-  /* ───── 3.8  result  ─────────────────────────────────────── */
+  /* ---------- 3.9 Result ---------- */
   return {
     projectCosts: {
       totalProjectCost,
-      categories
+      categories,
     },
     fixedCosts: {
       totalFixedCost,
-      objects: fixedCostObjs.map(o => ({
+      objects: fixedCostObjs.map((o) => ({
         id: o.id,
         name: o.costObjectName,
-        monthlyCostEuro: o.costPerMonthEuro
-      }))
+        monthlyCostEuro: o.costPerMonthEuro,
+      })),
     },
     employees: {
       totalEmployeeCost,
-      list: employeeSection
-    }
+      list: employeeSection,
+    },
   };
 }

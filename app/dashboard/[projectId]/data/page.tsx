@@ -211,6 +211,7 @@ export default function Page() {
                                     <Separator className="my-3" />
                                     <StepDetails
                                         step={selectedStep}
+                                        
                                         onSave={(updatedFields) => {
                                             updateStep(selectedStep.id, updatedFields);
                                         }}
