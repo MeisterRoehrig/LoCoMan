@@ -180,9 +180,9 @@ function DataTable<T extends { id: string }>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -402,7 +402,7 @@ export default function FixedCostSection() {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-        Jobtitel <ArrowUpDown className="ml-1 h-4 w-4" />
+          Jobtitel <ArrowUpDown className="ml-1 h-4 w-4" />
         </Button>
       ),
       cell: ({ row }) => <span>{row.getValue("jobtitel")}</span>,
@@ -520,16 +520,16 @@ export default function FixedCostSection() {
       create: (p: Omit<T, "id">) => Promise<string | undefined>,
       kind: FixedCostKind,
     ) =>
-    async (payload: Omit<T, "id">) => {
+      async (payload: Omit<T, "id">) => {
         console.log("createAndAttach", payload);
-      const id = await create(payload);
-      if (id) await addToFixedCosts(projectId, kind, id);
-    };
+        const id = await create(payload);
+        if (id) await addToFixedCosts(projectId, kind, id);
+      };
 
   /* ====================================================================
    * 4. Render
    * ================================================================== */
-  if (loadingFixedTree) {
+  if (loadingFixedTree && !fixedCosts) {   // ← replace with this
     return <p className="p-4">Loading project data…</p>;
   }
 

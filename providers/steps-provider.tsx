@@ -26,13 +26,11 @@ import { toast } from "sonner";
 export interface StepDoc {
   id: string;
   name: string;
-  person?: string;
-  personMonthlySalary?: number;
+  person?: string[];
   costDriver?: string;
   costDriverValue?: number;
   stepDuration?: number;
-  additionalResources?: string;
-  additionalResourcesValue?: number;
+  additionalResources?: string[];
   createdAt?: Date | null;
   updatedAt?: Date | null;
   // ... more fields as needed
@@ -84,16 +82,16 @@ export function StepsProvider({ children }: { readonly children: ReactNode }) {
         const data = docSnap.data();
         return {
           id: docSnap.id,
-          name: data.name || "",
-          person: data.person || "",
-          personMonthlySalary: data.personMonthlySalary || 0,
-          costDriver: data.costDriver || "",
-          costDriverValue: data.costDriverValue || 0,
-          stepDuration: data.stepDuration || 0,
-          additionalResources: data.additionalResources || "",
-          additionalResourcesValue: data.additionalResourcesValue || 0,
-          createdAt: data.createdAt?.toDate() || null,
-          updatedAt: data.updatedAt?.toDate() || null,
+          name: data.name ?? "",
+          person: data.person ?? "",
+          personMonthlySalary: data.personMonthlySalary ?? 0,
+          costDriver: data.costDriver ?? "",
+          costDriverValue: data.costDriverValue ?? 0,
+          stepDuration: data.stepDuration ?? 0,
+          additionalResources: data.additionalResources ?? "",
+          additionalResourcesValue: data.additionalResourcesValue ?? 0,
+          createdAt: data.createdAt?.toDate() ?? null,
+          updatedAt: data.updatedAt?.toDate() ?? null,
         };
       });
       setSteps(result);

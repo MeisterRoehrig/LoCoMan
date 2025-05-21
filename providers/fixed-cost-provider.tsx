@@ -39,7 +39,7 @@ interface FixedCostObjectsContextValue {
   loadFixedCostObjects: () => Promise<void>;
   getFixedCostObjectById: (id: string) => FixedCostObjectDoc | null;
   addFixedCostObject: (data: Omit<FixedCostObjectDoc, "id">) => Promise<string | undefined>;
-  
+
   addFixedCostObjectWithId: (
     data: Omit<FixedCostObjectDoc, "id">,
     customId: string
@@ -55,12 +55,12 @@ interface FixedCostObjectsContextValue {
 const FixedCostObjectsContext = createContext<FixedCostObjectsContextValue>({
   fixedCostObjects: [],
   loadingFixedCostObjects: false,
-  loadFixedCostObjects: async () => {},
+  loadFixedCostObjects: async () => { },
   getFixedCostObjectById: () => null,
   addFixedCostObject: async () => undefined,
   addFixedCostObjectWithId: async () => undefined,
-  updateFixedCostObject: async () => {},
-  deleteFixedCostObject: async () => {},
+  updateFixedCostObject: async () => { },
+  deleteFixedCostObject: async () => { },
 });
 
 export function FixedCostObjectsProvider({
@@ -77,6 +77,7 @@ export function FixedCostObjectsProvider({
   /* ---------- 3.1 Load ---------- */
   async function loadFixedCostObjects() {
     if (!user || typeof user !== "object" || !("uid" in user)) return;
+
     setLoadingFixedCostObjects(true);
     try {
       const ref = collection(
@@ -111,9 +112,7 @@ export function FixedCostObjectsProvider({
   }
 
   /* ---------- 3.3 Create ---------- */
-  async function addFixedCostObject(
-    data: Omit<FixedCostObjectDoc, "id">
-  ): Promise<string | undefined> {
+  async function addFixedCostObject(data: Omit<FixedCostObjectDoc, "id">){
     if (!user || typeof user !== "object" || !("uid" in user)) return;
     try {
       const ref = collection(firestore, "users", user.uid, "fixedCostObjects");

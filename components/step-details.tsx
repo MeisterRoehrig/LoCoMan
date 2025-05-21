@@ -1,101 +1,184 @@
 "use client";
 
-import React, { useState, useEffect, FormEvent, useMemo } from "react";
+import React, { FormEvent, useEffect, useMemo, useState } from "react";
+import { InputTags, type TagOption } from "@/components/ui/tag-input";
 import { StepDoc } from "@/providers/steps-provider";
+import { useEmployees } from "@/providers/employees-provider";
+import { useResources } from "@/providers/resources-provider";
+import { useFixedTree } from "@/providers/fixed-tree-provider";
 
+/* -------------------------------------------------------
+ * Types & helpers
+ * -----------------------------------------------------*/
 interface StepDetailsProps {
   step: StepDoc;
   onSave: (updates: Partial<StepDoc>) => void;
 }
 
+/** Normalise whatever comes from Firestore → always string[] */
+function toIdArray(val: unknown): string[] {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.map(String);
+  if (typeof val === "string" && val.trim() !== "") return [val.trim()];
+  return [];
+}
+
+/* -------------------------------------------------------
+ * Component
+ * -----------------------------------------------------*/
 export default function StepDetails({ step, onSave }: StepDetailsProps) {
-  const [person, setPerson] = useState(step.person || "");
-  const [personMonthlySalary, setPersonMonthlySalary] = useState(step.personMonthlySalary || 0);
-  const [costDriver, setCostDriver] = useState(step.costDriver || "");
-  const [costDriverValue, setCostDriverValue] = useState(step.costDriverValue || 0);
-  const [stepDuration, setStepDuration] = useState(step.stepDuration || 0);
-  const [additionalResources, setAdditionalResources] = useState(step.additionalResources || "");
-  const [additionalResourcesValue, setAdditionalResourcesValue] = useState(step.additionalResourcesValue || 0);
+  /* Domain – already loaded upstream */
+  const { fixedCosts } = useFixedTree();
+  const { employees, loadEmployees, loadingEmployees } = useEmployees();
+  const { resources, loadResources, loadingResources } = useResources();
 
-  // Sync when step changes
+  /* One‑shot lazy load (in case parent hasn't) */
   useEffect(() => {
-    setPerson(step.person || "");
-    setPersonMonthlySalary(step.personMonthlySalary || 0);
-    setCostDriver(step.costDriver || "");
-    setCostDriverValue(step.costDriverValue || 0);
-    setStepDuration(step.stepDuration || 0);
-    setAdditionalResources(step.additionalResources || "");
-    setAdditionalResourcesValue(step.additionalResourcesValue || 0);
-  }, [step]);
+    if (employees.length === 0) void loadEmployees();
+    if (resources.length === 0) void loadResources();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Dirty check – is anything different from the original?
+  /* -----------------------------------------------------
+   * Project‑scoped lists -> options for <InputTags>
+   * ---------------------------------------------------*/
+  const projectEmployees = useMemo(() => {
+    if (!fixedCosts) return [] as typeof employees;
+    const ids = new Set(fixedCosts.employees);
+    return employees.filter((e) => ids.has(e.id));
+  }, [employees, fixedCosts]);
+
+  const employeeOptions = useMemo<TagOption[]>(
+    () =>
+      projectEmployees.map((emp) => ({
+        id: emp.id,
+        label: emp.jobtitel,
+        employee: emp,
+      })),
+    [projectEmployees],
+  );
+
+  const projectResources = useMemo(() => {
+    if (!fixedCosts) return [] as typeof resources;
+    const ids = new Set(fixedCosts.resources);
+    return resources.filter((r) => ids.has(r.id));
+  }, [resources, fixedCosts]);
+
+  const resourceOptions = useMemo<TagOption[]>(
+    () =>
+      projectResources.map((res) => ({
+        id: res.id,
+        label: res.costObjectName,
+        resource: res,
+      })),
+    [projectResources],
+  );
+
+  /* -----------------------------------------------------
+   * Local state – syncs whenever the `step` prop changes
+   * ---------------------------------------------------*/
+  const [person, setPerson] = useState<string[]>(toIdArray(step.person));
+  const [additionalResources, setAdditionalResources] = useState<string[]>(
+    toIdArray(step.additionalResources),
+  );
+  const [costDriver, setCostDriver] = useState(step.costDriver ?? "");
+  const [costDriverValue, setCostDriverValue] = useState(
+    step.costDriverValue ?? 0,
+  );
+  const [stepDuration, setStepDuration] = useState(step.stepDuration ?? 0);
+
+  /**
+   * Reset the editing state when a DIFFERENT step doc arrives.
+   * Using step.id is safe because it is immutable within Firestore.
+   */
+  useEffect(() => {
+    setPerson(toIdArray(step.person));
+    setAdditionalResources(toIdArray(step.additionalResources));
+    setCostDriver(step.costDriver ?? "");
+    setCostDriverValue(step.costDriverValue ?? 0);
+    setStepDuration(step.stepDuration ?? 0);
+  }, [step.id]);
+
+  /* -----------------------------------------------------
+   * Dirty check – JSON stringify for simple deep compare
+   * ---------------------------------------------------*/
   const isDirty = useMemo(() => {
-    return (
-      (person || "") !== (step.person || "") ||
-      (personMonthlySalary || 0) !== (step.personMonthlySalary || 0) ||
-      (costDriver || "") !== (step.costDriver || "") ||
-      (costDriverValue || 0) !== (step.costDriverValue || 0) ||
-      (stepDuration || 0) !== (step.stepDuration || 0) ||
-      (additionalResources || "") !== (step.additionalResources || "") ||
-      (additionalResourcesValue || 0) !== (step.additionalResourcesValue || 0)
-    );
-  }, [
-    person,
-    personMonthlySalary,
-    costDriver,
-    costDriverValue,
-    stepDuration,
-    additionalResources,
-    additionalResourcesValue,
-    step,
-  ]);
+    const eqArr = (a: string[], b?: unknown) =>
+      JSON.stringify(a) === JSON.stringify(toIdArray(b));
 
-  function handleSubmit(e: FormEvent) {
+    return (
+      !eqArr(person, step.person) ||
+      costDriver !== (step.costDriver ?? "") ||
+      costDriverValue !== (step.costDriverValue ?? 0) ||
+      stepDuration !== (step.stepDuration ?? 0) ||
+      !eqArr(additionalResources, step.additionalResources)
+    );
+  }, [person, additionalResources, costDriver, costDriverValue, stepDuration, step]);
+
+  /* -----------------------------------------------------
+   * Save handler
+   * ---------------------------------------------------*/
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!isDirty) return;
 
     onSave({
       person,
-      personMonthlySalary,
       costDriver,
       costDriverValue,
       stepDuration,
       additionalResources,
-      additionalResourcesValue,
     });
-  }
+  };
 
+  /* -----------------------------------------------------
+   * Render
+   * ---------------------------------------------------*/
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Responsible person */}
       <div>
-        <span className="block text-sm font-medium text-muted-foreground pb-2">Step Name</span>
-        <div className="p-2 border rounded bg-muted text-muted-foreground">{step.name}</div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium" htmlFor="person">Responsible Person</label>
-        <input
-          id="person"
-          type="text"
-          className="border p-2 rounded w-full"
+        <label className="block text-sm font-medium pb-2">Responsible Person</label>
+        <InputTags
+          key={`person-${step.id}`}
           value={person}
-          onChange={(e) => setPerson(e.target.value)}
+          onChange={setPerson}
+          options={employeeOptions}
+          allowCustom={false}
+          placeholder="Select project employee…"
+          isLoading={loadingEmployees}
         />
       </div>
 
+      {/* Additional resources */}
       <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="salary">Monthly Salary (€)</label>
-        <input
-          id="salary"
-          type="number"
-          className="border p-2 rounded w-full"
-          value={personMonthlySalary}
-          onChange={(e) => setPersonMonthlySalary(Number(e.target.value))}
+        <label className="block text-sm font-medium pb-2">Additional Resources</label>
+        <InputTags
+          key={`resources-${step.id}`}
+          value={additionalResources}
+          onChange={setAdditionalResources}
+          options={resourceOptions}
+          allowCustom={false}
+          placeholder="Select resource…"
+          isLoading={loadingResources}
         />
       </div>
 
+      {/* Step name (read-only) */}
       <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="driver">Cost Driver</label>
+        <span className="block text-sm font-medium text-muted-foreground pb-2">
+          Step Name
+        </span>
+        <div className="p-2 border rounded bg-muted text-muted-foreground">
+          {step.name}
+        </div>
+      </div>
+
+      {/* Cost driver */}
+      <div>
+        <label className="block text-sm font-medium pb-2" htmlFor="driver">
+          Cost Driver
+        </label>
         <input
           id="driver"
           type="text"
@@ -105,8 +188,11 @@ export default function StepDetails({ step, onSave }: StepDetailsProps) {
         />
       </div>
 
+      {/* Cost driver value */}
       <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="driverValue">Cost Driver Value</label>
+        <label className="block text-sm font-medium pb-2" htmlFor="driverValue">
+          Cost Driver Value
+        </label>
         <input
           id="driverValue"
           type="number"
@@ -116,8 +202,11 @@ export default function StepDetails({ step, onSave }: StepDetailsProps) {
         />
       </div>
 
+      {/* Step duration */}
       <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="duration">Step Duration (min)</label>
+        <label className="block text-sm font-medium pb-2" htmlFor="duration">
+          Step Duration (min)
+        </label>
         <input
           id="duration"
           type="number"
@@ -127,36 +216,15 @@ export default function StepDetails({ step, onSave }: StepDetailsProps) {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="resources">Additional Resources</label>
-        <input
-          id="resources"
-          type="text"
-          className="border p-2 rounded w-full"
-          value={additionalResources}
-          onChange={(e) => setAdditionalResources(e.target.value)}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="resourcesValue">Resources Value (€)</label>
-        <input
-          id="resourcesValue"
-          type="number"
-          className="border p-2 rounded w-full"
-          value={additionalResourcesValue}
-          onChange={(e) => setAdditionalResourcesValue(Number(e.target.value))}
-        />
-      </div>
-
+      {/* Save button */}
       <button
         type="submit"
+        disabled={!isDirty}
         className={`px-4 py-2 border rounded ${
           isDirty
             ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
             : "bg-muted text-muted-foreground cursor-not-allowed"
         }`}
-        disabled={!isDirty}
       >
         Save Changes
       </button>
