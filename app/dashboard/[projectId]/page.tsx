@@ -39,6 +39,9 @@ import { useEmployees } from "@/providers/employees-provider";
 import { useResources } from "@/providers/resources-provider";
 import { useFixedCostObjects } from "@/providers/fixed-cost-provider";
 import { useFixedTree } from "@/providers/fixed-tree-provider";
+import CostBarChart from "@/components/bar-chart";
+
+import StepEfficiencyGrid from "@/components/ui/cost-efficiency-heatmap";
 
 /**
  * Utility helpers
@@ -88,6 +91,7 @@ export default function Page() {
   const totalProjectCost = summary?.projectCosts.totalProjectCost ?? 0;
   const fixedCostsSection = summary?.fixedCosts;
   const employeeSection = summary?.employees;
+  const resourcesSection = summary?.resources;
 
   const projectChartData = React.useMemo(
     () =>
@@ -99,25 +103,6 @@ export default function Page() {
     [categories]
   );
 
-  const fixedCostChartData = React.useMemo(
-    () =>
-      (fixedCostsSection?.objects ?? []).map((obj, idx, arr) => ({
-        name: obj.name,
-        value: obj.monthlyCostEuro,
-        fill: childColor("hsl(200, 65%, 55%)", idx, arr.length) ?? "#bbb",
-      })),
-    [fixedCostsSection]
-  );
-
-  const employeeChartData = React.useMemo(
-    () =>
-      (employeeSection?.list ?? []).map((emp, idx, arr) => ({
-        name: emp.jobtitel || emp.employeeId,
-        value: emp.totalCost,
-        fill: childColor("hsl(340, 65%, 55%)", idx, arr.length) ?? "#ddd",
-      })),
-    [employeeSection]
-  );
 
   if (!projectId || !project) return <Loader show={true} />;
 
@@ -169,7 +154,7 @@ export default function Page() {
         <div className="flex flex-col gap-4">
           {/* ── OVERVIEW GRID ─────────────────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-           <Card className="min-w-0">
+            <Card className="min-w-0">
               <CardHeader>
                 <CardDescription>Gesamtkosten</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
@@ -214,7 +199,7 @@ export default function Page() {
             </Card>
 
             {/* AI REPORT */}
-            <Card>
+            <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>AI Report</CardTitle>
                 <CardDescription>Eine kurze Zusammenfassung der Kostenstruktur aus Sicht der KI.</CardDescription>
@@ -225,39 +210,81 @@ export default function Page() {
             </Card>
 
             {/* Fixed costs */}
-            <Card className="flex flex-col col-span-1">
+            <Card className="flex flex-col">
               <CardHeader>
-                <CardDescription>Fixkosten (Monat)</CardDescription>
+                <CardDescription>Fixkosten&nbsp;</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
                   {formatEuro(fixedCostsSection?.totalFixedCost ?? 0)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-1 text-sm overflow-y-auto max-h-36">
-                {(fixedCostsSection?.objects ?? []).map((obj) => (
-                  <div key={obj.id} className="flex justify-between">
-                    <span>{obj.name}</span>
-                    <span className="tabular-nums">{formatEuro(obj.monthlyCostEuro)}</span>
-                  </div>
-                ))}
+
+              <CardContent>
+                <CostBarChart baseColor="hsl(227, 65%, 55%)" objects={fixedCostsSection?.objects ?? []} />
               </CardContent>
             </Card>
 
             {/* Employee cost */}
-            <Card className="flex flex-col col-span-1">
+            <Card className="flex flex-col">
               <CardHeader>
-                <CardDescription>Personalkosten (Projekt)</CardDescription>
+                <CardDescription>Personalkosten&nbsp;</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
                   {formatEuro(employeeSection?.totalEmployeeCost ?? 0)}
                 </CardTitle>
               </CardHeader>
-              <ChartContainer config={chartConfig} className="h-40">
-                <PieChart width={160} height={160}>
-                  <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                  <Pie data={employeeChartData} dataKey="value" nameKey="name" innerRadius="60%" paddingAngle={1} stroke="#fff" />
-                </PieChart>
-              </ChartContainer>
+              <CardContent>
+                <CostBarChart
+                  baseColor="hsl(262, 65%, 55%)"
+                  objects={employeeSection?.list ?? []}           // array of employee summaries
+                  valueAccessor="totalCost"                       // numeric field name
+                  labelAccessor={(e) => e.jobtitel || e.employeeId}
+                />
+              </CardContent>
             </Card>
+
+            {/* Resource cost */}
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardDescription>Ressourcenkosten&nbsp;</CardDescription>
+                <CardTitle className="text-2xl font-semibold tabular-nums">
+                  {formatEuro(resourcesSection?.totalResourceCost ?? 0)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CostBarChart
+                  baseColor="hsl(276, 65%, 55%)"
+                  objects={resourcesSection?.objects ?? []}           // array of employee summaries
+                  valueAccessor="monthlyCostEuro"                     // numeric field name
+                  labelAccessor={(e) => e.name}
+                />
+              </CardContent>
+            </Card>
+
+
+
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Kosteneffizienz Heatmap (€/min)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <StepEfficiencyGrid categories={categories} />
+            </CardContent>
+          </Card>
+
+          {/* ── TREEMAP ──────────────────────────────────────────────── */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Kostenstruktur</CardTitle>
+              <CardDescription className="text-sm">Alle Kosten im Verhältnis</CardDescription>
+            </CardHeader>
+            <CardContent className="-my-4">
+              <ChartContainer config={chartConfig} className="w-full h-full p-0">
+                <CostTreemap categories={categories} />
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
 
           {/* ── CATEGORY GRID ─────────────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -294,22 +321,12 @@ export default function Page() {
             })}
           </div>
 
-          {/* ── TREEMAP ──────────────────────────────────────────────── */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Kostenstruktur (Treemap)</CardTitle>
-              <CardDescription className="text-sm">Alle Kosten im Verhältnis</CardDescription>
-            </CardHeader>
-            <CardContent className="-my-4">
-              <CostTreemap categories={categories} />
-            </CardContent>
-          </Card>
 
           {/* ── RAW JSON ─────────────────────────────────────────────── */}
           <Card>
             <CardHeader>
               <CardTitle>Raw Summary JSON</CardTitle>
-              <CardDescription className="text-sm">Nur für Entwicklung & Debugging 🔧</CardDescription>
+              <CardDescription className="text-sm">Nur f&uuml;r Entwicklung &amp; Debugging 🔧</CardDescription>
             </CardHeader>
             <CardFooter>
               <pre className="p-2 bg-muted rounded-md w-full text-sm overflow-auto">
@@ -319,7 +336,7 @@ export default function Page() {
           </Card>
         </div>
       ) : (
-        <div className="text-sm text-muted-foreground mt-4">Noch kein Bericht generiert. Klicke auf "Generate Report", um zu starten.</div>
+        <div className="text-sm text-muted-foreground mt-4">Noch kein Bericht generiert. Klicke auf Generate Report, um zu starten.</div>
       )}
     </ScrollArea>
   );
@@ -367,5 +384,9 @@ interface ProjectCostSummary {
       totalCost: number;
       steps: { stepId: string; minutes: number; cost: number }[];
     }[];
+  };
+  resources: {
+    totalResourceCost: number;
+    objects: Array<{ id: string; name: string; monthlyCostEuro: number }>;
   };
 }

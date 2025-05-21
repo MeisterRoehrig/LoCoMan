@@ -78,14 +78,6 @@ export function FixedCostObjectsProvider({
   async function loadFixedCostObjects() {
     if (!user || typeof user !== "object" || !("uid" in user)) return;
 
-    /* --------------------  NEW: prevent duplicate fetches  -------------------- */
-    if (fixedCostObjects.length) {          // we already have the data
-      setLoadingFixedCostObjects(false);    // make sure the flag is not left true
-      return;
-    }
-    /* ------------------------------------------------------------------------- */
-
-
     setLoadingFixedCostObjects(true);
     try {
       const ref = collection(
@@ -120,9 +112,7 @@ export function FixedCostObjectsProvider({
   }
 
   /* ---------- 3.3 Create ---------- */
-  async function addFixedCostObject(
-    data: Omit<FixedCostObjectDoc, "id">
-  ): Promise<string | undefined> {
+  async function addFixedCostObject(data: Omit<FixedCostObjectDoc, "id">){
     if (!user || typeof user !== "object" || !("uid" in user)) return;
     try {
       const ref = collection(firestore, "users", user.uid, "fixedCostObjects");

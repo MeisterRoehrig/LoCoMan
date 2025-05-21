@@ -78,13 +78,11 @@ export function NewStepDialog({
 
     const newStep: Omit<StepDoc, "id"> = {
       name,
-      person,
-      personMonthlySalary: Number(salary),
+      person: person ? [person] : [],
       costDriver: driver,
       costDriverValue: Number(driverValue),
       stepDuration: Number(duration),
-      additionalResources: resources,
-      additionalResourcesValue: Number(resourceValue),
+      additionalResources: resources ? resources.split(",").map(r => r.trim()).filter(Boolean) : [],
       createdAt: null,
       updatedAt: null,
     };

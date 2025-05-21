@@ -51,6 +51,10 @@ export interface ProjectSummary {
       steps: Array<{ stepId: string; minutes: number; cost: number }>;
     }>;
   };
+  resources: {
+    totalResourceCost: number;
+    objects: Array<{ id: string; name: string; monthlyCostEuro: number }>;
+  };
 }
 
 /* ─────────────────────────────────────────────────────────── */
@@ -109,9 +113,10 @@ export function generateProjectSummary(
   const employeeMap = Object.fromEntries(employees.map((e) => [e.id, e]));
   const resourceMap = Object.fromEntries(resources.map((r) => [r.id, r]));
 
-  /* ---------- 3.3 Minute buckets ---------- */
+  /* ---------- 3.3 Minute buckets & resource ids ---------- */
   const employeeMinutes: Record<string, number> = {};
   const resourceMinutes: Record<string, number> = {};
+  const projectResourceIds = new Set<string>();
 
   projectSteps.forEach((step) => {
     const minutes = (step.stepDuration ?? 0) * (step.costDriverValue ?? 0);
@@ -121,6 +126,7 @@ export function generateProjectSummary(
     });
 
     arr(step.additionalResources).forEach((resId) => {
+      projectResourceIds.add(resId);
       resourceMinutes[resId] = (resourceMinutes[resId] ?? 0) + minutes;
     });
   });
@@ -233,7 +239,19 @@ export function generateProjectSummary(
 
   const totalEmployeeCost = employeeSection.reduce((acc, e) => acc + e.totalCost, 0);
 
-  /* ---------- 3.9 Result ---------- */
+  /* ---------- 3.9 Resource section ---------- */
+  const resourceSectionObjects = Array.from(projectResourceIds).map((resId) => ({
+    id: resId,
+    name: resourceMap[resId]?.costObjectName ?? "",
+    monthlyCostEuro: resourceMap[resId]?.costPerMonthEuro ?? 0,
+  }));
+
+  const totalResourceCost = resourceSectionObjects.reduce(
+    (acc, obj) => acc + obj.monthlyCostEuro,
+    0,
+  );
+
+  /* ---------- 3.10 Result ---------- */
   return {
     projectCosts: {
       totalProjectCost,
@@ -250,6 +268,10 @@ export function generateProjectSummary(
     employees: {
       totalEmployeeCost,
       list: employeeSection,
+    },
+    resources: {
+      totalResourceCost,
+      objects: resourceSectionObjects,
     },
   };
 }

@@ -12,7 +12,6 @@ import React, {
   forwardRef,
   useRef,
   useState,
-  useEffect,
   Dispatch,
   SetStateAction,
   KeyboardEvent,
