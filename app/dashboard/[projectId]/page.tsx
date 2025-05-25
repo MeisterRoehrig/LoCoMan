@@ -42,6 +42,9 @@ import { useFixedTree } from "@/providers/fixed-tree-provider";
 import CostBarChart from "@/components/bar-chart";
 
 import StepEfficiencyGrid from "@/components/ui/cost-efficiency-heatmap";
+import FixedCostContributionChart from "@/components/fixed-cost-contribution-chart";
+import EmployeeStepRadarChart from "@/components/employee-contribution-radar";
+import EmployeeProductivityScatter from "@/components/employee-productivity-scatter";
 
 /**
  * Utility helpers
@@ -102,6 +105,16 @@ export default function Page() {
       })),
     [categories]
   );
+
+  const stepNameLookup = React.useMemo(
+    () =>
+      Object.fromEntries(
+        categories.flatMap((c) =>
+          c.steps.map((s) => [s.stepId, s.stepName])
+        )
+      ),
+    [categories]
+  )
 
 
   if (!projectId || !project) return <Loader show={true} />;
@@ -258,33 +271,62 @@ export default function Page() {
                 />
               </CardContent>
             </Card>
-
-
-
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Kosteneffizienz Heatmap (€/min)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StepEfficiencyGrid categories={categories} />
-            </CardContent>
-          </Card>
+
+          <div className="flex gap-4 items-stretch">
+            <div className="flex-1 flex flex-col">
+              <EmployeeStepRadarChart
+                employees={employeeSection?.list ?? []}
+                metric="cost"
+                smooth="log"             // or "sqrt" | "percent" | "none"
+                stepNameLookup={stepNameLookup}
+              />
+            </div>
+            <div className="flex-1 flex flex-col">
+              <FixedCostContributionChart categories={categories} />
+            </div>
+          </div>
+
+          <div className="flex gap-4 items-stretch">
+            <div className="flex-1 flex flex-col">
+              <Card className="flex flex-1 flex-col h-full">
+                <CardHeader>
+                  <CardTitle>Employee Productivity vs. Cost</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col items-center justify-center">
+                  <EmployeeProductivityScatter employees={employeeSection?.list ?? []} />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex-1 flex flex-col">
+              <Card className="flex flex-1 flex-col h-full">
+                <CardHeader>
+                  <CardTitle>Kosteneffizienz Heatmap (€/min)</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col items-center justify-center">
+                  <StepEfficiencyGrid categories={categories} />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
 
           {/* ── TREEMAP ──────────────────────────────────────────────── */}
-          <Card>
+          <Card className="w-full h-fit min-h-0">               {/* allow the card itself to collapse */}
             <CardHeader>
               <CardTitle>Kostenstruktur</CardTitle>
-              <CardDescription className="text-sm">Alle Kosten im Verhältnis</CardDescription>
+              <CardDescription className="text-sm">
+                Alle Kosten im Verhältnis
+              </CardDescription>
             </CardHeader>
-            <CardContent className="-my-4">
-              <ChartContainer config={chartConfig} className="w-full h-full p-0">
+
+            <CardContent className="-mt-4">
+              {/* remove h-full so the flex item can shrink */}
+              <ChartContainer config={chartConfig} className="w-full max-h-[500px]">
                 <CostTreemap categories={categories} />
               </ChartContainer>
             </CardContent>
           </Card>
-
 
           {/* ── CATEGORY GRID ─────────────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

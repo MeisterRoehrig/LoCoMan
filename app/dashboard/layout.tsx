@@ -19,6 +19,7 @@ import ProtectedRoute from "@/components/protected-route"
 import {
   DashboardContext,
 } from "@/lib/dashboard-context"  // <-- new import
+import BreadcrumbProvider from "@/providers/breadcrumb-provider"
 
 export default function DashboardLayout({
   children,
@@ -43,17 +44,7 @@ export default function DashboardLayout({
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
 
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbLink href="#">{breadcrumbTitle}</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    {/* <BreadcrumbSeparator className="hidden md:block" />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>Dateneingabe</BreadcrumbPage>
-                    </BreadcrumbItem> */}
-                  </BreadcrumbList>
-                </Breadcrumb>
+                <BreadcrumbProvider/>
               </div>
             </header>
 
