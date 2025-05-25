@@ -210,9 +210,9 @@ export default function CostContributionChart({ categories }: Props) {
 
 
   return (
-    <Card>
+    <Card className="h-full">
 
-      <CardHeader className="flex justify-between items-start">
+      <CardHeader className="flex justify-between items-start ">
         <div>
           <CardTitle>Beitrag zu den Fixkosten</CardTitle>
           <CardDescription className="text-sm">
@@ -237,10 +237,8 @@ export default function CostContributionChart({ categories }: Props) {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 items-center justify-center p-0">
         <div className="space-y-4">
-
-
           <ChartContainer config={chartConfig} className="w-full overflow-x-auto">
             <BarChart
               accessibilityLayer

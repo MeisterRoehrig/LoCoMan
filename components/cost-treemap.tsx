@@ -127,7 +127,6 @@ export default function CostTreemap({ categories = [] }: CostTreemapProps) {
           ),
       },
       tooltip: {
-        followCursor: true,
         fixed: { enabled: false },
         intersect: false,
         fillSeriesColor: false,
@@ -150,8 +149,8 @@ export default function CostTreemap({ categories = [] }: CostTreemapProps) {
         <>
           <ReactApexChart
             type="treemap"
-            height={550}
             options={options}
+            height='100%'
             series={series}
           />
           <style jsx global>{`
