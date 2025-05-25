@@ -42,6 +42,7 @@ import { useFixedTree } from "@/providers/fixed-tree-provider";
 import CostBarChart from "@/components/bar-chart";
 
 import StepEfficiencyGrid from "@/components/ui/cost-efficiency-heatmap";
+import FixedCostContributionChart from "@/components/fixed-cost-contribution-chart";
 
 /**
  * Utility helpers
@@ -263,14 +264,26 @@ export default function Page() {
 
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Kosteneffizienz Heatmap (€/min)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StepEfficiencyGrid categories={categories} />
-            </CardContent>
-          </Card>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Kosteneffizienz Heatmap (€/min)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StepEfficiencyGrid categories={categories} />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex-1">
+              <FixedCostContributionChart categories={categories} />
+            </div>
+          </div>
+
+
+
+
+
 
           {/* ── TREEMAP ──────────────────────────────────────────────── */}
           <Card>
