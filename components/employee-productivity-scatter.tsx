@@ -9,6 +9,7 @@ import {
     ZAxis,
     CartesianGrid,
     ResponsiveContainer,
+    TooltipProps
 } from "recharts";
 import {
     ChartContainer,
@@ -30,8 +31,8 @@ type EmployeeSummary = {
 };
 
 interface Props {
-    employees: EmployeeSummary[];
-    className?: string;
+    readonly employees: readonly EmployeeSummary[];
+    readonly className?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -46,16 +47,22 @@ function buildPalette(count: number): string[] {
 }
 
 /* ---------- custom tooltip ---------- */
-
-import { TooltipProps } from "recharts";
+type ScatterPoint = {
+    x: number;
+    y: number;
+    z: number;
+    name: string;
+    color: string;
+    fill: string;
+};
 
 function ScatterTooltip(props: TooltipProps<number, string>) {
     const { active, payload } = props;
 
-    if (!active || !payload || !payload.length) return null;
+    if (!active || !payload?.length) return null;
 
     const p = payload[0];                       // only one point in payload
-    const { x, y, z, name } = p.payload as any; // props added below
+    const { x, y, z, name } = p.payload as ScatterPoint; // props added below
 
     return (
         <div className="rounded-md border bg-background p-2 shadow-sm text-xs">
@@ -84,8 +91,6 @@ export default function EmployeeProductivityScatter({
     employees,
     className,
 }: Props) {
-    if (!employees.length) return null;
-
     /* ---------- palette + config ---------- */
     const palette = React.useMemo(() => buildPalette(employees.length), [employees]);
 
@@ -117,6 +122,8 @@ export default function EmployeeProductivityScatter({
         [employees]
     );
 
+    if (!employees.length) return null;
+
     /* ---------- render ---------- */
     return (
         <ChartContainer config={chartConfig} className={className ?? "h-80 w-full"}>
@@ -143,13 +150,13 @@ export default function EmployeeProductivityScatter({
 
                     <ChartTooltip
                         cursor={false}
-                        content={(p: any) => <ScatterTooltip {...p} />}
+                        content={(p: TooltipProps<number, string>) => <ScatterTooltip {...p} />}
                     />
 
                     {/* one <Scatter> per employee keeps colour and legend consistent */}
-                    {series.map((pt, idx) => (
+                    {series.map((pt) => (
                         <Scatter
-                            key={idx}
+                            key={pt.name}
                             data={[pt]}
                             name={pt.name}
                             fill={pt.fill}
