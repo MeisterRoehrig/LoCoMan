@@ -90,8 +90,15 @@ function collectStepIdsForCategory(cat: TreeCategory): string[] {
 }
 
 /** Guarantee an array */
-const arr = <T>(x: T | T[] | null | undefined): T[] =>
-  x === undefined || x === null ? [] : Array.isArray(x) ? x : [x];
+const arr = <T>(x: T | T[] | null | undefined): T[] => {
+  if (x === undefined || x === null) {
+    return [];
+  }
+  if (Array.isArray(x)) {
+    return x;
+  }
+  return [x];
+};
 
 /* ─────────────────────────────────────────────────────────── */
 /* 3 ─ Main generator                                         */
@@ -200,7 +207,7 @@ export function generateProjectSummary(
   /* ---------- 3.7 Category summaries ---------- */
   const buildCat = (cat: TreeCategory): ProjectCategorySummary => {
     const ids = collectStepIdsForCategory(cat);
-    const stepsArr = ids.map((id) => stepBreakdown[id]).filter(Boolean) as StepCostBreakdown[];
+    const stepsArr = ids.map((id) => stepBreakdown[id]).filter(Boolean);
     const total = stepsArr.reduce((acc, s) => acc + s.stepCost, 0);
     return {
       categoryId: cat.id,

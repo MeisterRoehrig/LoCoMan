@@ -6,6 +6,7 @@ import {
     PolarGrid,
     Radar,
     RadarChart,
+    TooltipProps
 } from "recharts";
 import {
     Card,
@@ -19,7 +20,6 @@ import {
     ChartTooltip,
     ChartConfig,
 } from "@/components/ui/chart";
-import { formatEuro } from "@/lib/utils";
 import { RadarTooltip } from "./radar-tooltip";
 
 /* ------------------------------------------------------------------ */
@@ -90,19 +90,7 @@ export default function EmployeeStepRadarChart({
     smooth = "none",
     stepNameLookup = {},
     className,
-}: Props) {
-    /* ---------- early return ---------- */
-    if (!employees.length) {
-        return (
-            <Card className={className}>
-                <CardHeader>
-                    <CardTitle>Personenbeitrag pro Schritt</CardTitle>
-                    <CardDescription>Keine Daten vorhanden</CardDescription>
-                </CardHeader>
-            </Card>
-        );
-    }
-
+}: Readonly<Props>) {
     /* ---------- constant values ---------- */
     const palette = React.useMemo(() => buildPalette(employees.length), [employees]);
 
@@ -114,16 +102,6 @@ export default function EmployeeStepRadarChart({
         });
         return Array.from(set);
     }, [employees]);
-
-    /* ---------- formatter helpers ---------- */
-    const formatValue = React.useCallback(
-        (v: number): string => {
-            if (smooth === "percent") return `${v.toFixed(1)} %`;
-            if (metric === "cost") return formatEuro(v);
-            return `${v.toFixed(0)} min`;
-        },
-        [metric, smooth]
-    );
 
     const stepLabel = React.useCallback(
         (id: string) => stepNameLookup[id] ?? id,
@@ -163,9 +141,27 @@ export default function EmployeeStepRadarChart({
         return cfg;
     }, [employees, palette]);
 
+    /* ---------- early return ---------- */
+    if (!employees.length) {
+        return (
+            <Card className={className}>
+                <CardHeader>
+                    <CardTitle>Personenbeitrag pro Schritt</CardTitle>
+                    <CardDescription>Keine Daten vorhanden</CardDescription>
+                </CardHeader>
+            </Card>
+        );
+    }
+
     /* ---------- render ---------- */
-    const yUnit =
-        smooth === "percent" ? "%" : metric === "cost" ? "€" : "min";
+    let yUnit: string;
+    if (smooth === "percent") {
+        yUnit = "%";
+    } else if (metric === "cost") {
+        yUnit = "€";
+    } else {
+        yUnit = "min";
+    }
 
     return (
         <Card className={className}>
@@ -186,13 +182,13 @@ export default function EmployeeStepRadarChart({
 
                         <ChartTooltip
                             cursor={false}
-                            content={(p: any) => (
+                            content={(p: TooltipProps<number, string>) => (
                                 <RadarTooltip
                                     {...p}
                                     employees={employees}
                                     stepNameLookup={stepNameLookup}
                                     metric={metric}      // "cost" | "minutes"
-                                // "none" | "log" | "sqrt" | "percent"
+                                    smooth={smooth}      // "none" | "log" | "sqrt" | "percent"
                                 />
                             )}
                         />

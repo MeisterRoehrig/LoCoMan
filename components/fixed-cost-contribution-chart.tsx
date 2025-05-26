@@ -60,7 +60,7 @@ function Tooltip({
   const shortLabel =
     label.length > max ? label.slice(0, max - 1) + "…" : label
 
-  const row = payload[0].payload as any
+  const row = payload[0].payload
   const lines = [
     { key: "fixedEuro",    label: "Fixed",    col: COL_FIX },
     { key: "employeeEuro", label: "Employee", col: COL_EMP },
@@ -97,7 +97,7 @@ function Tooltip({
 //
 // ─── MAIN COMPONENT ─────────────────────────────────────────────────────
 //
-export default function CostContributionChart({ categories }: Props) {
+export default function CostContributionChart({ categories }: Readonly<Props>) {
   const [view, setView] = React.useState<"categories" | "steps">("categories")
 
   const chartData = React.useMemo(() => {
@@ -269,8 +269,8 @@ export default function CostContributionChart({ categories }: Props) {
                 stackId={stacked ? "a" : undefined}
                 radius={stacked ? [4, 4, 0, 0] : [2, 2, 0, 0]}
               >
-                {chartData.map((_, i) => (
-                  <Cell key={`fix-${i}`} fill={COL_FIX} />
+                {chartData.map((row) => (
+                  <Cell key={`fix-${row.label}`} fill={COL_FIX} />
                 ))}
               </Bar>
 
@@ -281,8 +281,8 @@ export default function CostContributionChart({ categories }: Props) {
                 stackId={stacked ? "a" : undefined}
                 radius={stacked ? [4, 4, 0, 0] : [2, 2, 0, 0]}
               >
-                {chartData.map((_, i) => (
-                  <Cell key={`emp-${i}`} fill={COL_EMP} />
+                {chartData.map((row) => (
+                  <Cell key={`emp-${row.label}`} fill={COL_EMP} />
                 ))}
               </Bar>
 
@@ -293,8 +293,8 @@ export default function CostContributionChart({ categories }: Props) {
                 stackId={stacked ? "a" : undefined}
                 radius={stacked ? [4, 4, 0, 0] : [2, 2, 0, 0]}
               >
-                {chartData.map((_, i) => (
-                  <Cell key={`res-${i}`} fill={COL_RES} />
+                {chartData.map((row) => (
+                  <Cell key={`res-${row.label}`} fill={COL_RES} />
                 ))}
               </Bar>
             </BarChart>

@@ -8,17 +8,11 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-} from "@/components/ui/breadcrumb"
 
 import ProtectedRoute from "@/components/protected-route"
 import {
   DashboardContext,
-} from "@/lib/dashboard-context"  // <-- new import
+} from "@/lib/dashboard-context"  
 import BreadcrumbProvider from "@/providers/breadcrumb-provider"
 
 export default function DashboardLayout({
@@ -43,11 +37,9 @@ export default function DashboardLayout({
               <div className="flex items-center gap-2 px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
-
                 <BreadcrumbProvider/>
               </div>
             </header>
-
             {children}
           </SidebarInset>
         </SidebarProvider>

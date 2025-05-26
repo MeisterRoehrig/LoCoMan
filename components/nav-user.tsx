@@ -1,10 +1,9 @@
 "use client"
 
 import {
-  BadgeCheck,
+  History,
   Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
   Moon,
   Sun
@@ -57,8 +56,8 @@ export function NavUser({
     setTheme(currentTheme === "dark" ? "light" : "dark")
   }
 
-  const { logout } = useAuth(); 
-  
+  const { logout } = useAuth();
+
 
   return (
     <SidebarMenu>
@@ -100,21 +99,17 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={toggleTheme} className="flex items-center space-x-2">
-                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                {currentTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              <DropdownMenuItem disabled>
+                <History/>
+                Version {process.env.NEXT_PUBLIC_GIT_COMMIT}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuItem onClick={toggleTheme} className="flex items-center">
+                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                {currentTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
@@ -123,7 +118,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()} >
-              <LogOut/>
+              <LogOut />
               Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
