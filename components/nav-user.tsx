@@ -99,9 +99,9 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem disabled>
+              <DropdownMenuItem>
                 <History/>
-                Version {process.env.NEXT_PUBLIC_GIT_COMMIT}
+                Version {process.env.NEXT_PUBLIC_APP_VERSION}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
