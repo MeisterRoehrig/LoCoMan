@@ -66,7 +66,7 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
@@ -97,29 +97,31 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator/>
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <div className="flex coursur-text items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
                 <History/>
-                Version {process.env.NEXT_PUBLIC_APP_VERSION}
-              </DropdownMenuItem>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span>Version {process.env.NEXT_PUBLIC_APP_VERSION}</span>
+                </div>
+              </div>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={toggleTheme} className="flex items-center">
+              <DropdownMenuItem onClick={toggleTheme} className="flex items-center cursor-pointer">
                 <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                {currentTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                {currentTheme === "dark" ? "Light Mode Aktivieren" : "Dark Mode Aktivieren"}
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <Bell />
-                Notifications
+                Mitteilungen
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logout()} >
+            <DropdownMenuItem className="cursor-pointer" onClick={() => logout()} >
               <LogOut />
-              Sign Out
+              Abmelden
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

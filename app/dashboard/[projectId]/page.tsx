@@ -149,14 +149,14 @@ export default function Page() {
           <h2>{project.description}</h2>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleDownloadSummary}>
+          <Button className="cursor-pointer" variant="outline" onClick={handleDownloadSummary}>
             <Download />
           </Button>
-          <Button variant="outline" onClick={() => router.push(`/dashboard/${projectId}/data`)}>
-            <Edit /> Edit Data
+          <Button className="cursor-pointer" variant="outline" onClick={() => router.push(`/dashboard/${projectId}/data`)}>
+            <Edit />Daten Editieren
           </Button>
-          <Button onClick={handleGenerateReport}>
-            <Sparkles /> {summary ? "Update Report" : "Generate Report"}
+          <Button className="cursor-pointer" onClick={handleGenerateReport}>
+            <Sparkles /> {summary ? "Report Updaten" : "Report Generieren"}
           </Button>
         </div>
       </div>
@@ -378,7 +378,9 @@ export default function Page() {
           </Card>
         </div>
       ) : (
-        <div className="text-sm text-muted-foreground mt-4">Noch kein Bericht generiert. Klicke auf Generate Report, um zu starten.</div>
+        <div className="flex justify-center items-center h-40">
+          <div className="text-sm text-muted-foreground">Noch kein Bericht generiert. Klicke auf Report Generieren, um zu starten.</div>
+        </div>
       )}
     </ScrollArea>
   );

@@ -75,7 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="#">
+                <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Truck className="size-4" />
                 </div>
@@ -83,7 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate font-medium">LoCoMan</span>
                   <span className="truncate text-xs">DHBW Friedrichshafen</span>
                 </div>
-              </Link>
+                </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -91,6 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         {/* Example of a "New Project" link or button in the main nav: */}
+
         <NewProjectButton />
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>Projekte</SidebarGroupLabel>
@@ -138,13 +139,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         }}
                       >
                         <Folder className="text-muted-foreground" />
-                        <span>Edit Data</span>
+                        <span>Daten Editieren</span>
                       </DropdownMenuItem>
 
 
                       <DropdownMenuItem onClick={() => handleShareProject(item.id)}>
                         <Share className="text-muted-foreground" />
-                        <span>Share Project</span>
+                        <span>Projekt Teilen</span>
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
@@ -152,7 +153,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       {/* 4) Here’s the “Delete Project” click */}
                       <DropdownMenuItem onClick={() => removeProject(item.id)}>
                         <Trash2 className="text-muted-foreground" />
-                        <span>Delete Project</span>
+                        <span>Projekt Löschen</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -161,17 +162,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           )}
         </SidebarGroup>
-
-        <NavSecondary
-          items={[
-            { title: "Assistant", url: "/assistant", icon: Sparkles },
-          ]}
-          className="mt-auto"
-        />
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser
+        <NavUser 
           user={{
             name: userProfile?.displayName ?? "Loading...",
             email: userProfile?.email ?? "",

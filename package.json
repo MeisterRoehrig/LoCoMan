@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predeploy:app": "echo \"NEXT_PUBLIC_APP_VERSION=$(git rev-parse --short HEAD)\" > .env.apphosting",
+    "prebuild": "ts-node scripts/inject-version.ts",
+    "build": "npm run prebuild && next build",
+    "predeploy:app": "npm run prebuild",
     "deploy": "npm run predeploy:app && firebase deploy --only apphosting",
-    "build": "next build",
     "dev": "next dev --turbopack",
     "start": "next start",
     "lint": "next lint"
