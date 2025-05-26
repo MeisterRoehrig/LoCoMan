@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "predeploy:app": "echo \"NEXT_PUBLIC_APP_VERSION=$(git rev-parse --short HEAD)\" > .env.apphosting",
+    "deploy": "npm run predeploy:app && firebase deploy --only apphosting",
     "build": "next build",
+    "dev": "next dev --turbopack",
     "start": "next start",
     "lint": "next lint"
   },
@@ -55,6 +57,7 @@
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.15.2",
     "sonner": "^2.0.3",
+    "swr": "^2.3.3",
     "tailwind-merge": "^3.0.2",
     "tw-animate-css": "^1.2.4",
     "vaul": "^1.1.2",
