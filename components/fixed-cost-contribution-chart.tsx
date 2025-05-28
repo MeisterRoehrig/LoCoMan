@@ -226,7 +226,7 @@ export default function CostContributionChart({ categories }: Readonly<Props>) {
             variant={view === "categories" ? "default" : "outline"}
             onClick={() => setView("categories")}
           >
-            Categories
+            Kategorien
           </Button>
           <Button
             size="sm"

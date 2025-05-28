@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
-import { BellRing, Download, Edit, Sparkles } from "lucide-react";
+import {Download, Edit, Sparkles } from "lucide-react";
 import { Report, forceRefreshReports } from "@/lib/report-manager";
 import {
   Card,
@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 
 import { useSteps } from "@/providers/steps-provider";
 import { useTree } from "@/providers/tree-provider";
@@ -149,14 +149,14 @@ export default function Page() {
           <h2>{project.description}</h2>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleDownloadSummary}>
+          <Button className="cursor-pointer" variant="outline" onClick={handleDownloadSummary}>
             <Download />
           </Button>
-          <Button variant="outline" onClick={() => router.push(`/dashboard/${projectId}/data`)}>
-            <Edit /> Edit Data
+          <Button className="cursor-pointer" variant="outline" onClick={() => router.push(`/dashboard/${projectId}/data`)}>
+            <Edit />Daten Editieren
           </Button>
-          <Button onClick={handleGenerateReport}>
-            <Sparkles /> {summary ? "Update Report" : "Generate Report"}
+          <Button className="cursor-pointer" onClick={handleGenerateReport}>
+            <Sparkles /> {summary ? "Report Updaten" : "Report Generieren"}
           </Button>
         </div>
       </div>
@@ -174,9 +174,9 @@ export default function Page() {
                   {formatEuro(totalProjectCost)}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
+                  {/* <Badge variant="outline">
                     <BellRing size={64} color="var(--destructive-highlight)" />
-                  </Badge>
+                  </Badge> */}
                 </CardAction>
               </CardHeader>
               <ChartContainer config={chartConfig} className="w-full h-full p-0">
@@ -218,14 +218,14 @@ export default function Page() {
                 <CardDescription>Eine kurze Zusammenfassung der Kostenstruktur aus Sicht der KI.</CardDescription>
               </CardHeader>
               <CardFooter className="text-sm">
-                <Report project={project} kind="overview" responseType="text" wordRange={[300, 400]} />
+                <Report project={project} kind="overview" responseType="text" wordRange={[400, 800]} />
               </CardFooter>
             </Card>
 
             {/* Fixed costs */}
             <Card className="flex flex-col">
               <CardHeader>
-                <CardDescription>Fixkosten&nbsp;</CardDescription>
+                <CardDescription>Gemeinkosten</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
                   {formatEuro(fixedCostsSection?.totalFixedCost ?? 0)}
                 </CardTitle>
@@ -239,7 +239,7 @@ export default function Page() {
             {/* Employee cost */}
             <Card className="flex flex-col">
               <CardHeader>
-                <CardDescription>Personalkosten&nbsp;</CardDescription>
+                <CardDescription>Personalkosten</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
                   {formatEuro(employeeSection?.totalEmployeeCost ?? 0)}
                 </CardTitle>
@@ -257,7 +257,7 @@ export default function Page() {
             {/* Resource cost */}
             <Card className="flex flex-col">
               <CardHeader>
-                <CardDescription>Ressourcenkosten&nbsp;</CardDescription>
+                <CardDescription>Hilfsmittelkosten</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
                   {formatEuro(resourcesSection?.totalResourceCost ?? 0)}
                 </CardTitle>
@@ -292,7 +292,7 @@ export default function Page() {
             <div className="flex-1 flex flex-col">
               <Card className="flex flex-1 flex-col h-full">
                 <CardHeader>
-                  <CardTitle>Employee Productivity vs. Cost</CardTitle>
+                  <CardTitle>Mitarbeiterproduktivität vs. Kosten</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col items-center justify-center">
                   <EmployeeProductivityScatter employees={employeeSection?.list ?? []} />
@@ -365,7 +365,7 @@ export default function Page() {
 
 
           {/* ── RAW JSON ─────────────────────────────────────────────── */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Raw Summary JSON</CardTitle>
               <CardDescription className="text-sm">Nur f&uuml;r Entwicklung &amp; Debugging 🔧</CardDescription>
@@ -375,10 +375,12 @@ export default function Page() {
                 {JSON.stringify(summary, null, 2)}
               </pre>
             </CardFooter>
-          </Card>
+          </Card> */}
         </div>
       ) : (
-        <div className="text-sm text-muted-foreground mt-4">Noch kein Bericht generiert. Klicke auf Generate Report, um zu starten.</div>
+        <div className="flex justify-center items-center h-40">
+          <div className="text-sm text-muted-foreground">Noch kein Bericht generiert. Klicke auf Report Generieren, um zu starten.</div>
+        </div>
       )}
     </ScrollArea>
   );

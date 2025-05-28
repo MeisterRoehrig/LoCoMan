@@ -8,11 +8,14 @@ runConfig:
   # memoryMiB: 512
 
 # Environment variables and secrets.
-env:
-  - variable: GIT_COMMIT
-    value: "abc1234"         # replace in CI before you commit
-    availability:
-      - BUILD                # only needed at build time
+# env:
+  # Configure environment variables.
+  # See https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
+  # - variable: MESSAGE
+  #   value: Hello world!
+  #   availability:
+  #     - BUILD
+  #     - RUNTIME
 
   # Grant access to secrets in Cloud Secret Manager.
   # See https://firebase.google.com/docs/app-hosting/configure#secret-parameters

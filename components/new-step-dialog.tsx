@@ -13,9 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AutoComplete, type Option } from "@/lib/autocomplete";
-import { useSteps } from "@/providers/steps-provider";
 import { useTree } from "@/providers/tree-provider";
-import { StepDoc } from "@/providers/steps-provider";
+import { StepDoc, useSteps} from "@/providers/steps-provider";
 
 export function NewStepDialog({
   open,
@@ -73,6 +72,7 @@ export function NewStepDialog({
 
     if (!name.trim()) {
       alert("Bitte Schrittname eingeben");
+      console.log(salary, resourceValue);
       return;
     }
 
@@ -135,75 +135,6 @@ export function NewStepDialog({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="z.B. Verpackung vorbereiten"
-              />
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Person</Label>
-              <Input
-                className="col-span-3"
-                value={person}
-                onChange={(e) => setPerson(e.target.value)}
-                placeholder="z.B. Lagerist"
-              />
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Gehalt (€)</Label>
-              <Input
-                type="number"
-                className="col-span-3"
-                value={salary}
-                onChange={(e) => setSalary(e.target.valueAsNumber || "")}
-              />
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Kosten-Treiber</Label>
-              <Input
-                className="col-span-3"
-                value={driver}
-                onChange={(e) => setDriver(e.target.value)}
-                placeholder="z.B. Pakete pro Tag"
-              />
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Treiberwert</Label>
-              <Input
-                type="number"
-                className="col-span-3"
-                value={driverValue}
-                onChange={(e) => setDriverValue(e.target.valueAsNumber || "")}
-              />
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Dauer (min)</Label>
-              <Input
-                type="number"
-                className="col-span-3"
-                value={duration}
-                onChange={(e) => setDuration(e.target.valueAsNumber || "")}
-              />
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Zusatzressourcen</Label>
-              <Input
-                className="col-span-3"
-                value={resources}
-                onChange={(e) => setResources(e.target.value)}
-              />
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Ressourcenkosten (€)</Label>
-              <Input
-                type="number"
-                className="col-span-3"
-                value={resourceValue}
-                onChange={(e) => setResourceValue(e.target.valueAsNumber || "")}
               />
             </div>
           </div>

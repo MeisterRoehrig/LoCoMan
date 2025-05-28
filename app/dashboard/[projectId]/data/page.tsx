@@ -26,7 +26,7 @@ import { useSteps } from "@/providers/steps-provider";
 import { NewStepDialog } from "@/components/new-step-dialog";
 import StepDetails from "@/components/step-details";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import FixedCostSection from "@/components/fixed-cost-details";
@@ -38,7 +38,7 @@ export default function Page() {
     const projectId = String(params.projectId);
     const { user } = useAuth();
     const { getStepById, updateStep } = useSteps();
-    const { loadFixedTree } = useFixedTree();                // ← add this line
+    const { loadFixedTree } = useFixedTree();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
@@ -56,7 +56,7 @@ export default function Page() {
     React.useEffect(() => {
         if (user && user.uid && projectId) {
             loadTree(projectId);
-            loadFixedTree(projectId);     // ← add this lineF
+            loadFixedTree(projectId);
         }
     }, [user, projectId, loadTree]);
 
@@ -144,16 +144,13 @@ export default function Page() {
                                         className="cursor-pointer"
                                         variant="link"
                                     >
-                                        Add Category <Plus />
+                                        Kategorie hinzufügen <Plus />
                                     </Button>
                                 </div>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
-                                    <DialogTitle>Add Category</DialogTitle>
-                                    <DialogDescription>
-                                        Make changes to your profile here. Click save when you&apos;re done.
-                                    </DialogDescription>
+                                    <DialogTitle>Kategorie hinzufügen</DialogTitle>
                                 </DialogHeader>
                                 <div className="grid gap-4 py-4">
                                     <div className="grid grid-cols-4 items-center gap-4">
@@ -177,7 +174,7 @@ export default function Page() {
                                                 setDialogOpen(false); // Close the dialog after saving
                                             }}
                                         >
-                                            Save changes
+                                            Speichern
                                         </Button>
                                     </DialogClose>
                                 </DialogFooter>
@@ -207,11 +204,11 @@ export default function Page() {
                         if (viewMode === "step" && selectedStep) {
                             return (
                                 <div className="pb-4">
-                                    <h2>Details for “{selectedStep.name}”</h2>
-                                    <Separator className="my-3" />
+                                    <h1 className="text-3xl font-bold tracking-tight">{selectedStep.name}</h1>
+                                    <Separator className="my-4" />
                                     <StepDetails
                                         step={selectedStep}
-                                        
+
                                         onSave={(updatedFields) => {
                                             updateStep(selectedStep.id, updatedFields);
                                         }}
@@ -221,17 +218,21 @@ export default function Page() {
                         } else if (viewMode === "fixed-costs") {
                             return (
                                 <div className="pb-4">
-                                    <h2>Fixkosten</h2>
-                                    <Separator className="my-3" />
+                                    <h1 className="text-3xl font-bold tracking-tight">Fixkosten</h1>
+                                    <Separator className="mt-4 mb-6" />
                                     <FixedCostSection />
                                 </div>
                             );
                         } else {
-                            return <p>Select a step or open fixed costs to view details.</p>;
+                            return (
+                                <div className="flex justify-center items-center h-40">
+                                    <div className="text-sm text-muted-foreground">Wählen Sie einen Schritt oder öffnen Sie die Fixkosten, um Details anzuzeigen.</div>
+                                </div>
+                            )
                         }
                     })()}
                 </ScrollArea>
             </ResizablePanel>
-        </ResizablePanelGroup>
+        </ResizablePanelGroup >
     );
 }

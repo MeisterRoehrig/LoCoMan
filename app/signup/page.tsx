@@ -58,9 +58,9 @@ function SignUpPage() {
       <div className="w-full max-w-sm">
         <Card>
           <CardHeader>
-            <CardTitle>Create your account</CardTitle>
+            <CardTitle>Erstellen Sie Ihr Konto</CardTitle>
             <CardDescription>
-              Enter your email and password to sign up
+              Geben Sie Ihre E-Mail-Adresse und Ihr Passwort ein, um sich anzumelden.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -90,7 +90,7 @@ function SignUpPage() {
                 </div>
 
                 <div className="grid gap-3">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -112,7 +112,7 @@ function SignUpPage() {
               </div>
 
               <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
+                Sie haben bereits ein Konto?{" "}
                 <Link href="/login" className="underline underline-offset-4">
                   Log in
                 </Link>

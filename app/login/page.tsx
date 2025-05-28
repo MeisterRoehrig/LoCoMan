@@ -49,9 +49,9 @@ function LoginPage() {
       <div className="w-full max-w-sm">
         <Card>
           <CardHeader>
-            <CardTitle>Login to your account</CardTitle>
+            <CardTitle>Loggen Sie sich in Ihr Konto ein</CardTitle>
             <CardDescription>
-              Enter your email below to login to your account
+              Geben Sie unten Ihre E-Mail-Adresse ein, um sich in Ihr Konto einzuloggen.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -75,7 +75,7 @@ function LoginPage() {
                       href="#"
                       className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                     >
-                      Forgot your password?
+                      Passwort vergessen?
                     </Link>
                   </div>
                   <Input
@@ -104,7 +104,7 @@ function LoginPage() {
                 )}
               </div>
               <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{" "}
+                Haben Sie noch kein Konto?{" "}
                 <Link href="/signup" className="underline underline-offset-4">
                   Sign up
                 </Link>

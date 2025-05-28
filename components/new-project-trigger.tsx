@@ -20,7 +20,6 @@ import { Label } from "@/components/ui/label";
 // Sidebar menu (same as NavMain uses)
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -54,8 +53,6 @@ export function NavMainNewProject() {
   return (
     <SidebarGroup>
       {/* You can rename "Platform" to whatever section heading you want */}
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
-
       <SidebarMenu>
         {/* A single top-level “NavMain” item: collapsible just for consistent structure */}
         <Collapsible asChild defaultOpen={false}>

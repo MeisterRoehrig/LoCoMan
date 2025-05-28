@@ -128,8 +128,8 @@ export default function EmployeeProductivityScatter({
     return (
         <ChartContainer config={chartConfig} className={className ?? "h-80 w-full"}>
             <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 16, right: 32, left: 16, bottom: 24 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                <ScatterChart margin={{ top: 16, right: 16, left: 16, bottom: 16 }}>
+                    <CartesianGrid strokeDasharray="3 3"/>
                     <XAxis
                         type="number"
                         dataKey="x"
@@ -146,7 +146,7 @@ export default function EmployeeProductivityScatter({
                         domain={[minCost, "auto"]}
                         label={{ value: "Total Employee Cost (€)", angle: -90, position: "Left", dx: -40 }}
                     />
-                    <ZAxis type="number" dataKey="z" range={[60, 400]} />
+                    <ZAxis type="number" dataKey="z" range={[60, 400]}/>
 
                     <ChartTooltip
                         cursor={false}
