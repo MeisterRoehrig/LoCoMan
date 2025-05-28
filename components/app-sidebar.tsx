@@ -105,7 +105,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {/* 6) Use the projects data to render the list */}
           {!loadingProjects && projects.length === 0 && (
             <div className="flex items-center justify-center py-2">
-              <span className="text-sm text-muted-foreground">No projects found</span>
+              <span className="text-sm text-muted-foreground">Keine Projekte gefunden</span>
             </div>
           )}
 

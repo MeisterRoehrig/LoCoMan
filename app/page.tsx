@@ -31,8 +31,8 @@ export default function Page() {
                 </NavbarRight>
             </NavbarComponent>
             <div className="relative z-0 flex flex-col items-center justify-center pb-100">
-                <h1 className="text-center text-8xl font-semibold leading-none text-foreground max-w-5xl py-8">
-                    Smarter <span className="bg-gradient-to-r from-blue-600 via-indigo-300 to-indigo-400 inline-block text-transparent bg-clip-text pb-4">insights</span> for transparent <span className="bg-gradient-to-r from-indigo-300 via-indigo-400 to-indigo-500 inline-block text-transparent bg-clip-text pb-4">logistics</span>
+                <h1 className="text-center text-8xl font-semibold leading-none text-foreground max-w-6xl py-8">
+                    Kosten <span className="bg-gradient-to-r from-blue-600 via-indigo-300 to-indigo-400 inline-block text-transparent bg-clip-text pb-4">verstehen</span>, Entscheidungen <span className="bg-gradient-to-r from-blue-600 via-indigo-300 to-indigo-400 inline-block text-transparent bg-clip-text pb-4">treffen</span>.
                 </h1>
             </div>
 

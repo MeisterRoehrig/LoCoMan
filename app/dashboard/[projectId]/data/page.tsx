@@ -26,7 +26,7 @@ import { useSteps } from "@/providers/steps-provider";
 import { NewStepDialog } from "@/components/new-step-dialog";
 import StepDetails from "@/components/step-details";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import FixedCostSection from "@/components/fixed-cost-details";

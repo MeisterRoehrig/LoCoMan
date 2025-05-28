@@ -174,9 +174,9 @@ export default function Page() {
                   {formatEuro(totalProjectCost)}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
+                  {/* <Badge variant="outline">
                     <BellRing size={64} color="var(--destructive-highlight)" />
-                  </Badge>
+                  </Badge> */}
                 </CardAction>
               </CardHeader>
               <ChartContainer config={chartConfig} className="w-full h-full p-0">
@@ -218,14 +218,14 @@ export default function Page() {
                 <CardDescription>Eine kurze Zusammenfassung der Kostenstruktur aus Sicht der KI.</CardDescription>
               </CardHeader>
               <CardFooter className="text-sm">
-                <Report project={project} kind="overview" responseType="text" wordRange={[300, 400]} />
+                <Report project={project} kind="overview" responseType="text" wordRange={[400, 800]} />
               </CardFooter>
             </Card>
 
             {/* Fixed costs */}
             <Card className="flex flex-col">
               <CardHeader>
-                <CardDescription>Fixkosten&nbsp;</CardDescription>
+                <CardDescription>Gemeinkosten</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
                   {formatEuro(fixedCostsSection?.totalFixedCost ?? 0)}
                 </CardTitle>
@@ -239,7 +239,7 @@ export default function Page() {
             {/* Employee cost */}
             <Card className="flex flex-col">
               <CardHeader>
-                <CardDescription>Personalkosten&nbsp;</CardDescription>
+                <CardDescription>Personalkosten</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
                   {formatEuro(employeeSection?.totalEmployeeCost ?? 0)}
                 </CardTitle>
@@ -257,7 +257,7 @@ export default function Page() {
             {/* Resource cost */}
             <Card className="flex flex-col">
               <CardHeader>
-                <CardDescription>Ressourcenkosten&nbsp;</CardDescription>
+                <CardDescription>Hilfsmittelkosten</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">
                   {formatEuro(resourcesSection?.totalResourceCost ?? 0)}
                 </CardTitle>
@@ -292,7 +292,7 @@ export default function Page() {
             <div className="flex-1 flex flex-col">
               <Card className="flex flex-1 flex-col h-full">
                 <CardHeader>
-                  <CardTitle>Employee Productivity vs. Cost</CardTitle>
+                  <CardTitle>Mitarbeiterproduktivität vs. Kosten</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col items-center justify-center">
                   <EmployeeProductivityScatter employees={employeeSection?.list ?? []} />
