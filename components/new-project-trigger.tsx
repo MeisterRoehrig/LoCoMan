@@ -20,7 +20,6 @@ import { Label } from "@/components/ui/label";
 // Sidebar menu (same as NavMain uses)
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,

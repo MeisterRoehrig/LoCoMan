@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import {
-  Sparkles,
   Truck,
   Folder,
   MoreHorizontal,
@@ -11,7 +10,6 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation" // Next.js App Router
 
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,

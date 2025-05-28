@@ -21,19 +21,12 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
-  ChevronDown,
   Plus as PlusIcon,
   Trash2,
 } from "lucide-react";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +44,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 import { AutoComplete, type Option } from "@/lib/autocomplete";

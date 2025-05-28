@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
-import { BellRing, Download, Edit, Sparkles } from "lucide-react";
+import {Download, Edit, Sparkles } from "lucide-react";
 import { Report, forceRefreshReports } from "@/lib/report-manager";
 import {
   Card,
@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 
 import { useSteps } from "@/providers/steps-provider";
 import { useTree } from "@/providers/tree-provider";

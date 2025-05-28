@@ -13,9 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AutoComplete, type Option } from "@/lib/autocomplete";
-import { useSteps } from "@/providers/steps-provider";
 import { useTree } from "@/providers/tree-provider";
-import { StepDoc } from "@/providers/steps-provider";
+import { StepDoc, useSteps} from "@/providers/steps-provider";
 
 export function NewStepDialog({
   open,
@@ -73,6 +72,7 @@ export function NewStepDialog({
 
     if (!name.trim()) {
       alert("Bitte Schrittname eingeben");
+      console.log(salary, resourceValue);
       return;
     }
 
