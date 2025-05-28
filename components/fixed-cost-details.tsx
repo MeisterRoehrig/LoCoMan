@@ -21,7 +21,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
-  ArrowUpDown,
   ChevronDown,
   Plus as PlusIcon,
   Trash2,
@@ -121,53 +120,12 @@ function DataTable<T extends { id: string }>({
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
         <Button size="sm" onClick={onAddClick}>
-          <PlusIcon className="mr-1.5 h-4 w-4" /> Add&nbsp;
+          <PlusIcon className="mr-1.5 h-4 w-4" />&nbsp;
           {title.split(" ")[0]}
         </Button>
       </div>
 
-      <div className="flex items-center">
-        {table.getAllColumns().length > 0 && (
-          <Input
-            placeholder={`Filter ${title.toLowerCase()}…`}
-            value={
-              (table
-                .getAllColumns()
-                .find((c) => c.getCanFilter())
-                ?.getFilterValue() as string) ?? ""
-            }
-            onChange={(e) =>
-              table
-                .getAllColumns()
-                .find((c) => c.getCanFilter())
-                ?.setFilterValue(e.target.value)
-            }
-            className="max-w-sm"
-          />
-        )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="ml-auto">
-              Columns <ChevronDown className="ml-1 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((c) => c.getCanHide())
-              .map((column) => (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  checked={column.getIsVisible()}
-                  className="capitalize"
-                  onCheckedChange={(v) => column.toggleVisibility(!!v)}
-                >
-                  {column.id}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      
 
       {/* ---------- the table ---------- */}
       <div className="rounded-md border">
@@ -215,11 +173,6 @@ function DataTable<T extends { id: string }>({
             )}
           </TableBody>
         </Table>
-      </div>
-
-      <div className="flex items-center justify-end text-sm text-muted-foreground">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
       </div>
     </div>
   );
@@ -294,14 +247,14 @@ function AddDialog<T extends { id: string }>({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Select existing or create new.
+            Wählen Sie vorhandene oder erstellen Sie neue.
           </DialogDescription>
         </DialogHeader>
 
         <AutoComplete
           options={options}
-          emptyMessage="No results"
-          placeholder="Search existing…"
+          emptyMessage="Keine Ergebnisse"
+          placeholder="Nach vorhandenen suchen…"
           onValueChange={setSelected}
           value={selected}
         />
@@ -322,7 +275,7 @@ function AddDialog<T extends { id: string }>({
         )}
 
         <DialogFooter>
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleSave}>Speichern</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -397,19 +350,12 @@ export default function FixedCostSection() {
   const employeeColumns: ColumnDef<EmployeeDoc>[] = [
     {
       accessorKey: "jobtitel",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Jobtitel <ArrowUpDown className="ml-1 h-4 w-4" />
-        </Button>
-      ),
+      header: "Mitarbeiter",
       cell: ({ row }) => <span>{row.getValue("jobtitel")}</span>,
     },
     {
       accessorKey: "monthlySalaryEuro",
-      header: () => <div className="text-right">Salary/Mon.</div>,
+      header: () => <div className="text-right">€/Mon.</div>,
       cell: ({ row }) => {
         const value: number = row.getValue("monthlySalaryEuro");
         return (
@@ -422,18 +368,20 @@ export default function FixedCostSection() {
     {
       id: "actions",
       enableHiding: false,
-      header: () => <span className="sr-only">Actions</span>,
+      header: () => <div className="text-right sr-only">Actions</div>,
       cell: ({ row }) => (
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() =>
-            removeFromFixedCosts(projectId, "employees", row.original.id)
-          }
-        >
-          <Trash2 className="h-4 w-4" />
-          <span className="sr-only">remove</span>
-        </Button>
+        <div className="flex justify-end">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() =>
+              removeFromFixedCosts(projectId, "employees", row.original.id)
+            }
+          >
+            <Trash2 className="h-4 w-4" />
+            <span className="sr-only">remove</span>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -441,7 +389,7 @@ export default function FixedCostSection() {
   const fixedCostColumns: ColumnDef<FixedCostObjectDoc>[] = [
     {
       accessorKey: "costObjectName",
-      header: "Cost Object",
+      header: "Gemeinkosten",
       cell: ({ row }) => <span>{row.getValue("costObjectName")}</span>,
     },
     {
@@ -458,16 +406,21 @@ export default function FixedCostSection() {
     },
     {
       id: "actions",
+      enableHiding: false,
+      header: () => <div className="text-right sr-only">Actions</div>,
       cell: ({ row }) => (
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() =>
-            removeFromFixedCosts(projectId, "fixedCosts", row.original.id)
-          }
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex justify-end">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() =>
+              removeFromFixedCosts(projectId, "fixedCosts", row.original.id)
+            }
+          >
+            <Trash2 className="h-4 w-4" />
+            <span className="sr-only">remove</span>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -475,7 +428,7 @@ export default function FixedCostSection() {
   const resourceColumns: ColumnDef<ResourceDoc>[] = [
     {
       accessorKey: "costObjectName",
-      header: "Resource",
+      header: "Hilfsmittel",
       cell: ({ row }) => <span>{row.getValue("costObjectName")}</span>,
     },
     {
@@ -492,16 +445,21 @@ export default function FixedCostSection() {
     },
     {
       id: "actions",
+      enableHiding: false,
+      header: () => <div className="text-right sr-only">Actions</div>,
       cell: ({ row }) => (
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() =>
-            removeFromFixedCosts(projectId, "resources", row.original.id)
-          }
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex justify-end">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() =>
+              removeFromFixedCosts(projectId, "resources", row.original.id)
+            }
+          >
+            <Trash2 className="h-4 w-4" />
+            <span className="sr-only">remove</span>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -539,7 +497,7 @@ export default function FixedCostSection() {
       <AddDialog<EmployeeDoc>
         open={dlgEmp}
         onOpenChange={setDlgEmp}
-        title="Add Employee"
+        title="Mitarbeiter hinzufügen"
         options={employees.map((e) => ({ value: e.id, label: e.jobtitel }))}
         onAttachExisting={attachExisting("employees")}
         onCreateNew={createAndAttach(addEmployee, "employees")}
@@ -572,7 +530,7 @@ export default function FixedCostSection() {
       <AddDialog<FixedCostObjectDoc>
         open={dlgFix}
         onOpenChange={setDlgFix}
-        title="Add Fixed Cost"
+        title="Gemeinkosten hinzufügen"
         options={fixedCostObjects.map((f) => ({
           value: f.id,
           label: f.costObjectName,
@@ -608,7 +566,7 @@ export default function FixedCostSection() {
       <AddDialog<ResourceDoc>
         open={dlgRes}
         onOpenChange={setDlgRes}
-        title="Add Resource"
+        title="Hilfsmittel hinzufügen"
         options={resources.map((r) => ({
           value: r.id,
           label: r.costObjectName,
@@ -645,7 +603,7 @@ export default function FixedCostSection() {
       <ScrollArea className="h-full w-full pr-4">
         <div className="space-y-10 pb-8">
           <DataTable
-            title="Employees"
+            title="Mitarbeiter"
             data={projectEmployees}
             columns={employeeColumns}
             isLoading={loadingEmployees}
@@ -654,10 +612,9 @@ export default function FixedCostSection() {
               removeFromFixedCosts(projectId, "employees", id)
             }
           />
-          <Separator />
 
           <DataTable
-            title="Fixed Cost Objects"
+            title="Gemeinkosten"
             data={projectFixedCosts}
             columns={fixedCostColumns}
             isLoading={loadingFixedCostObjects}
@@ -666,10 +623,9 @@ export default function FixedCostSection() {
               removeFromFixedCosts(projectId, "fixedCosts", id)
             }
           />
-          <Separator />
 
           <DataTable
-            title="Resources"
+            title="Hilfsmittel"
             data={projectResources}
             columns={resourceColumns}
             isLoading={loadingResources}

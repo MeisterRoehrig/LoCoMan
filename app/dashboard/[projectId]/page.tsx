@@ -365,7 +365,7 @@ export default function Page() {
 
 
           {/* ── RAW JSON ─────────────────────────────────────────────── */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Raw Summary JSON</CardTitle>
               <CardDescription className="text-sm">Nur f&uuml;r Entwicklung &amp; Debugging 🔧</CardDescription>
@@ -375,7 +375,7 @@ export default function Page() {
                 {JSON.stringify(summary, null, 2)}
               </pre>
             </CardFooter>
-          </Card>
+          </Card> */}
         </div>
       ) : (
         <div className="flex justify-center items-center h-40">

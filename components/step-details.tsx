@@ -136,49 +136,11 @@ export default function StepDetails({ step, onSave }: StepDetailsProps) {
    * ---------------------------------------------------*/
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Responsible person */}
-      <div>
-        <label className="block text-sm font-medium pb-2">Responsible Person</label>
-        <InputTags
-          key={`person-${step.id}`}
-          value={person}
-          onChange={setPerson}
-          options={employeeOptions}
-          allowCustom={false}
-          placeholder="Select project employee…"
-          isLoading={loadingEmployees}
-        />
-      </div>
-
-      {/* Additional resources */}
-      <div>
-        <label className="block text-sm font-medium pb-2">Additional Resources</label>
-        <InputTags
-          key={`resources-${step.id}`}
-          value={additionalResources}
-          onChange={setAdditionalResources}
-          options={resourceOptions}
-          allowCustom={false}
-          placeholder="Select resource…"
-          isLoading={loadingResources}
-        />
-      </div>
-
-      {/* Step name (read-only) */}
-      <div>
-        <span className="block text-sm font-medium text-muted-foreground pb-2">
-          Step Name
-        </span>
-        <div className="p-2 border rounded bg-muted text-muted-foreground">
-          {step.name}
-        </div>
-      </div>
+      
 
       {/* Cost driver */}
       <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="driver">
-          Cost Driver
-        </label>
+        <h3 className="text-lg font-semibold tracking-tight pb-2">Kostentreiber</h3>
         <input
           id="driver"
           type="text"
@@ -190,9 +152,7 @@ export default function StepDetails({ step, onSave }: StepDetailsProps) {
 
       {/* Cost driver value */}
       <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="driverValue">
-          Cost Driver Value
-        </label>
+        <h3 className="text-lg font-semibold tracking-tight pb-2">Kostentreiber Multiplikator</h3>
         <input
           id="driverValue"
           type="number"
@@ -204,9 +164,7 @@ export default function StepDetails({ step, onSave }: StepDetailsProps) {
 
       {/* Step duration */}
       <div>
-        <label className="block text-sm font-medium pb-2" htmlFor="duration">
-          Step Duration (min)
-        </label>
+        <h3 className="text-lg font-semibold tracking-tight pb-2">Schritt Dauer (min)</h3>
         <input
           id="duration"
           type="number"
@@ -216,17 +174,45 @@ export default function StepDetails({ step, onSave }: StepDetailsProps) {
         />
       </div>
 
+      {/* Responsible person */}
+      <div>
+        <h3 className="text-lg font-semibold tracking-tight">Zuständige Person</h3>
+
+        <InputTags
+          key={`person-${step.id}`}
+          value={person}
+          onChange={setPerson}
+          options={employeeOptions}
+          allowCustom={false}
+          placeholder="Mitarbeiter auswählen…"
+          isLoading={loadingEmployees}
+        />
+      </div>
+
+      {/* Additional resources */}
+      <div>
+        <h3 className="text-lg font-semibold tracking-tight">Zusätzliche Hilfsmittel</h3>
+        <InputTags
+          key={`resources-${step.id}`}
+          value={additionalResources}
+          onChange={setAdditionalResources}
+          options={resourceOptions}
+          allowCustom={false}
+          placeholder="Hilfsmittel auswählen…"
+          isLoading={loadingResources}
+        />
+      </div>
+
       {/* Save button */}
       <button
         type="submit"
         disabled={!isDirty}
-        className={`px-4 py-2 border rounded ${
-          isDirty
-            ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-            : "bg-muted text-muted-foreground cursor-not-allowed"
-        }`}
+        className={`px-4 py-2 border rounded ${isDirty
+          ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+          : "bg-muted text-muted-foreground cursor-not-allowed"
+          }`}
       >
-        Save Changes
+        Änderungen speichern
       </button>
     </form>
   );
