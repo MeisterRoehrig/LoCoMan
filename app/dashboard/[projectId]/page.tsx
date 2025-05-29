@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
-import {Download, Edit, Sparkles } from "lucide-react";
+import { Download, Edit, Sparkles } from "lucide-react";
 import { Report, forceRefreshReports } from "@/lib/report-manager";
 import {
   Card,
@@ -273,10 +273,10 @@ export default function Page() {
             </Card>
           </div>
 
-
           <div className="flex gap-4 items-stretch">
             <div className="flex-1 flex flex-col">
               <EmployeeStepRadarChart
+                className="h-full"
                 employees={employeeSection?.list ?? []}
                 metric="cost"
                 smooth="log"             // or "sqrt" | "percent" | "none"

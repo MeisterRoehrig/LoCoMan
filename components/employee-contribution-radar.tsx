@@ -165,7 +165,7 @@ export default function EmployeeStepRadarChart({
 
     return (
         <Card className={className}>
-            <CardHeader className="items-center pb-4">
+            <CardHeader className="items-center ">
                 <CardTitle>Personenbeitrag pro Schritt</CardTitle>
                 <CardDescription>
                     {metric === "minutes" ? "Arbeitszeit" : "Kosten"} ({yUnit}),
@@ -173,7 +173,7 @@ export default function EmployeeStepRadarChart({
                 </CardDescription>
             </CardHeader>
 
-            <CardContent className="pb-0">
+            <CardContent className="">
                 <ChartContainer
                     config={chartConfig}
                     className="mx-auto width-full "

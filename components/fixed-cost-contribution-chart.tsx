@@ -220,7 +220,7 @@ export default function CostContributionChart({ categories }: Readonly<Props>) {
           </CardDescription>
         </div>
         {/* VIEW TOGGLE  */}
-        <div className="flex gap-2">
+        <div className="flex">
           <Button
             size="sm"
             variant={view === "categories" ? "default" : "outline"}
