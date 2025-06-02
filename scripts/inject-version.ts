@@ -1,10 +1,10 @@
-import { writeFileSync } from "fs";
 import { execSync } from "child_process";
+import { writeFileSync } from "fs";
 
 const hash = execSync("git rev-parse --short HEAD").toString().trim();
-const out  = `NEXT_PUBLIC_APP_VERSION=${hash}\n`;
+const env  = `NEXT_PUBLIC_APP_VERSION=${hash}\n`;
 
-writeFileSync(".env.local",       out);   // local dev + next build
-writeFileSync(".env.apphosting",  out);   // picked up by App Hosting
+writeFileSync(".env.local",      env);   // local builds / dev
+writeFileSync(".env.apphosting", env);   // picked up by App Hosting
 
 console.log(`✅ Injected commit ${hash}`);
