@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
 "scripts": {
-  "prebuild":      "node scripts/inject-version.js",
-  "build":         "npm run prebuild && next build",
+  "prebuild":"node scripts/inject-version.js",
+  "build":"npm run prebuild && next build",
 
-  "predeploy:app": "npm run prebuild",
-  "deploy":        "npm run predeploy:app && firebase deploy --only apphosting",
+  "predeploy:app":"npm run prebuild",
+  "deploy":"npm run predeploy:app && firebase deploy --only apphosting",
 
-  "start": "next start",
-  "lint":  "next lint"
+  "start":"next start",
+  "lint":"next lint"
 },
 
 
