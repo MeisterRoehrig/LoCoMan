@@ -3,11 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "ts-node scripts/inject-version.ts",
+    "prebuild": "ts-node scripts/inject-version.ts", 
     "build": "npm run prebuild && next build",
-    "predeploy:app": "npm run prebuild",
+    "predeploy:app": "npm run prebuild", 
     "deploy": "npm run predeploy:app && firebase deploy --only apphosting",
-    "dev": "next dev --turbopack",
     "start": "next start",
     "lint": "next lint"
   },
