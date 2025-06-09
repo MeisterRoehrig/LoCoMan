@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD4qFSZPUYMoo4J62Czfc1lCPwwpiy5wwk",
@@ -24,4 +25,31 @@ const model = getGenerativeModel(vertexAI, { model: "gemini-2.0-flash" });
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 
-export { auth, firestore, model};
+async function genApiKey() {
+  const functions = getFunctions(app);
+  const getGenAIKey = httpsCallable(functions, 'getGenAIKey');
+  try {
+    const result = await getGenAIKey();
+    return (result.data as { genAiApiKey: string }).genAiApiKey;
+  } catch (error) {
+    console.error('Error calling Cloud Function:', error);
+    throw error;
+  }
+}
+
+export async function getServerSideGenApiKey() {
+  let genAiApiKey = null;
+  try {
+    genAiApiKey = await genApiKey();
+  } catch (error) {
+    console.error("Failed to fetch API key", error);
+  }
+  return {
+    props: {
+      genAiApiKey,
+    },
+  };
+}
+
+
+export { auth, firestore, model,genApiKey};

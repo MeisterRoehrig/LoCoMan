@@ -5,7 +5,6 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from '@/lib/auth-provider';
-// import { DataProvider } from "@/lib/data-provider";
 import { AppProviders } from "@/providers/app-provider";
 
 const geistSans = Geist({
@@ -23,22 +22,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
-    <html lang="en" className="" suppressHydrationWarning>
+    <html lang="de" className="" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
-          <AppProviders>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem>
-              <main>
-                {children}
-              </main>
-              <Toaster />
-            </ThemeProvider>
-          </AppProviders>
+            <AppProviders>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem>
+                <main>
+                  {children}
+                </main>
+                <Toaster />
+              </ThemeProvider>
+            </AppProviders>
         </AuthProvider>
       </body >
     </html >
