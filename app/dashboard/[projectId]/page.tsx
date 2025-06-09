@@ -211,7 +211,7 @@ export default function Page() {
               </ChartContainer>
             </Card>
 
-            {/* AI REPORT */}
+            {/* AI REPORT
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>AI Report</CardTitle>
@@ -219,6 +219,19 @@ export default function Page() {
               </CardHeader>
               <CardFooter className="text-sm">
                 <Report project={project} kind="overview" responseType="text" wordRange={[400, 800]} />
+              </CardFooter>
+            </Card> */}
+
+            {/* AI Chat */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>AI Chat</CardTitle>
+                <CardDescription>Eine kurze Zusammenfassung der Kostenstruktur aus Sicht der KI.</CardDescription>
+              </CardHeader>
+              <CardFooter className="text-sm">
+                <div>
+
+                </div>
               </CardFooter>
             </Card>
 

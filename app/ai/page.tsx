@@ -1,30 +1,98 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
-import { Input } from "@/components/ui/input"
+import { useState } from 'react';
+import { runFlow, streamFlow } from '@genkit-ai/next/client';
+import { menuSuggestionFlow } from '@/genAi/genkit/menuSuggestionFlow';
+import { Button } from '@/components/ui/button';
 
-export default function Page() {
-  const { messages, input, setInput, append } = useChat();
+export default function Home() {
+    const [menuItem, setMenuItem] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [streamedText, setStreamedText] = useState<string>('');
 
-  return (
-    <div>
-      <h1>AI Chat</h1>
+    async function getMenuItem(formData: FormData) {
+        const theme = formData.get('theme')?.toString() ?? '';
+        setIsLoading(true);
 
-      <Input 
-        value={input}
-        onChange={event => {
-          setInput(event.target.value);
-        }}
-        onKeyDown={async event => {
-          if (event.key === 'Enter') {
-            append({ content: input, role: 'user' });
-          }
-        }}
-      />
+        try {
+            // Regular (non-streaming) approach
+            const result = await runFlow<typeof menuSuggestionFlow>({
+                url: '/api/menuSuggestion',
+                input: { theme },
+            });
 
-      {messages.map((message, index) => (
-        <div key={index}>{message.content}</div>
-      ))}
-    </div>
-  );
+            setMenuItem(result.menuItem);
+        } catch (error) {
+            console.error('Error generating menu item:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    async function streamMenuItem(formData: FormData) {
+        const theme = formData.get('theme')?.toString() ?? '';
+        setIsLoading(true);
+        setStreamedText('');
+
+        try {
+            // Streaming approach
+            const result = streamFlow<typeof menuSuggestionFlow>({
+                url: '/api/menuSuggestion',
+                input: { theme },
+            });
+
+            // Process the stream chunks as they arrive
+            for await (const chunk of result.stream) {
+                setStreamedText((prev) => prev + chunk);
+            }
+
+            // Get the final complete response
+            const finalOutput = await result.output;
+            setMenuItem(finalOutput.menuItem);
+        } catch (error) {
+            console.error('Error streaming menu item:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    return (
+        <main>
+            <form action={getMenuItem}>
+                <label htmlFor="theme">Suggest a menu item for a restaurant with this theme: </label>
+                <input type="text" name="theme" id="theme" />
+                <br />
+                <br />
+                <Button type="submit" disabled={isLoading}>
+                    Generate
+                </Button>
+                <Button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget.form!);
+                        streamMenuItem(formData);
+                    }}
+                >
+                    Stream Generation
+                </Button>
+            </form>
+            <br />
+
+            {streamedText && (
+                <div>
+                    <h3>Streaming Output:</h3>
+                    <pre>{streamedText}</pre>
+                </div>
+            )}
+
+            {menuItem && (
+                <div>
+                    <h3>Final Output:</h3>
+                    <pre>{menuItem}</pre>
+                </div>
+            )}
+        </main>
+    );
 }
