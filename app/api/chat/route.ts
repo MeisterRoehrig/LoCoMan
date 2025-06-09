@@ -1,23 +1,21 @@
-'use server';
+import { genkit } from 'genkit/beta';
+import { googleAI } from '@genkit-ai/googleai';
+import { createInterface } from 'node:readline/promises';
 
-import { streamText, UIMessage } from 'ai';
-import { createGoogleGenerativeAI  } from '@ai-sdk/google';
-import { getGeminiApiKey } from "@/providers/api-key-provider";
+const ai = genkit({
+  plugins: [googleAI()],
+  model: googleAI.model('gemini-2.0-flash'),
+});
 
-
-const geminiApiKey = await getGeminiApiKey();
-
-const google = createGoogleGenerativeAI({apiKey: geminiApiKey})
-
-export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json();
-
-  const result = streamText({
-    model: google('gemini-1.5-flash'),
-
-    system: 'You are a helpful assistant.',
-    messages,
-  });
-
-  return result.toDataStreamResponse();
+async function main() {
+  const chat = ai.chat();
+  console.log("You're chatting with Gemini. Ctrl-C to quit.\n");
+  const readline = createInterface(process.stdin, process.stdout);
+  while (true) {
+    const userInput = await readline.question('> ');
+    const { text } = await chat.send(userInput);
+    console.log(text);
+  }
 }
+
+main();
