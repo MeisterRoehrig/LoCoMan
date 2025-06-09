@@ -8,7 +8,7 @@
     "predeploy:app": "npm run prebuild",
     "deploy": "npm run predeploy:app && firebase deploy --only apphosting",
     "start": "next start",
-    "lint": "next lint",
+    "lint": ".eslintrc.js",
     "dev": "next dev --turbopack"
   },
   "dependencies": {

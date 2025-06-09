@@ -2,10 +2,12 @@
 
 import { streamText, UIMessage } from 'ai';
 import { createGoogleGenerativeAI  } from '@ai-sdk/google';
-import { genApiKey } from '@/lib/firebase-config';
+import { getGeminiApiKey } from "@/providers/api-key-provider";
 
-const GEMINI_API_KEY = await genApiKey();
-const google = createGoogleGenerativeAI({apiKey: GEMINI_API_KEY})
+
+const geminiApiKey = await getGeminiApiKey();
+
+const google = createGoogleGenerativeAI({apiKey: geminiApiKey})
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
