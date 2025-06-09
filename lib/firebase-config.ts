@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
+import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD4qFSZPUYMoo4J62Czfc1lCPwwpiy5wwk",
@@ -23,5 +24,7 @@ const model = getGenerativeModel(vertexAI, { model: "gemini-2.0-flash" });
 
 const auth = getAuth(app);
 const firestore = getFirestore(app);
+const functions = getFunctions(app, "europe-west4");
 
-export { auth, firestore, model};
+
+export { auth, firestore, model, functions };
