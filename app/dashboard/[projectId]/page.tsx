@@ -6,8 +6,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
-import { Download, Edit, Sparkles } from "lucide-react";
+import { Download, Edit, Sparkles, Send, Copy } from "lucide-react";
 import { Report, forceRefreshReports } from "@/lib/report-manager";
+
+import { ChatMessageList } from '@/components/chat-message-list';
+import { ChatBubble, ChatBubbleAction, ChatBubbleMessage } from '@/components/chat-bubble';
+import { ChatInput } from '@/components/chat-input';
+
 import {
   Card,
   CardAction,
@@ -130,6 +135,12 @@ export default function Page() {
     }
   }
 
+  async function handleSend() {
+    // Placeholder for sending a message in the AI chat
+    // This could be replaced with actual AI chat functionality
+    console.log("Send message clicked");
+  }
+
   const handleDownloadSummary = () => {
     if (!summary) return alert("No summary available to download!");
     const url = URL.createObjectURL(new Blob([JSON.stringify(summary, null, 2)], { type: "application/json" }));
@@ -223,15 +234,51 @@ export default function Page() {
             </Card> */}
 
             {/* AI Chat */}
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 ">
               <CardHeader>
                 <CardTitle>AI Chat</CardTitle>
                 <CardDescription>Eine kurze Zusammenfassung der Kostenstruktur aus Sicht der KI.</CardDescription>
               </CardHeader>
-              <CardFooter className="text-sm">
-                <div>
+              <CardContent className="flex-1 flex flex-col min-h-0">
+                <ChatMessageList className="max-h-[300px] ">
+                  <ChatBubble variant='sent'>
+                    <ChatBubbleMessage variant='sent'>
+                      Hi, I am doing well, thank you for asking. How can I help you today?
+                    </ChatBubbleMessage>
+                  </ChatBubble>
 
-                </div>
+                  <ChatBubble variant='received' layout="ai">
+                    <ChatBubbleMessage variant='received' >
+                      Thanks for asking, that’s genuinely kind of you. My day’s been busy, full of interesting questions and creative projects—keeps things engaging. How about you? What kind of mood are you in today, and is there anything you'd like to dive into?
+                      {/* <ChatBubbleAction
+                        className="size-7"
+                        key="copy"
+                        icon={<Copy />}
+                        onClick={() =>
+                          console.log(
+                            "Action clicked for message "
+                          )
+                        }
+                      /> */}
+                    </ChatBubbleMessage>
+                  </ChatBubble>
+
+                </ChatMessageList>
+              </CardContent>
+              <CardFooter className="text-sm">
+                <form className="flex items-end gap-2 w-full">
+                  <ChatInput
+                    placeholder="Type your message here..."
+                    className="flex-1 min-h-10 resize-none rounded-lg bg-background border-1 shadow-none focus-visible:ring-0"
+                  />
+                  <Button
+                    className="cursor-pointer h-11"
+                    style={{ alignSelf: "stretch" }}
+                    onClick={handleSend}
+                  >
+                    <Send /> Send
+                  </Button>
+                </form>
               </CardFooter>
             </Card>
 

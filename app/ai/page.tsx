@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { runFlow, streamFlow } from '@genkit-ai/next/client';
 import { menuSuggestionFlow } from '@/genAi/genkit/menuSuggestionFlow';
 import { Button } from '@/components/ui/button';
+import { ChatMessageList } from '@/components/chat-message-list';
+import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/chat-bubble';
+import { ChatInput } from '@/components/chat-input';
 
 export default function Home() {
     const [menuItem, setMenuItem] = useState<string>('');
@@ -58,6 +61,34 @@ export default function Home() {
 
     return (
         <main>
+            <ChatMessageList>
+                <ChatBubble variant='sent'>
+                    <ChatBubbleMessage variant='sent'>
+                        Hello, how has your day been? I hope you are doing well.
+                    </ChatBubbleMessage>
+                </ChatBubble>
+
+                <ChatBubble variant='received'>
+                    <ChatBubbleMessage variant='received'>
+                        Hi, I am doing well, thank you for asking. How can I help you today?
+                    </ChatBubbleMessage>
+                </ChatBubble>
+
+                <ChatBubble variant='received'>
+                    <ChatBubbleMessage isLoading />
+                </ChatBubble>
+            </ChatMessageList>
+
+            <form className="flex items-end gap-2 p-1">
+                <ChatInput
+                    placeholder="Type your message here..."
+                    className="flex-1 min-h-12 resize-none rounded-lg bg-background border-0 p-3 shadow-none focus-visible:ring-0"
+                />
+                <Button size="sm" className="ml-auto gap-1.5">
+                    Send Message
+                </Button>
+            </form>
+
             <form action={getMenuItem}>
                 <label htmlFor="theme">Suggest a menu item for a restaurant with this theme: </label>
                 <input type="text" name="theme" id="theme" />
