@@ -1,129 +1,115 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { runFlow, streamFlow } from '@genkit-ai/next/client';
-import { menuSuggestionFlow } from '@/genAi/genkit/menuSuggestionFlow';
-import { Button } from '@/components/ui/button';
-import { ChatMessageList } from '@/components/chat-message-list';
-import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/chat-bubble';
-import { ChatInput } from '@/components/chat-input';
+import { useRef, useState } from 'react'
+import { v4 as uuid } from 'uuid'
+import { streamFlow } from '@genkit-ai/next/client'
+import { projectAssistantFlow } from '@/genAi/genkit/projectAssistantFlow'
+
+/* ――― UI primitives from your new library ――― */
+import { ChatForm } from '@/components/ui/chat'
+import { MessageInput } from '@/components/ui/message-input'
+import { MessageList } from '@/components/ui/message-list'
+import { ScrollDiv } from '@/components/ui/scroll-div'
+
+type Role = 'user' | 'assistant'
+
+interface ChatMessage {
+  id: string
+  role: Role
+  content: string
+}
+
+/* ---------- helper ---------- */
+
+const copyToClipboard = (text: string) =>
+  navigator.clipboard.writeText(text).catch(() => { })
+
+/* ---------- page ---------- */
 
 export default function Home() {
-    const [menuItem, setMenuItem] = useState<string>('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [streamedText, setStreamedText] = useState<string>('');
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [value, setValue] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
 
-    async function getMenuItem(formData: FormData) {
-        const theme = formData.get('theme')?.toString() ?? '';
-        setIsLoading(true);
+  const assistantId = useRef<string | null>(null)
+  const abortController = useRef<AbortController | null>(null)
 
-        try {
-            // Regular (non-streaming) approach
-            const result = await runFlow<typeof menuSuggestionFlow>({
-                url: '/api/menuSuggestion',
-                input: { theme },
-            });
+  const updateMsg = (id: string, fn: (m: ChatMessage) => ChatMessage) =>
+    setMessages(prev => prev.map(m => (m.id === id ? fn(m) : m)))
 
-            setMenuItem(result.menuItem);
-        } catch (error) {
-            console.error('Error generating menu item:', error);
-        } finally {
-            setIsLoading(false);
-        }
+  /* ----- submit handler (supports streaming) ----- */
+  async function handleSubmit(
+    event?: { preventDefault?: (() => void) | undefined } | undefined,
+    options?: { experimental_attachments?: FileList | undefined } | undefined
+  ) {
+    event?.preventDefault?.()
+
+    const question = value.trim()
+    if (!question || isGenerating) return
+
+    setValue('')
+    setIsGenerating(true)
+
+    /* 1. push user message */
+    const userId = uuid()
+    setMessages(prev => [...prev, { id: userId, role: 'user', content: question }])
+
+    /* 2. placeholder for assistant */
+    assistantId.current = uuid()
+    const curAssistantId = assistantId.current
+    setMessages(prev => [...prev, { id: curAssistantId, role: 'assistant', content: '' }])
+
+    try {
+      const result = streamFlow<typeof projectAssistantFlow>({
+        url: '/api/projectAssistant',
+        input: { question },
+      })
+
+      for await (const token of result.stream) {
+        updateMsg(curAssistantId, m => ({ ...m, content: m.content + token }))
+      }
+
+      const final = await result.output
+      updateMsg(curAssistantId, m => ({ ...m, content: final.assistantAnwser }))
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error(err)
+        updateMsg(curAssistantId, m => ({
+          ...m,
+          content: 'Sorry, something went wrong.',
+        }))
+      }
+    } finally {
+      setIsGenerating(false)
     }
+  }
 
-    async function streamMenuItem(formData: FormData) {
-        const theme = formData.get('theme')?.toString() ?? '';
-        setIsLoading(true);
-        setStreamedText('');
+  /* ----- render ----- */
+  return (
+    <main className="flex flex-col h-screen w-full overflow-hidden">
+      {/* messages */}
+      {/* <section className=""> */}
+      <ScrollDiv className="flex-1 overflow-y-auto px-4 pt-4">
+        <div className="pb-4">
+          <MessageList messages={messages} />
+        </div>
+      </ScrollDiv>
+      {/* </section> */}
 
-        try {
-            // Streaming approach
-            const result = streamFlow<typeof menuSuggestionFlow>({
-                url: '/api/menuSuggestion',
-                input: { theme },
-            });
-
-            // Process the stream chunks as they arrive
-            for await (const chunk of result.stream) {
-                setStreamedText((prev) => prev + chunk);
-            }
-
-            // Get the final complete response
-            const finalOutput = await result.output;
-            setMenuItem(finalOutput.menuItem);
-        } catch (error) {
-            console.error('Error streaming menu item:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }
-
-    return (
-        <main>
-            <ChatMessageList>
-                <ChatBubble variant='sent'>
-                    <ChatBubbleMessage variant='sent'>
-                        Hello, how has your day been? I hope you are doing well.
-                    </ChatBubbleMessage>
-                </ChatBubble>
-
-                <ChatBubble variant='received'>
-                    <ChatBubbleMessage variant='received'>
-                        Hi, I am doing well, thank you for asking. How can I help you today?
-                    </ChatBubbleMessage>
-                </ChatBubble>
-
-                <ChatBubble variant='received'>
-                    <ChatBubbleMessage isLoading />
-                </ChatBubble>
-            </ChatMessageList>
-
-            <form className="flex items-end gap-2 p-1">
-                <ChatInput
-                    placeholder="Type your message here..."
-                    className="flex-1 min-h-12 resize-none rounded-lg bg-background border-0 p-3 shadow-none focus-visible:ring-0"
-                />
-                <Button size="sm" className="ml-auto gap-1.5">
-                    Send Message
-                </Button>
-            </form>
-
-            <form action={getMenuItem}>
-                <label htmlFor="theme">Suggest a menu item for a restaurant with this theme: </label>
-                <input type="text" name="theme" id="theme" />
-                <br />
-                <br />
-                <Button type="submit" disabled={isLoading}>
-                    Generate
-                </Button>
-                <Button
-                    type="button"
-                    disabled={isLoading}
-                    onClick={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.currentTarget.form!);
-                        streamMenuItem(formData);
-                    }}
-                >
-                    Stream Generation
-                </Button>
-            </form>
-            <br />
-
-            {streamedText && (
-                <div>
-                    <h3>Streaming Output:</h3>
-                    <pre>{streamedText}</pre>
-                </div>
-            )}
-
-            {menuItem && (
-                <div>
-                    <h3>Final Output:</h3>
-                    <pre>{menuItem}</pre>
-                </div>
-            )}
-        </main>
-    );
+      {/* input */}
+      <ChatForm
+        className="w-full shrink-0 bg-background px-4 pb-4"  // border for visual separation
+        isPending={false}
+        handleSubmit={handleSubmit}
+      >
+        {() => (
+          <MessageInput
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            isGenerating={isGenerating}
+          />
+        )}
+      </ChatForm>
+    </main>
+  )
 }

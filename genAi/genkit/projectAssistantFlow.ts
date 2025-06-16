@@ -16,22 +16,21 @@ const ai = genkit({
   plugins: [
     googleAI({ apiKey: geminiApiKey }),
   ],
-
 });
 
 
-export const menuSuggestionFlow = ai.defineFlow(
+export const projectAssistantFlow = ai.defineFlow(
   {
-    name: 'menuSuggestionFlow',
-    inputSchema: z.object({ theme: z.string() }),
-    outputSchema: z.object({ menuItem: z.string() }),
+    name: 'projectAssistantFlow',
+    inputSchema: z.object({ question: z.string() }),
+    outputSchema: z.object({ assistantAnwser: z.string() }),
     streamSchema: z.string(),
   },
-  async ({ theme }, { sendChunk }) => {
+  async ({ question }, { sendChunk }) => {
+    if (!question) throw new Error("Must supply context.");
     const { stream, response } = ai.generateStream({
       model: googleAI.model('gemini-2.0-flash'),
-
-      prompt: `Invent a menu item for a ${theme} themed restaurant.`,
+      prompt: `You are a helpfull assistant trying to solve the following: ${question} Respond using markdown formatting.`,
     });
 
     for await (const chunk of stream) {
@@ -39,6 +38,6 @@ export const menuSuggestionFlow = ai.defineFlow(
     }
 
     const { text } = await response;
-    return { menuItem: text };
+    return { assistantAnwser: text };
   }
 );
