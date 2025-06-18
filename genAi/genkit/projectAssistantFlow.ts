@@ -22,15 +22,18 @@ const ai = genkit({
 export const projectAssistantFlow = ai.defineFlow(
   {
     name: 'projectAssistantFlow',
-    inputSchema: z.object({ question: z.string() }),
+    inputSchema: z.object({ 
+      question: z.string(),
+      summary: z.string()
+    }),
     outputSchema: z.object({ assistantAnwser: z.string() }),
     streamSchema: z.string(),
   },
-  async ({ question }, { sendChunk }) => {
+  async ({ question, summary }, { sendChunk }) => {
     if (!question) throw new Error("Must supply context.");
     const { stream, response } = ai.generateStream({
       model: googleAI.model('gemini-2.0-flash'),
-      prompt: `You are a helpfull assistant trying to solve the following: ${question} Respond using markdown formatting.`,
+      prompt: `Sie sind ein hilfreicher Assistent, der in eine Kostenanalyseplattform eingebettet ist und versucht, die folgende Aufgabenstellung zu lösen: ${question} \n\nSofern nötig, können Sie die folgende Kostenzusammenfassung für detaillierte Informationen verwenden: ${summary}\n `,
     });
 
     for await (const chunk of stream) {

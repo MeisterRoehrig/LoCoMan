@@ -12,6 +12,7 @@ import { Report, forceRefreshReports } from "@/lib/report-manager";
 import { ChatMessageList } from '@/components/chat-message-list';
 import { ChatBubble, ChatBubbleAction, ChatBubbleMessage } from '@/components/chat-bubble';
 import { ChatInput } from '@/components/chat-input';
+import { AiAssistant } from '@/components/ai-assistant'
 
 import {
   Card,
@@ -239,47 +240,9 @@ export default function Page() {
                 <CardTitle>AI Chat</CardTitle>
                 <CardDescription>Eine kurze Zusammenfassung der Kostenstruktur aus Sicht der KI.</CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col min-h-0">
-                <ChatMessageList className="max-h-[300px] ">
-                  <ChatBubble variant='sent'>
-                    <ChatBubbleMessage variant='sent'>
-                      Hi, I am doing well, thank you for asking. How can I help you today?
-                    </ChatBubbleMessage>
-                  </ChatBubble>
-
-                  <ChatBubble variant='received' layout="ai">
-                    <ChatBubbleMessage variant='received' >
-                      Thanks for asking, that’s genuinely kind of you. My day’s been busy, full of interesting questions and creative projects—keeps things engaging. How about you? What kind of mood are you in today, and is there anything you'd like to dive into?
-                      {/* <ChatBubbleAction
-                        className="size-7"
-                        key="copy"
-                        icon={<Copy />}
-                        onClick={() =>
-                          console.log(
-                            "Action clicked for message "
-                          )
-                        }
-                      /> */}
-                    </ChatBubbleMessage>
-                  </ChatBubble>
-
-                </ChatMessageList>
-              </CardContent>
-              <CardFooter className="text-sm">
-                <form className="flex items-end gap-2 w-full">
-                  <ChatInput
-                    placeholder="Type your message here..."
-                    className="flex-1 min-h-10 resize-none rounded-lg bg-background border-1 shadow-none focus-visible:ring-0"
-                  />
-                  <Button
-                    className="cursor-pointer h-11"
-                    style={{ alignSelf: "stretch" }}
-                    onClick={handleSend}
-                  >
-                    <Send /> Send
-                  </Button>
-                </form>
-              </CardFooter>
+                <CardContent className="flex-1 flex flex-col min-h-0 max-h-96 overflow-auto">
+                <AiAssistant summary={project.summary as Record<string, unknown> | undefined} />
+                </CardContent>
             </Card>
 
             {/* Fixed costs */}
