@@ -6,13 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
-import { Download, Edit, Sparkles, Send, Copy } from "lucide-react";
+import { Download, Edit, Sparkles, Bot} from "lucide-react";
 import { Report, forceRefreshReports } from "@/lib/report-manager";
-
-import { ChatMessageList } from '@/components/chat-message-list';
-import { ChatBubble, ChatBubbleAction, ChatBubbleMessage } from '@/components/chat-bubble';
-import { ChatInput } from '@/components/chat-input';
-import { AiAssistant } from '@/components/ai-assistant'
 
 import {
   Card,
@@ -167,6 +162,9 @@ export default function Page() {
           <Button className="cursor-pointer" variant="outline" onClick={() => router.push(`/dashboard/${projectId}/data`)}>
             <Edit />Daten Editieren
           </Button>
+          <Button className="cursor-pointer" variant="outline" onClick={() => router.push(`/dashboard/${projectId}/chat`)}>
+            <Bot />AI Chat
+          </Button>
           <Button className="cursor-pointer" onClick={handleGenerateReport}>
             <Sparkles /> {summary ? "Report Updaten" : "Report Generieren"}
           </Button>
@@ -223,7 +221,7 @@ export default function Page() {
               </ChartContainer>
             </Card>
 
-            {/* AI REPORT
+            {/* AI REPORT */}
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>AI Report</CardTitle>
@@ -232,9 +230,9 @@ export default function Page() {
               <CardFooter className="text-sm">
                 <Report project={project} kind="overview" responseType="text" wordRange={[400, 800]} />
               </CardFooter>
-            </Card> */}
+            </Card>
 
-            {/* AI Chat */}
+            {/* AI Chat
             <Card className="lg:col-span-2 ">
               <CardHeader>
                 <CardTitle>AI Chat</CardTitle>
@@ -243,7 +241,7 @@ export default function Page() {
                 <CardContent className="flex-1 flex flex-col min-h-0 max-h-96 overflow-auto">
                 <AiAssistant summary={project.summary as Record<string, unknown> | undefined} />
                 </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Fixed costs */}
             <Card className="flex flex-col">

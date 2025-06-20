@@ -29,7 +29,7 @@ export const projectReportFlow = ai.defineFlow(
   async ({ context }, { sendChunk }) => {
     if (!context) throw new Error("Must supply context.");
     const { stream, response } = ai.generateStream({
-      model: googleAI.model('gemini-2.0-flash'),
+      model: googleAI.model('gemini-2.5-flash'),
       prompt: `Give a short overview of the provided cost data ${JSON.stringify(context)} `,
     });
 
