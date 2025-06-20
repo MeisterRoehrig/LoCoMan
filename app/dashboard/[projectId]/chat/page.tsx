@@ -136,11 +136,22 @@ export default function AiAssistant({
     }
   }
 
+  const isEmpty = messages.length === 0
+
   /* ------------------------------------------------------------------ */
   /*                          component UI                              */
   /* ------------------------------------------------------------------ */
   return (
     <main className={`relative flex h-full w-full flex-col overflow-hidden ${className}`}>
+       {isEmpty ? (
+        <div className="flex flex-1 items-center justify-center h-full flex-col gap-4">
+          <h1 className="text-center bg-gradient-to-r from-blue-600 via-indigo-300 to-indigo-400 inline-block text-transparent bg-clip-text  text-3xl max-w-2xl">
+            Hallo, wie kann ich weiterhelfen?
+          </h1>
+          <h2 className="text-center text-1xl max-w-sm text-muted-foreground" >Fragen Sie mich etwas über Ihr Projekt, oder bitten Sie mich um Hilfe bei einer bestimmten Aufgabe.</h2>
+        </div>
+      ) : null}
+      
       {/* Messages area */}
       <ScrollDiv
         ref={scrollRef}
