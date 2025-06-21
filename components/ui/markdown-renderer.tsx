@@ -1,9 +1,21 @@
-import React, { Suspense } from "react"
+/* components/ui/markdown-renderer.tsx */
+import React, {
+  memo,
+  Suspense,
+  HTMLAttributes,
+  ReactNode,
+} from "react"
+import type { JSX } from "react"          // ① bring JSX into scope
 import Markdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import type { Components } from "react-markdown"
 
 import { cn } from "@/lib/utils"
 import { CopyButton } from "@/components/ui/copy-button"
+
+/* -------------------------------------------------------------------------- */
+/*                             Public renderer API                            */
+/* -------------------------------------------------------------------------- */
 
 interface MarkdownRendererProps {
   children: string
@@ -12,20 +24,24 @@ interface MarkdownRendererProps {
 export function MarkdownRenderer({ children }: MarkdownRendererProps) {
   return (
     <div className="space-y-3">
-      <Markdown remarkPlugins={[remarkGfm]} components={COMPONENTS}>
+      <Markdown remarkPlugins={[remarkGfm]} components={components}>
         {children}
       </Markdown>
     </div>
   )
 }
 
-interface HighlightedPre extends React.HTMLAttributes<HTMLPreElement> {
+/* -------------------------------------------------------------------------- */
+/*                         Syntax-highlighted <pre>                           */
+/* -------------------------------------------------------------------------- */
+
+interface HighlightedPreProps extends HTMLAttributes<HTMLPreElement> {
   children: string
   language: string
 }
 
-const HighlightedPre = React.memo(
-  async ({ children, language, ...props }: HighlightedPre) => {
+const HighlightedPre = memo(
+  async ({ children, language, ...props }: HighlightedPreProps) => {
     const { codeToTokens, bundledLanguages } = await import("shiki")
 
     if (!(language in bundledLanguages)) {
@@ -33,6 +49,7 @@ const HighlightedPre = React.memo(
     }
 
     const { tokens } = await codeToTokens(children, {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       lang: language as keyof typeof bundledLanguages,
       defaultColor: false,
       themes: {
@@ -45,37 +62,40 @@ const HighlightedPre = React.memo(
       <pre {...props}>
         <code>
           {tokens.map((line, lineIndex) => (
-            <>
-              <span key={lineIndex}>
-                {line.map((token, tokenIndex) => {
-                  const style =
-                    typeof token.htmlStyle === "string"
-                      ? undefined
-                      : token.htmlStyle
+            <span key={lineIndex}>
+              {line.map((token, tokenIndex) => {
+                const style =
+                  typeof token.htmlStyle === "string"
+                    ? undefined
+                    : token.htmlStyle
 
-                  return (
-                    <span
-                      key={tokenIndex}
-                      className="text-shiki-light bg-shiki-light-bg dark:text-shiki-dark dark:bg-shiki-dark-bg"
-                      style={style}
-                    >
-                      {token.content}
-                    </span>
-                  )
-                })}
-              </span>
+                return (
+                  <span
+                    key={tokenIndex}
+                    className="text-shiki-light bg-shiki-light-bg dark:text-shiki-dark dark:bg-shiki-dark-bg"
+                    style={style}
+                  >
+                    {token.content}
+                  </span>
+                )
+              })}
               {lineIndex !== tokens.length - 1 && "\n"}
-            </>
+            </span>
           ))}
         </code>
       </pre>
     )
   }
 )
-HighlightedPre.displayName = "HighlightedCode"
 
-interface CodeBlockProps extends React.HTMLAttributes<HTMLPreElement> {
-  children: React.ReactNode
+HighlightedPre.displayName = "HighlightedPre"
+
+/* -------------------------------------------------------------------------- */
+/*                            Code block wrapper                              */
+/* -------------------------------------------------------------------------- */
+
+interface CodeBlockProps extends HTMLAttributes<HTMLPreElement> {
+  children: ReactNode
   className?: string
   language: string
 }
@@ -87,9 +107,7 @@ const CodeBlock = ({
   ...restProps
 }: CodeBlockProps) => {
   const code =
-    typeof children === "string"
-      ? children
-      : childrenTakeAllStringContents(children)
+    typeof children === "string" ? children : extractStrings(children)
 
   const preClass = cn(
     "overflow-x-scroll rounded-md border bg-background/50 p-4 font-mono text-sm [scrollbar-width:none]",
@@ -101,7 +119,7 @@ const CodeBlock = ({
       <Suspense
         fallback={
           <pre className={preClass} {...restProps}>
-            {children}
+            {code}
           </pre>
         }
       >
@@ -117,27 +135,45 @@ const CodeBlock = ({
   )
 }
 
-function childrenTakeAllStringContents(element: any): string {
-  if (typeof element === "string") {
-    return element
-  }
+/* -------------------------------------------------------------------------- */
+/*                       Utility to flatten React children                     */
+/* -------------------------------------------------------------------------- */
 
-  if (element?.props?.children) {
-    let children = element.props.children
+function extractStrings(node: ReactNode): string {
+  if (typeof node === "string") return node
+  if (Array.isArray(node)) return node.map(extractStrings).join("")
 
-    if (Array.isArray(children)) {
-      return children
-        .map((child) => childrenTakeAllStringContents(child))
-        .join("")
-    } else {
-      return childrenTakeAllStringContents(children)
-    }
-  }
-
-  return ""
+  const maybeElement = node as { props?: { children?: ReactNode } }
+  return maybeElement?.props?.children
+    ? extractStrings(maybeElement.props.children)
+    : ""
 }
 
-const COMPONENTS = {
+/* -------------------------------------------------------------------------- */
+/*                     Helper HOC to inject Tailwind classes                   */
+/* -------------------------------------------------------------------------- */
+
+function withClass<Tag extends keyof JSX.IntrinsicElements>(
+  Tag: Tag,
+  classes: string
+) {
+  const Component = (props: JSX.IntrinsicElements[Tag]) => {
+    const { className, ...rest } = props
+    return React.createElement(
+      Tag,
+      { className: cn(classes, className), ...rest }
+    )
+  }
+
+  Component.displayName = typeof Tag === "string" ? Tag : String(Tag)
+  return Component
+}
+
+/* -------------------------------------------------------------------------- */
+/*                     react-markdown component mapping                       */
+/* -------------------------------------------------------------------------- */
+
+const components: Components = {
   h1: withClass("h1", "text-2xl font-semibold"),
   h2: withClass("h2", "font-semibold text-xl"),
   h3: withClass("h3", "font-semibold text-lg"),
@@ -146,8 +182,9 @@ const COMPONENTS = {
   strong: withClass("strong", "font-semibold"),
   a: withClass("a", "text-primary underline underline-offset-2"),
   blockquote: withClass("blockquote", "border-l-2 border-primary pl-4"),
-  code: ({ children, className, node, ...rest }: any) => {
-    const match = /language-(\w+)/.exec(className || "")
+  /* Inline and fenced code */
+  code: ({ children, className, ...rest }) => {
+    const match = /language-(\w+)/.exec(className ?? "")
     return match ? (
       <CodeBlock className={className} language={match[1]} {...rest}>
         {children}
@@ -163,7 +200,7 @@ const COMPONENTS = {
       </code>
     )
   },
-  pre: ({ children }: any) => children,
+  pre: ({ children }) => <>{children}</>,
   ol: withClass("ol", "list-decimal space-y-2 pl-6"),
   ul: withClass("ul", "list-disc space-y-2 pl-6"),
   li: withClass("li", "my-1.5"),
@@ -182,14 +219,6 @@ const COMPONENTS = {
   tr: withClass("tr", "m-0 border-t p-0 even:bg-muted"),
   p: withClass("p", "whitespace-pre-wrap"),
   hr: withClass("hr", "border-foreground/20"),
-}
-
-function withClass(Tag: keyof JSX.IntrinsicElements, classes: string) {
-  const Component = ({ node, ...props }: any) => (
-    <Tag className={classes} {...props} />
-  )
-  Component.displayName = Tag
-  return Component
 }
 
 export default MarkdownRenderer

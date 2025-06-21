@@ -108,6 +108,7 @@ export interface Project {
   reportUpdatedAt?: Date | null;
   dataTree?: any;
   fixedCosts?: FixedCostsTree;
+  chatSession?: string;
 }
 
 interface ProjectsContextValue {
@@ -126,6 +127,7 @@ interface ProjectsContextValue {
     fieldPath: string,
     value: any
   ) => Promise<void>;
+  saveChatSession: (projectId: string, chatSession: string) => Promise<void>;
 }
 
 const ProjectsContext = createContext<ProjectsContextValue>({
@@ -137,6 +139,7 @@ const ProjectsContext = createContext<ProjectsContextValue>({
   removeProject: async () => {},
   updateProjectSummary: async () => {},
   updateProjectReport: async () => {},
+  saveChatSession: async () => {},
 });
 
 export function ProjectsProvider({ children }: { readonly children: ReactNode }) {
@@ -159,16 +162,17 @@ export function ProjectsProvider({ children }: { readonly children: ReactNode })
         const data = docSnap.data();
         return {
           id: docSnap.id,
-          title: data.title || "",
-          description: data.description || "",
-          createdAt: data.createdAt?.toDate() || null,
-          updatedAt: data.updatedAt?.toDate() || null,
-          summary: data.summary || null,
-          summaryUpdatedAt: data.summaryUpdatedAt?.toDate() || null,
-          report: data.report || null,
-          reportUpdatedAt: data.reportUpdatedAt?.toDate() || null,
+          title: data.title ?? "",
+          description: data.description ?? "",
+          createdAt: data.createdAt?.toDate() ?? null,
+          updatedAt: data.updatedAt?.toDate() ?? null,
+          summary: data.summary ?? null,
+          summaryUpdatedAt: data.summaryUpdatedAt?.toDate() ?? null,
+          report: data.report ?? null,
+          reportUpdatedAt: data.reportUpdatedAt?.toDate() ?? null,
           dataTree: data.dataTree ?? null,
           fixedCosts: data.fixedCosts ?? null,
+          chatSession: data.chatSession ?? null,
         };
       });
       setProjects(result);
@@ -318,6 +322,28 @@ export function ProjectsProvider({ children }: { readonly children: ReactNode })
     }
   }, [user]);
 
+
+
+  /* ------------------------------------------------------------------------ */
+  /*                 7. Save Chat Session                                     */
+  /* ------------------------------------------------------------------------ */
+
+  async function saveChatSession(projectId: string, chatSession: string) {
+    if (!user || !user.uid) return;
+
+    try {
+      const projectRef = doc(firestore, "users", user.uid, "projects", projectId);
+      await updateDoc(projectRef, {
+        chatSession,
+        updatedAt: serverTimestamp(),
+      });
+      await loadProjects();
+    } catch (error) {
+      console.error("Error saving chat session:", error);
+      toast.error("Failed to save chat session.");
+    }
+  }
+
   /* ------------------------------------------------------------------------ */
   /*                                  Value                                   */
   /* ------------------------------------------------------------------------ */
@@ -331,6 +357,7 @@ export function ProjectsProvider({ children }: { readonly children: ReactNode })
       addProjectWithDefaultTree,
       updateProjectSummary,
       updateProjectReport,
+      saveChatSession,
     }),
     [projects, loadingProjects]
   );

@@ -12,11 +12,23 @@ import { ArrowDown, ThumbsDown, ThumbsUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAutoScroll } from "@/hooks/use-auto-scroll"
 import { Button } from "@/components/ui/button"
-import { type Message } from "@/components/ui/chat-message"
+import { type Message} from "@/components/ui/chat-message"
 import { CopyButton } from "@/components/ui/copy-button"
 import { MessageInput } from "@/components/ui/message-input"
 import { MessageList } from "@/components/ui/message-list"
 import { PromptSuggestions } from "@/components/ui/prompt-suggestions"
+
+// type AssistantMessagePart = {
+//   type: string
+//   toolInvocation?: {
+//     state: string
+//     result?: {
+//       content: string
+//       __cancelled?: boolean
+//     }
+//   }
+//   // ...add other properties as needed
+// }
 
 interface ChatPropsBase {
   handleSubmit: (
@@ -33,7 +45,7 @@ interface ChatPropsBase {
     messageId: string,
     rating: "thumbs-up" | "thumbs-down"
   ) => void
-  setMessages?: (messages: any[]) => void
+  setMessages?: (messages: Message[]) => void
   transcribeAudio?: (blob: Blob) => Promise<string>
 }
 
@@ -113,13 +125,14 @@ export function Chat({
     }
 
     if (lastAssistantMessage.parts && lastAssistantMessage.parts.length > 0) {
-      const updatedParts = lastAssistantMessage.parts.map((part: any) => {
+      const updatedParts = lastAssistantMessage.parts.map((part) => {
+        // Only update if this is a tool-invocation part and state is "call"
         if (
           part.type === "tool-invocation" &&
           part.toolInvocation &&
           part.toolInvocation.state === "call"
         ) {
-          needsUpdate = true
+          needsUpdate = true;
           return {
             ...part,
             toolInvocation: {
@@ -130,9 +143,9 @@ export function Chat({
                 __cancelled: true,
               },
             },
-          }
+          } as typeof part; // or as MessagePart
         }
-        return part
+        return part;
       })
 
       if (needsUpdate) {
@@ -305,7 +318,7 @@ interface ChatFormProps {
 }
 
 export const ChatForm = forwardRef<HTMLFormElement, ChatFormProps>(
-  ({ children, handleSubmit, isPending, className }, ref) => {
+  ({ children, handleSubmit, className }, ref) => {
     const [files, setFiles] = useState<File[] | null>(null)
 
     const onSubmit = (event: React.FormEvent) => {

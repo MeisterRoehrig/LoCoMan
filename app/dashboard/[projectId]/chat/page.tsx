@@ -1,20 +1,34 @@
 'use client'
 
-import { useRef, useState, useEffect, forwardRef } from 'react'
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  forwardRef,
+} from 'react'
 import { v4 as uuid } from 'uuid'
-import { MoveDown } from "lucide-react";
+import { MoveDown, Trash2 } from 'lucide-react'
 
 import { streamFlow } from '@genkit-ai/next/client'
 import { projectAssistantFlow } from '@/genAi/genkit/projectAssistantFlow'
 
-/* UI primitives from your design-system */
+/* UI primitives from your design system */
 import { ChatForm } from '@/components/ui/chat'
 import { MessageInput } from '@/components/ui/message-input'
 import { MessageList } from '@/components/ui/message-list'
 import { ScrollDiv as ScrollDivBase } from '@/components/ui/scroll-div'
+import { useParams } from 'next/navigation'
+import { useProjects } from '@/providers/projects-provider'
+import Loader from '@/components/loader'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
 
 /* ------------------------------------------------------------------ */
-/*                     Types (unchanged)                              */
+/* Types                                                              */
 /* ------------------------------------------------------------------ */
 
 type Role = 'user' | 'assistant'
@@ -25,74 +39,86 @@ export interface ChatMessage {
   content: string
 }
 
-interface AiAssistantProps {
-  summary?: Record<string, unknown>
-  className?: string
-  initialMessages?: ChatMessage[]
-}
+/**
+ * The canonical props type, kept in sync with page-checker.ts
+ */
+// export interface PageProps {
+//   className?: string
+//   summary?: string
+//   initialMessages?: ChatMessage[]
+// }
 
 /* ------------------------------------------------------------------ */
-/*         ScrollDiv now forwards its ref to let us observe it        */
+/* ScrollDiv forwards its ref so we can observe it                    */
 /* ------------------------------------------------------------------ */
 
-const ScrollDiv = forwardRef<HTMLDivElement, React.ComponentProps<typeof ScrollDivBase>>(
-  function ScrollDivWithRef(props, ref) {
-    return <ScrollDivBase ref={ref} {...props} />
-  }
-)
+const ScrollDiv = forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<typeof ScrollDivBase>
+>(function ScrollDivWithRef(props, ref) {
+  return <ScrollDivBase ref={ref} {...props} />
+})
 
 /* ------------------------------------------------------------------ */
-/*                         Main component                             */
+/* Main component                                                     */
 /* ------------------------------------------------------------------ */
 
 export default function AiAssistant({
-  summary,
-  className = '',
-  initialMessages = [],
-}: AiAssistantProps) {
+}) {
   /* ----------------------- state & refs --------------------------- */
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [value, setValue] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
 
-  /** Scroll handling */
-  const scrollRef = useRef<HTMLDivElement | null>(null)
-  const [isAtBottom, setIsAtBottom] = useState(true) // we start at bottom
-  /** A stable helper so we can call it from many places */
-  const scrollToBottom = () =>
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+  const params = useParams()
+  const projectId = String((params as { projectId?: string }).projectId ?? '')
+  const { projects, saveChatSession } = useProjects()
+  const project = React.useMemo(
+    () => projects.find(p => p.id === projectId),
+    [projects, projectId],
+  )
+  const summary = project?.summary;
 
-  /** ----------------------------------------------------------------
-   *  Detect whether the user is near the bottom
-   *  --------------------------------------------------------------- */
+
+  /* -------------------- load persisted chat ----------------------- */
+  useEffect(() => {
+    if (project?.chatSession) {
+      try {
+        const parsed = JSON.parse(project.chatSession) as ChatMessage[]
+        setMessages(parsed)
+      } catch {
+        /* ignore JSON parse errors */
+      }
+    }
+  }, [project?.chatSession])
+
+  /* -------------------- scrolling helpers ------------------------ */
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const [isAtBottom, setIsAtBottom] = useState(true)
+  const scrollToBottom = () =>
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: 'smooth',
+    })
+
   const handleScroll = () => {
     if (!scrollRef.current) return
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current
-    /* How far are we from the bottom? 24-32 px feels right */
     const tolerance = 128
-    const shouldStick = scrollHeight - scrollTop - clientHeight < tolerance
-    setIsAtBottom(shouldStick)
+    const nearBottom = scrollHeight - scrollTop - clientHeight < tolerance
+    setIsAtBottom(nearBottom)
   }
 
-  /** ----------------------------------------------------------------
-   *  Every time messages change, stick to the bottom only if the
-   *  user was already at the bottom. This prevents “jumping” while
-   *  they read older messages.
-   *  --------------------------------------------------------------- */
   useEffect(() => {
     if (isAtBottom) scrollToBottom()
   }, [messages, isAtBottom])
 
-  /** The rest of the code is your original business logic */
+  /* -------------------- chat logic ------------------------------- */
   const assistantId = useRef<string | null>(null)
-
   const updateMsg = (id: string, fn: (m: ChatMessage) => ChatMessage) =>
     setMessages(prev => prev.map(m => (m.id === id ? fn(m) : m)))
 
-  async function handleSubmit(
-    ev?: { preventDefault?: () => void },
-    opts?: { experimental_attachments?: FileList }
-  ) {
+  async function handleSubmit(ev?: { preventDefault?: () => void }) {
     ev?.preventDefault?.()
 
     const question = value.trim()
@@ -101,20 +127,31 @@ export default function AiAssistant({
     setValue('')
     setIsGenerating(true)
 
-    /* 1. push user message */
     const userId = uuid()
-    setMessages(prev => [...prev, { id: userId, role: 'user', content: question }])
+    setMessages(prev => [
+      ...prev,
+      { id: userId, role: 'user', content: question },
+    ])
 
-    /* 2. placeholder for assistant */
     assistantId.current = uuid()
     const curAssistantId = assistantId.current
-    setMessages(prev => [...prev, { id: curAssistantId, role: 'assistant', content: '' }])
+    setMessages(prev => [
+      ...prev,
+      { id: curAssistantId, role: 'assistant', content: '' },
+    ])
 
     try {
-      /* 3. call your Genkit flow with streaming */
+      const lastMessages = [
+        ...messages,
+        { id: userId, role: 'user', content: question },
+      ].slice(-11) // send max ten prior
       const result = streamFlow<typeof projectAssistantFlow>({
         url: '/api/projectAssistant',
-        input: { question, summary: JSON.stringify(summary ?? {}) },
+        input: {
+          question,
+          summary: JSON.stringify(summary ?? {}),
+          chatSession: JSON.stringify(lastMessages),
+        },
       })
 
       for await (const token of result.stream) {
@@ -122,7 +159,20 @@ export default function AiAssistant({
       }
 
       const final = await result.output
-      updateMsg(curAssistantId, m => ({ ...m, content: final.assistantAnwser }))
+      updateMsg(curAssistantId, m => ({
+        ...m,
+        content: final.assistantAnwser,
+      }))
+
+      saveChatSession(
+        projectId,
+        JSON.stringify(
+          [
+            ...lastMessages,
+            { id: curAssistantId, role: 'assistant', content: final.assistantAnwser },
+          ].slice(-100),
+        ),
+      )
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
         console.error(err)
@@ -139,44 +189,64 @@ export default function AiAssistant({
   const isEmpty = messages.length === 0
 
   /* ------------------------------------------------------------------ */
-  /*                          component UI                              */
+  /* UI                                                                 */
   /* ------------------------------------------------------------------ */
   return (
-    <main className={`relative flex h-full w-full flex-col overflow-hidden ${className}`}>
-       {isEmpty ? (
-        <div className="flex flex-1 items-center justify-center h-full flex-col gap-4">
-          <h1 className="text-center bg-gradient-to-r from-blue-600 via-indigo-300 to-indigo-400 inline-block text-transparent bg-clip-text  text-3xl max-w-2xl">
+    <main
+      className={`relative flex h-full w-full flex-col overflow-hidden`}
+    >
+      {!projectId || !project ? <Loader show /> : null}
+
+      {project && isEmpty ? (
+        <div className="flex h-full flex-1 flex-col items-center justify-center gap-4">
+          <h1 className="bg-gradient-to-r from-blue-600 via-indigo-300 to-indigo-400 bg-clip-text text-center text-3xl text-transparent">
             Hallo, wie kann ich weiterhelfen?
           </h1>
-          <h2 className="text-center text-1xl max-w-sm text-muted-foreground" >Fragen Sie mich etwas über Ihr Projekt, oder bitten Sie mich um Hilfe bei einer bestimmten Aufgabe.</h2>
+          <h2 className="max-w-sm text-center text-1xl text-muted-foreground">
+            Fragen Sie mich etwas über Ihr Projekt, oder bitten Sie mich um Hilfe bei
+            einer bestimmten Aufgabe.
+          </h2>
         </div>
       ) : null}
-      
-      {/* Messages area */}
-      <ScrollDiv
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 pt-4"
-      >
-        <div className="pb-4">
-          <MessageList messages={messages} />
-        </div>
-      </ScrollDiv>
 
-      {/* Floating “scroll to bottom” button */}
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <ScrollDiv
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex-1 overflow-y-auto px-4"
+          >
+            <div className="pb-4">
+              <MessageList messages={messages} />
+            </div>
+          </ScrollDiv>
+        </ContextMenuTrigger>
+
+        <ContextMenuContent>
+          <ContextMenuItem
+            onClick={() => {
+              saveChatSession(projectId, '')
+              window.location.reload()
+            }}
+            className="cursor-pointer bg-destructive"
+          >
+            <Trash2 /> Chat löschen
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+
       {!isAtBottom && (
         <div className="absolute bottom-28 left-1/2 z-10 flex -translate-x-1/2">
           <button
             onClick={scrollToBottom}
             aria-label="Scroll to newest"
-            className="rounded-full bg-background p-2 shadow-lg transition hover:bg-accent cursor-pointer"
+            className="cursor-pointer rounded-full bg-background p-2 shadow-lg transition hover:bg-accent"
           >
             <MoveDown className="h-5 w-5" />
           </button>
         </div>
       )}
 
-      {/* Input area */}
       <ChatForm
         className="w-full shrink-0 bg-background px-4 pb-4"
         isPending={false}

@@ -131,12 +131,6 @@ export default function Page() {
     }
   }
 
-  async function handleSend() {
-    // Placeholder for sending a message in the AI chat
-    // This could be replaced with actual AI chat functionality
-    console.log("Send message clicked");
-  }
-
   const handleDownloadSummary = () => {
     if (!summary) return alert("No summary available to download!");
     const url = URL.createObjectURL(new Blob([JSON.stringify(summary, null, 2)], { type: "application/json" }));

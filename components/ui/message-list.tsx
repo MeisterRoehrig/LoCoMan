@@ -39,6 +39,7 @@ export function MessageList({
           />
         )
       })}
+      
       {isTyping && <TypingIndicator />}
     </div>
   )

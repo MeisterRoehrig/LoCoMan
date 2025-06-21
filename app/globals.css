@@ -248,6 +248,27 @@
   }
 }
 
+@keyframes typing-dot-bounce {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(0); }
+  20% { transform: translateY(-0.4rem); }
+}
+
+.animate-typing-dot-bounce {
+  animation: typing-dot-bounce 1.5s linear infinite;
+}
+
+/* Utility classes for animation delay */
+.animate-typing-dot-bounce-delay-0 {
+  animation-delay: 0ms;
+}
+.animate-typing-dot-bounce-delay-1 {
+  animation-delay: 120ms;
+}
+.animate-typing-dot-bounce-delay-2 {
+  animation-delay: 240ms;
+}
+
 .animate-indeterminate {
   animation: loading-indeterminate 1.5s linear infinite;
 }

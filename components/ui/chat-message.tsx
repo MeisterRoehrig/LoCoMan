@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/collapsible"
 import { FilePreview } from "@/components/ui/file-preview"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+import { TypingIndicator } from "@/components/ui/typing-indicator"
 
 const chatBubbleVariants = cva(
   "group/message relative break-words rounded-lg p-3 text-sm sm:max-w-[70%]",
@@ -77,7 +78,7 @@ interface ToolResult {
   toolName: string
   result: {
     __cancelled?: boolean
-    [key: string]: any
+    [key: string]: unknown
   }
 }
 
@@ -101,7 +102,7 @@ interface TextPart {
 // For compatibility with AI SDK types, not used
 interface SourcePart {
   type: "source"
-  source?: any
+  source?: unknown
 }
 
 interface FilePart {
@@ -198,6 +199,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     )
   }
 
+  // Assistant message with parts
   if (parts && parts.length > 0) {
     return parts.map((part, index) => {
       if (part.type === "text") {
@@ -210,14 +212,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             key={`text-${index}`}
           >
             <div className={cn(chatBubbleVariants({ isUser, animation }))}>
-              <MarkdownRenderer>{part.text}</MarkdownRenderer>
+              {/* --- TypingIndicator logic for assistant --- */}
+              {!isUser && !part.text && <TypingIndicator />}
+              {part.text && <MarkdownRenderer>{part.text}</MarkdownRenderer>}
               {actions ? (
                 <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
                   {actions}
                 </div>
               ) : null}
             </div>
-
             {showTimeStamp && createdAt ? (
               <time
                 dateTime={createdAt.toISOString()}
@@ -252,14 +255,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   return (
     <div className={cn("flex flex-col", isUser ? "items-end" : "items-start")}>
       <div className={cn(chatBubbleVariants({ isUser, animation }))}>
-        <MarkdownRenderer>{content}</MarkdownRenderer>
+        {/* --- TypingIndicator logic for assistant --- */}
+        {!isUser && !content && <TypingIndicator />}
+        {content && <MarkdownRenderer>{content}</MarkdownRenderer>}
         {actions ? (
           <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
             {actions}
           </div>
         ) : null}
       </div>
-
       {showTimeStamp && createdAt ? (
         <time
           dateTime={createdAt.toISOString()}

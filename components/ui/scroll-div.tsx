@@ -7,8 +7,7 @@ import { cn } from '@/lib/utils'
 /*                            Public API                              */
 /* ------------------------------------------------------------------ */
 
-export interface ScrollDivProps
-  extends React.HTMLAttributes<HTMLDivElement> {}
+// (Removed empty ScrollDivProps interface)
 
 /**
  * ScrollDiv
@@ -17,9 +16,8 @@ export interface ScrollDivProps
  * • Exposes its scrollable viewport through a forwarded ref  
  * • Passes through normal DOM props such as onScroll
  */
-export const ScrollDiv = React.forwardRef<HTMLDivElement, ScrollDivProps>(
+export const ScrollDiv = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...rest }, forwardedRef) => {
-    /* -------- internal refs & state ---------- */
     const viewportRef = React.useRef<HTMLDivElement>(null)
     React.useImperativeHandle(forwardedRef, () => viewportRef.current as HTMLDivElement)
 
