@@ -6,7 +6,8 @@ import {
   Folder,
   MoreHorizontal,
   Share,
-  Trash2
+  Trash2,
+  Bot
 } from "lucide-react"
 import { useRouter } from "next/navigation" // Next.js App Router
 
@@ -73,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-                <Link href="/">
+              <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Truck className="size-4" />
                 </div>
@@ -81,7 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate font-medium">LoCoMan</span>
                   <span className="truncate text-xs">DHBW Friedrichshafen</span>
                 </div>
-                </Link>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -139,7 +140,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <Folder className="text-muted-foreground" />
                         <span>Daten Editieren</span>
                       </DropdownMenuItem>
-
+                      <DropdownMenuItem
+                        onClick={() => {
+                          router.push(`/dashboard/${item.id}/chat`)
+                        }}
+                      >
+                        <Bot className="text-muted-foreground" />
+                        <span>AI Chat</span>
+                      </DropdownMenuItem>
 
                       <DropdownMenuItem onClick={() => handleShareProject(item.id)}>
                         <Share className="text-muted-foreground" />
@@ -163,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser 
+        <NavUser
           user={{
             name: userProfile?.displayName ?? "Loading...",
             email: userProfile?.email ?? "",

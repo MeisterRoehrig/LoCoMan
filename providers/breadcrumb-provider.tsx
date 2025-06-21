@@ -17,14 +17,18 @@ import { useProjects } from '@/providers/projects-provider';
 
 export const BreadcrumbProvider = () => {
   /* ---------- locate us ---------- */
-  const pathname = usePathname();                  // e.g. /dashboard/abc123/data
-  const segments = pathname.split('/').filter(Boolean);
+  const pathname  = usePathname();                      // e.g. /dashboard/abc123/chat
+  const segments  = pathname.split('/').filter(Boolean);
 
   // outside /dashboard, render nothing
   if (segments[0] !== 'dashboard') return null;
 
-  const projectId   = segments[1];                 // undefined on /dashboard
-  const onDataPage  = segments[2] === 'data';
+  const projectId  = segments[1];                       // undefined on /dashboard
+  const subPage    = segments[2];                       // 'data', 'chat', or undefined
+
+  const onDataPage = subPage === 'data';
+  const onChatPage = subPage === 'chat';
+  const onSubPage  = onDataPage || onChatPage;
 
   /* ---------- project title ---------- */
   const { projects } = useProjects();
@@ -37,19 +41,20 @@ export const BreadcrumbProvider = () => {
   type Crumb = { label: string; href?: string };
 
   const crumbs: Crumb[] = [
-    { label: 'Dashboard' },                        // never clickable
+    { label: 'Dashboard' },                            // never clickable
   ];
 
   if (projectId) {
     crumbs.push({
       label: projectName,
-      // only clickable when a deeper “data” page exists
-      href: onDataPage ? `/dashboard/${projectId}` : undefined,
+      href: onSubPage ? `/dashboard/${projectId}` : undefined,
     });
   }
 
   if (onDataPage) {
-    crumbs.push({ label: 'Data' });                // final crumb, no link
+    crumbs.push({ label: 'Data' });
+  } else if (onChatPage) {
+    crumbs.push({ label: 'AI Chat' });
   }
 
   /* ---------- render ---------- */
@@ -57,8 +62,8 @@ export const BreadcrumbProvider = () => {
     <Breadcrumb>
       <BreadcrumbList>
         {crumbs.map((crumb, i) => {
-          const isLast  = i === crumbs.length - 1;
-          const isLink  = !!crumb.href && !isLast; // never link the final crumb
+          const isLast = i === crumbs.length - 1;
+          const isLink = !!crumb.href && !isLast;       // never link the final crumb
 
           return (
             <Fragment key={i}>

@@ -16,22 +16,21 @@ const ai = genkit({
   plugins: [
     googleAI({ apiKey: geminiApiKey }),
   ],
-
 });
 
 
-export const menuSuggestionFlow = ai.defineFlow(
+export const projectReportFlow = ai.defineFlow(
   {
-    name: 'menuSuggestionFlow',
-    inputSchema: z.object({ theme: z.string() }),
-    outputSchema: z.object({ menuItem: z.string() }),
+    name: 'projectReportFlow',
+    inputSchema: z.object({ context: z.string() }),
+    outputSchema: z.object({ report: z.string() }),
     streamSchema: z.string(),
   },
-  async ({ theme }, { sendChunk }) => {
+  async ({ context }, { sendChunk }) => {
+    if (!context) throw new Error("Must supply context.");
     const { stream, response } = ai.generateStream({
-      model: googleAI.model('gemini-2.0-flash'),
-
-      prompt: `Invent a menu item for a ${theme} themed restaurant.`,
+      model: googleAI.model('gemini-2.5-flash'),
+      prompt: `Give a short overview of the provided cost data ${JSON.stringify(context)} `,
     });
 
     for await (const chunk of stream) {
@@ -39,6 +38,6 @@ export const menuSuggestionFlow = ai.defineFlow(
     }
 
     const { text } = await response;
-    return { menuItem: text };
+    return { report: text };
   }
 );
