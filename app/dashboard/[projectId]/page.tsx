@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
-import { Download, Edit, Sparkles, Bot} from "lucide-react";
+import { Download, Edit, Sparkles, MessageSquareText, PhoneCall} from "lucide-react";
 import { Report, forceRefreshReports } from "@/lib/report-manager";
 
 import {
@@ -157,7 +157,10 @@ export default function Page() {
             <Edit />Daten Editieren
           </Button>
           <Button className="cursor-pointer" variant="outline" onClick={() => router.push(`/dashboard/${projectId}/chat`)}>
-            <Bot />AI Chat
+            <MessageSquareText/>AI Chat
+          </Button>
+          <Button className="cursor-pointer" variant="outline" onClick={() => router.push(`/dashboard/${projectId}/call`)}>
+            <PhoneCall/>Sprach Assistent
           </Button>
           <Button className="cursor-pointer" onClick={handleGenerateReport}>
             <Sparkles /> {summary ? "Report Updaten" : "Report Generieren"}

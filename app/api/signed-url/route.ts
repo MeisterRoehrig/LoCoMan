@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { ElevenLabsClient } from "elevenlabs";
+import { getElevenlabsAgentKey } from "@/providers/api-key-provider";
 
 export async function GET() {
-  const agentId = process.env.AGENT_ID;
+  const elevenlabsAgentKey = await getElevenlabsAgentKey();
+  const agentId = elevenlabsAgentKey;
+  console.log("Agent ID:", agentId);
   if (!agentId) {
     throw Error("AGENT_ID is not set");
   }
@@ -15,7 +18,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error:", error);
     return NextResponse.json(
-      { error: "Failed to get signed URL" },
+      { error: "Failed to get signed URL", elevenlabsAgentKey},
       { status: 500 }
     );
   }

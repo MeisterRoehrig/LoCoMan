@@ -2,10 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import * as React from "react";
-import { useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCallback, useRef, useState } from "react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useConversation } from "@elevenlabs/react";
-import { cn } from "@/lib/utils";
+import { ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
+import { RotatingText } from "@/components/animate-ui/text/rotating";
+import { ProjectNameForm } from "@/components/forms/project-name-form";
+import { AIVisual } from "./ai-visual";
+
+import { getElevenlabsAgentKey } from "@/providers/api-key-provider";
+import { Phone, PhoneOff } from "lucide-react";
+
+//  Ich freue mich auf unseren Austausch. Sind Sie bereit, einen Blick auf Ihre Kostenstruktur zu werfen?
 
 async function requestMicrophonePermission() {
   try {
@@ -17,95 +25,145 @@ async function requestMicrophonePermission() {
   }
 }
 
-async function getSignedUrl(): Promise<string> {
-  const response = await fetch("/api/signed-url");
-  if (!response.ok) {
-    throw Error("Failed to get signed url");
-  }
-  const data = await response.json();
-  return data.signedUrl;
-}
-
 export function ConvAI() {
+  const [currentMessage, setCurrentMessage] = useState<string>("");
+
+  /* Main ElevenLabs hook */
   const conversation = useConversation({
-    onConnect: () => {
-      console.log("connected");
-    },
-    onDisconnect: () => {
-      console.log("disconnected");
-    },
-    onError: error => {
-      console.log(error);
+    onConnect: () => console.log("connected"),
+    onDisconnect: () => console.log("disconnected"),
+    onError: err => {
+      console.error(err);
       alert("An error occurred during the conversation");
     },
     onMessage: message => {
+      if (message.source === "ai") setCurrentMessage(String(message.message));
       console.log(message);
     },
   });
 
+  // state
+  const [uiMode, setUiMode] = useState<"chat" | "projectName">("chat");
+  const projectNameResolver = useRef<(name: string) => void | null>(null);
+  const [projectNameInitial, setProjectNameInitial] = useState<string | undefined>();
+
+  // called when the form fires onComplete
+  const handleProjectNameComplete = (name: string | null) => {
+    setUiMode("chat");
+    if (projectNameResolver.current) {
+      projectNameResolver.current(name ?? "Unnamed project");
+      projectNameResolver.current = null;
+    }
+  };
+
+  /* Start session */
   async function startConversation() {
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) {
       alert("No permission");
       return;
     }
-    const signedUrl = await getSignedUrl();
-    const conversationId = await conversation.startSession({ signedUrl });
-    console.log(conversationId);
+    // const signedUrl = await getSignedUrl();
+    const elevenlabsAgentKey = await getElevenlabsAgentKey();
+
+    await conversation.startSession({
+      agentId: elevenlabsAgentKey, // Replace with your agent ID
+      clientTools: {
+        logMessage: async ({ message }) => {
+          console.log("Test Message:", message);
+        },
+        getProjectName: async ({ projectName }: { projectName?: string } = {}) => {
+          console.log("getProjectName called");
+          return new Promise<string>((resolve, reject) => {
+            projectNameResolver.current = resolve;
+            setProjectNameInitial(projectName);
+            setUiMode("projectName");
+            setTimeout(() => {
+              if (uiMode === "projectName") {
+                setUiMode("chat");
+                reject(new Error("timeout"));
+              }
+            }, 120_000);
+          });
+        },
+      },
+    });
   }
 
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
   }, [conversation]);
-
   return (
-    <div className={"flex justify-center items-center gap-x-4"}>
-      <Card className={"rounded-3xl"}>
-        <CardContent>
-          <CardHeader>
-            <CardTitle className={"text-center"}>
-              {conversation.status === "connected"
-                ? conversation.isSpeaking
-                  ? `Agent is speaking`
-                  : "Agent is listening"
-                : "Disconnected"}
-            </CardTitle>
-          </CardHeader>
-          <div className={"flex flex-col gap-y-4 text-center"}>
-            <div
-              className={cn(
-                "orb my-16 mx-12",
-                conversation.status === "connected" && conversation.isSpeaking
-                  ? "orb-active animate-orb"
-                  : conversation.status === "connected"
-                  ? "animate-orb-slow orb-inactive"
-                  : "orb-inactive"
-              )}
-            ></div>
-
-            <Button
-              variant={"outline"}
-              className={"rounded-full"}
-              size={"lg"}
-              disabled={
-                conversation !== null && conversation.status === "connected"
-              }
-              onClick={startConversation}
-            >
-              Start conversation
-            </Button>
-            <Button
-              variant={"outline"}
-              className={"rounded-full"}
-              size={"lg"}
-              disabled={conversation === null}
-              onClick={stopConversation}
-            >
-              End conversation
-            </Button>
+    <ResizablePanelGroup direction="horizontal" className="h-full w-full pb-4">
+      <ResizablePanel className="border-r-1" defaultSize={50}>
+        <div className="flex flex-col h-full min-h-0 justify-center">
+          <div className="flex justify-center items-center gap-x-4 h-full min-h-0 w-full p-16 max-h-5/6">
+            <Card className="lg:col-span-2 h-full min-h-0 w-full flex flex-col">
+              <CardHeader>
+                <CardTitle>
+                  {conversation.status === "connected"
+                    ? conversation.isSpeaking
+                      ? "Loco spricht"
+                      : "Loco hört zu"
+                    : "Getrennt"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 flex items-center justify-center h-full min-h-0 w-full">
+                <AIVisual
+                  isAsleep={false}
+                  isListening={false}
+                  isThinking={conversation.status === "connected"}
+                  isSpeaking={conversation.isSpeaking && conversation.status === "connected"}
+                />
+              </CardContent>
+              <CardFooter>
+                <div className="flex flex-row gap-4 w-full">
+                  <Button
+                    variant="outline"
+                    className="rounded-full w-full cursor-pointer bg-"
+                    size="lg"
+                    disabled={conversation.status === "connected"}
+                    onClick={startConversation}
+                  >
+                    <Phone className="size-4 mr-2" />
+                    Anrufen
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="rounded-full w-full cursor-pointer bg-destructive"
+                    size="lg"
+                    disabled={conversation.status !== "connected"}
+                    onClick={stopConversation}
+                  >
+                    <PhoneOff className="size-4 mr-2" />
+                    Auflegen
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </ResizablePanel>
+
+      <ResizablePanel defaultSize={50}>
+        <div className="flex h-full w-full items-center justify-center pb-14 px-12">
+          {uiMode === "chat" ? (
+            <RotatingText
+              key={currentMessage}
+              text={currentMessage ? [currentMessage] : [""]}
+              duration={1000}
+              y={-40}
+              className="text-2xl text-center"
+              containerClassName="inline-block"
+            />
+          ) : (
+            <ProjectNameForm
+              initialName={projectNameInitial}
+              onComplete={handleProjectNameComplete}
+            />
+          )}
+        </div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }

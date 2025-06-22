@@ -28,7 +28,8 @@ export const BreadcrumbProvider = () => {
 
   const onDataPage = subPage === 'data';
   const onChatPage = subPage === 'chat';
-  const onSubPage  = onDataPage || onChatPage;
+  const onCallPage = subPage === 'call';
+  const onSubPage  = onDataPage || onChatPage || onCallPage;
 
   /* ---------- project title ---------- */
   const { projects } = useProjects();
@@ -55,6 +56,8 @@ export const BreadcrumbProvider = () => {
     crumbs.push({ label: 'Data' });
   } else if (onChatPage) {
     crumbs.push({ label: 'AI Chat' });
+  } else if (onCallPage) {
+    crumbs.push({ label: 'Sprach Assistent' });
   }
 
   /* ---------- render ---------- */
