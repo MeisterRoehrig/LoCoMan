@@ -7,7 +7,8 @@ import {
   MoreHorizontal,
   Share,
   Trash2,
-  Bot
+  MessageSquareText,
+  PhoneCall
 } from "lucide-react"
 import { useRouter } from "next/navigation" // Next.js App Router
 
@@ -145,16 +146,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           router.push(`/dashboard/${item.id}/chat`)
                         }}
                       >
-                        <Bot className="text-muted-foreground" />
+                        <MessageSquareText className="text-muted-foreground" />
                         <span>AI Chat</span>
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          router.push(`/dashboard/${item.id}/call`)
+                        }}
+                      >
+                        <PhoneCall className="text-muted-foreground" />
+                        <span>Sprach Assistent</span>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
 
                       <DropdownMenuItem onClick={() => handleShareProject(item.id)}>
                         <Share className="text-muted-foreground" />
                         <span>Projekt Teilen</span>
                       </DropdownMenuItem>
-
-                      <DropdownMenuSeparator />
 
                       {/* 4) Here’s the “Delete Project” click */}
                       <DropdownMenuItem onClick={() => removeProject(item.id)}>
