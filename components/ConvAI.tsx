@@ -9,11 +9,8 @@ import { ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
 import { RotatingText } from "@/components/animate-ui/text/rotating";
 import { ProjectNameForm } from "@/components/forms/project-name-form";
 import { AIVisual } from "./ai-visual";
-
 import { getElevenlabsAgentKey } from "@/providers/api-key-provider";
-import { Phone, PhoneOff } from "lucide-react";
-
-//  Ich freue mich auf unseren Austausch. Sind Sie bereit, einen Blick auf Ihre Kostenstruktur zu werfen?
+import { Phone, PhoneOff, Mic, MicOff } from "lucide-react";
 
 async function requestMicrophonePermission() {
   try {
@@ -26,10 +23,15 @@ async function requestMicrophonePermission() {
 }
 
 export function ConvAI() {
-  const [currentMessage, setCurrentMessage] = useState<string>("");
+  const [currentMessage, setCurrentMessage] = useState("");
+  const [uiMode, setUiMode] = useState<"chat" | "projectName">("chat");
+  const projectNameResolver = useRef<(name: string) => void | null>(null);
+  const [projectNameInitial, setProjectNameInitial] = useState<string | undefined>();
 
-  /* Main ElevenLabs hook */
+  // conversation hook with controlled micMuted
+  const [micMuted, setMicMuted] = useState(false);
   const conversation = useConversation({
+    micMuted,
     onConnect: () => console.log("connected"),
     onDisconnect: () => console.log("disconnected"),
     onError: err => {
@@ -42,12 +44,7 @@ export function ConvAI() {
     },
   });
 
-  // state
-  const [uiMode, setUiMode] = useState<"chat" | "projectName">("chat");
-  const projectNameResolver = useRef<(name: string) => void | null>(null);
-  const [projectNameInitial, setProjectNameInitial] = useState<string | undefined>();
-
-  // called when the form fires onComplete
+  // Called when project name form completes
   const handleProjectNameComplete = (name: string | null) => {
     setUiMode("chat");
     if (projectNameResolver.current) {
@@ -56,24 +53,18 @@ export function ConvAI() {
     }
   };
 
-  /* Start session */
   async function startConversation() {
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) {
       alert("No permission");
       return;
     }
-    // const signedUrl = await getSignedUrl();
     const elevenlabsAgentKey = await getElevenlabsAgentKey();
-
     await conversation.startSession({
-      agentId: elevenlabsAgentKey, // Replace with your agent ID
+      agentId: elevenlabsAgentKey,
       clientTools: {
-        logMessage: async ({ message }) => {
-          console.log("Test Message:", message);
-        },
+        logMessage: async ({ message }) => console.log("Test Message:", message),
         getProjectName: async ({ projectName }: { projectName?: string } = {}) => {
-          console.log("getProjectName called");
           return new Promise<string>((resolve, reject) => {
             projectNameResolver.current = resolve;
             setProjectNameInitial(projectName);
@@ -93,6 +84,11 @@ export function ConvAI() {
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
   }, [conversation]);
+
+  const toggleMute = () => {
+    setMicMuted(prev => !prev);
+  };
+
   return (
     <ResizablePanelGroup direction="horizontal" className="h-full w-full pb-4">
       <ResizablePanel className="border-r-1" defaultSize={50}>
@@ -101,9 +97,13 @@ export function ConvAI() {
             <Card className="lg:col-span-2 h-full min-h-0 w-full flex flex-col">
               <CardHeader>
                 <CardTitle>
-                  {conversation.status === "connected"
+                    {conversation.status === "connected"
                     ? conversation.isSpeaking
-                      ? "Loco spricht"
+                      ? micMuted
+                      ? "Loco spricht, Mikro stumm"
+                      : "Loco spricht"
+                      : micMuted
+                      ? "Loco hört zu, Mikro stumm"
                       : "Loco hört zu"
                     : "Getrennt"}
                 </CardTitle>
@@ -111,23 +111,34 @@ export function ConvAI() {
               <CardContent className="flex-1 flex items-center justify-center h-full min-h-0 w-full">
                 <AIVisual
                   isAsleep={false}
-                  isListening={false}
+                  isListening={!micMuted && conversation.status === "connected" && !conversation.isSpeaking}
                   isThinking={conversation.status === "connected"}
                   isSpeaking={conversation.isSpeaking && conversation.status === "connected"}
                 />
               </CardContent>
               <CardFooter>
                 <div className="flex flex-row gap-4 w-full">
-                  <Button
-                    variant="outline"
-                    className="rounded-full w-full cursor-pointer bg-"
-                    size="lg"
-                    disabled={conversation.status === "connected"}
-                    onClick={startConversation}
-                  >
-                    <Phone className="size-4 mr-2" />
-                    Anrufen
-                  </Button>
+                  {conversation.status !== "connected" ? (
+                    <Button
+                      variant="outline"
+                      className="rounded-full w-full cursor-pointer"
+                      size="lg"
+                      onClick={startConversation}
+                    >
+                      <Phone className="size-4 mr-2" />
+                      Anrufen
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="rounded-full w-full cursor-pointer"
+                      size="lg"
+                      onClick={toggleMute}
+                    >
+                      {micMuted ? <MicOff className="size-4 mr-2" /> : <Mic className="size-4 mr-2" />}
+                      {/* {micMuted ? "Stumgeschaltet" : "Mikrofon Ein"} */}
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     className="rounded-full w-full cursor-pointer bg-destructive"
@@ -149,7 +160,7 @@ export function ConvAI() {
         <div className="flex h-full w-full items-center justify-center pb-14 px-12">
           {uiMode === "chat" ? (
             <RotatingText
-              key={currentMessage}
+              key={currentMessage + String(micMuted)}
               text={currentMessage ? [currentMessage] : [""]}
               duration={1000}
               y={-40}
