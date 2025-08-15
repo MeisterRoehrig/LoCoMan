@@ -425,43 +425,6 @@ export function ConvAI() {
     setMicMuted((prev) => !prev);
   };
 
-  // Simulate fake call for testing
-  const simulateFakeCall = async () => {
-    // Generate random data
-    const randomNumber = Math.floor(Math.random() * 1000);
-    const randomSalary = Math.floor(Math.random() * 3000) + 1500; // 1500-4500
-    const randomCost = Math.floor(Math.random() * 2000) + 500; // 500-2500
-    
-    const fakeSessionData: ProjectSessionData = {
-      name: `Test Project ${randomNumber}`,
-      description: "Automatically generated test project",
-      employees: [
-        {
-          employeeJobtitel: "Test Mitarbeiter",
-          employeeMonthlySalary: randomSalary,
-        }
-      ],
-      overheadCosts: [
-        {
-          overheadDescription: "Test Kosten",
-          overheadMonthlyCost: randomCost,
-        }
-      ],
-    };
-    
-    // Set the session data
-    setProjectSessionData(fakeSessionData);
-    projectSessionDataRef.current = fakeSessionData;
-    
-    // Simulate a short delay like a real conversation would have
-    setTimeout(async () => {
-      try {
-        await createProjectFromSessionData();
-      } catch (error) {
-        console.error("Fake call failed:", error);
-      }
-    }, 1000);
-  };
 
   return (
     <ResizablePanelGroup direction="horizontal" className="h-full w-full pb-4">
