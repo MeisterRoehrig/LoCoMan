@@ -111,15 +111,16 @@ export interface Project {
   chatSession?: string;
 }
 
+// Update the interface to return Promise<Project>
 interface ProjectsContextValue {
   projects: Project[];
   loadingProjects: boolean;
   loadProjects: () => Promise<void>;
-  addProject: (title: string, description: string) => Promise<void>;
+  addProject: (title: string, description: string) => Promise<Project>; // Changed from Promise<void>
   addProjectWithDefaultTree: (
     title: string,
     description: string
-  ) => Promise<void>;
+  ) => Promise<Project>; // Also update this one for consistency
   removeProject: (projectId: string) => Promise<void>;
   updateProjectSummary: (projectId: string, summary: any) => Promise<void>;
   updateProjectReport: (
@@ -130,12 +131,13 @@ interface ProjectsContextValue {
   saveChatSession: (projectId: string, chatSession: string) => Promise<void>;
 }
 
+// Update the default context value
 const ProjectsContext = createContext<ProjectsContextValue>({
   projects: [],
   loadingProjects: false,
   loadProjects: async () => {},
-  addProject: async () => {},
-  addProjectWithDefaultTree: async () => {},
+  addProject: async () => ({} as Project), // Updated default
+  addProjectWithDefaultTree: async () => ({} as Project), // Updated default
   removeProject: async () => {},
   updateProjectSummary: async () => {},
   updateProjectReport: async () => {},
@@ -187,46 +189,74 @@ export function ProjectsProvider({ children }: { readonly children: ReactNode })
   /* ------------------------------------------------------------------------ */
   /*                           2. Add project                                 */
   /* ------------------------------------------------------------------------ */
-  async function addProject(title: string, description: string) {
-    if (!user || !user.uid) return;
+  async function addProject(title: string, description: string): Promise<Project> {
+    if (!user || !user.uid) throw new Error("User not authenticated");
 
     try {
       const ref = collection(firestore, "users", user.uid, "projects");
-      await addDoc(ref, {
+      const docRef = await addDoc(ref, {
         title,
         description,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+      
+      // Create the project object to return
+      const newProject: Project = {
+        id: docRef.id,
+        title,
+        description,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      
       toast.success("Project created!");
-      await loadProjects();
+      await loadProjects(); // Refresh the list
+      
+      return newProject;
     } catch (error) {
       console.error("Error adding project:", error);
       toast.error("Failed to create project.");
+      throw error;
     }
   }
 
   /* ------------------------------------------------------------------------ */
   /*        3. Add project WITH default dataTree + fixedCosts tree            */
   /* ------------------------------------------------------------------------ */
-  async function addProjectWithDefaultTree(title: string, description: string) {
-    if (!user || !user.uid) return;
+  async function addProjectWithDefaultTree(title: string, description: string): Promise<Project> {
+    if (!user || !user.uid) throw new Error("User not authenticated");
 
     try {
       const ref = collection(firestore, "users", user.uid, "projects");
-      await addDoc(ref, {
+      const docRef = await addDoc(ref, {
         title,
         description,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        dataTree: defaultTreeData,          // operational tree
-        fixedCosts: defaultFixedCostsTree,  // ID-only fixed-cost tree 🎉
+        dataTree: defaultTreeData,
+        fixedCosts: defaultFixedCostsTree,
       });
+      
+      // Create the project object to return
+      const newProject: Project = {
+        id: docRef.id,
+        title,
+        description,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        dataTree: defaultTreeData,
+        fixedCosts: defaultFixedCostsTree,
+      };
+      
       toast.success("Project with default tree created!");
       await loadProjects();
+      
+      return newProject;
     } catch (error) {
       console.error("Error creating project with tree:", error);
       toast.error("Failed to create project with tree.");
+      throw error;
     }
   }
 
