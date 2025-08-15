@@ -11,46 +11,61 @@ import {
     FormItem,
     FormControl,
     FormMessage,
+    FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
 const schema = z.object({
     name: z.string().min(2, "Name is too short").max(64, "Name is too long"),
+    description: z.string().min(0).max(500, "Description is too long").optional(),
 });
 
-type Props = {
-  onComplete: (name: string | null) => void;
-  initialName?: string;
+type ProjectData = {
+    name: string;
+    description?: string;
 };
 
-export function ProjectNameForm({ onComplete, initialName}: Props) {
+type Props = {
+    onComplete: (project: ProjectData | null) => void;
+    initialName?: string;
+    initialDescription?: string;
+};
+
+export function ProjectNameForm({ onComplete, initialName, initialDescription }: Props) {
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
-        defaultValues: { name: initialName ?? "" },
+        defaultValues: { 
+            name: initialName ?? "",
+            description: initialDescription ?? "",
+        },
     });
 
     const submit = form.handleSubmit(values => {
-        onComplete(values.name.trim());
+        onComplete({
+            name: values.name.trim(),
+            description: values.description?.trim(),
+        });
     });
 
     return (
         <div className="w-full max-w-md">
             <Card className="lg:col-span-2">
                 <CardHeader>
-                    <CardTitle>Projekt Name</CardTitle>
-                    <CardDescription>Ein Begriff, der die Identität und den Zweck eines Projekts widerspiegelt.</CardDescription>
+                    <CardTitle>Projekt Details</CardTitle>
+                    <CardDescription>Geben Sie den Namen und eine optionale Beschreibung für Ihr Projekt ein.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
-                        <form onSubmit={submit} className="space-y-4 ">
+                        <form onSubmit={submit} className="space-y-4">
                             <FormField
                                 control={form.control}
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        {/* <FormLabel>Name</FormLabel> */}
+                                        <FormLabel>Projekt Name</FormLabel>
                                         <FormControl>
                                             <Input
                                                 className="focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -66,6 +81,29 @@ export function ProjectNameForm({ onComplete, initialName}: Props) {
                                     </FormItem>
                                 )}
                             />
+                            
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Beschreibung (optional)</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                className="focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
+                                                placeholder="Eine kurze Beschreibung des Projekts..."
+                                                rows={3}
+                                                {...field}
+                                                onKeyDown={e => {
+                                                    if (e.key === "Escape") onComplete(null);
+                                                }}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
                             <div className="flex justify-end gap-3">
                                 <Button className="cursor-pointer" variant="outline" type="button" onClick={() => onComplete(null)}>
                                     Abbrechen

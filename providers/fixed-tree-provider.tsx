@@ -29,6 +29,12 @@ export interface FixedCostsBucket {
   resources: string[];
 }
 
+export interface BulkSaveData {
+  employees?: string[];
+  fixedCosts?: string[];
+  resources?: string[];
+}
+
 interface FixedTreeContextValue {
   fixedCosts: FixedCostsBucket | null;
   loadingFixedTree: boolean;
@@ -43,6 +49,10 @@ interface FixedTreeContextValue {
     kind: FixedCostKind,
     id: string
   ) => Promise<void>;
+  bulkSaveFixedCosts: (
+    projectId: string,
+    data: BulkSaveData
+  ) => Promise<void>;
 }
 
 /* ———————————————————————————————————————————————— */
@@ -55,6 +65,7 @@ const FixedTreeContext = createContext<FixedTreeContextValue>({
   loadFixedTree: async () => {},
   addToFixedCosts: async () => {},
   removeFromFixedCosts: async () => {},
+  bulkSaveFixedCosts: async () => {},
 });
 
 export function FixedTreeProvider({
@@ -127,6 +138,47 @@ export function FixedTreeProvider({
     } catch (err) {
       console.error("Error saving fixed costs bucket:", err);
       toast.error("Failed to update fixed-costs data.");
+      throw err;
+    }
+  }
+
+  /* ——— NEW: bulk save functionality ——— */
+  async function bulkSaveFixedCosts(
+    projectId: string,
+    data: BulkSaveData
+  ) {
+    if (!user || typeof user === "boolean" || !user.uid) return;
+
+
+    try {
+      // For a brand new project, we should replace the arrays entirely, not merge
+      // Because we want a clean slate for each new project
+      const newFixed: FixedCostsBucket = {
+        employees: data.employees ?? [],
+        fixedCosts: data.fixedCosts ?? [],
+        resources: data.resources ?? [],
+      };
+
+
+      // Save in single operation
+      const projectRef = doc(
+        firestore,
+        "users",
+        user.uid,
+        "projects",
+        projectId
+      );
+      await updateDoc(projectRef, {
+        fixedCosts: newFixed,
+        updatedAt: serverTimestamp(),
+      });
+      
+      setFixedCosts(newFixed);
+      
+    } catch (err) {
+      console.error("Error in bulk save:", err);
+      toast.error("Failed to bulk save fixed-costs data.");
+      throw err;
     }
   }
 
@@ -172,6 +224,7 @@ export function FixedTreeProvider({
       loadFixedTree,
       addToFixedCosts,
       removeFromFixedCosts,
+      bulkSaveFixedCosts,
     }),
     [fixedCosts, loadingFixedTree, user]
   );

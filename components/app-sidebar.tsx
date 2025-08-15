@@ -8,7 +8,6 @@ import {
   Share,
   Trash2,
   MessageSquareText,
-  PhoneCall
 } from "lucide-react"
 import { useRouter } from "next/navigation" // Next.js App Router
 
@@ -149,14 +148,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <MessageSquareText className="text-muted-foreground" />
                         <span>AI Chat</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem
+                      {/* <DropdownMenuItem
                         onClick={() => {
                           router.push(`/dashboard/${item.id}/call`)
                         }}
                       >
                         <PhoneCall className="text-muted-foreground" />
                         <span>Sprach Assistent</span>
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
 
                       <DropdownMenuSeparator />
 

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { File } from "lucide-react";
+import { File, PhoneCall } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 
@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useProjects } from "@/providers/projects-provider";
+import { useRouter } from "next/navigation";
 
 export function NewProjectButton() {
   const { addProject, addProjectWithDefaultTree } = useProjects();
@@ -26,6 +27,8 @@ export function NewProjectButton() {
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [useDefault, setUseDefault] = React.useState(true);
+
+  const router = useRouter();
 
   function handleCreate() {
     if (!name.trim()) {
@@ -51,7 +54,15 @@ export function NewProjectButton() {
       <NavMain
         items={[
           {
-            title: "Neues Projekt",
+            title: "Projekt mit Assistent starten",
+            icon: PhoneCall,
+            onClick: () => {
+              router.push("/dashboard/Setup/call");
+            },
+            items: [],
+          },
+          {
+            title: "Projekt manuell anlegen",
             icon: File,
             onClick: () => {
               setDialogOpen(true);
@@ -66,7 +77,8 @@ export function NewProjectButton() {
           <DialogHeader>
             <DialogTitle>Neues Projekt</DialogTitle>
             <DialogDescription>
-              Bitte geben Sie Ihrem neuen Projekt einen Namen und eine Beschreibung.
+              Bitte geben Sie Ihrem neuen Projekt einen Namen und eine
+              Beschreibung.
             </DialogDescription>
           </DialogHeader>
 
